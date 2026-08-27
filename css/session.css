@@ -1,0 +1,353 @@
+/* Estilos para a Sessão Ativa de Resolução de Questões */
+
+/* Se a sessão estiver ativa, oculta a sidebar principal e altera o grid */
+body.session-active .app-sidebar {
+    display: none !important;
+}
+
+body.session-active .app-layout {
+    grid-template-columns: 1fr !important;
+}
+
+body.session-active .mobile-topbar {
+    display: none !important;
+}
+
+body.session-active .app-content {
+    padding: 0 !important;
+}
+
+/* Ocultar a barra de banner do cabeçalho da página de questões quando em sessão ativa */
+body.session-active #section-questoes .prova-banner {
+    display: none !important;
+}
+
+body.session-active #section-questoes {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Barra de Informações da Sessão Ativa (Estilo Dark Premium Ocupando 100% de largura) */
+.active-caderno-bar-dark {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    z-index: 1000 !important;
+    background: #0b1120 !important; /* Solid dark navy background */
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 40px !important;
+    height: 75px !important;
+    box-sizing: border-box !important;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    animation: none !important;
+}
+
+.active-caderno-bar-dark a,
+.active-caderno-bar-dark span,
+.active-caderno-bar-dark div {
+    color: #ffffff;
+}
+
+/* Container do Layout Dividido da Sessão Ativa */
+.active-session-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 280px; /* 3 columns: left sidebar (280px), content cards, right sidebar (280px) */
+    gap: 30px;
+    margin-top: 75px !important; /* Offset to push layout under fixed top bar */
+    padding: 20px 40px 40px 40px !important; /* Perfect 40px margins left/right/bottom, 20px top */
+    align-items: start;
+    text-align: left;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Sidebar da Sessão Ativa */
+.active-session-sidebar {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky !important;
+    top: 95px !important;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* Individual Sidebar Card Blocks */
+.sidebar-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+}
+
+.sidebar-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.sidebar-card-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #94a3b8; /* Slate gray as in mockup */
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0;
+}
+
+.sidebar-card-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.sidebar-card-heading {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #94a3b8; /* Slate gray as in mockup */
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 4px 0;
+}
+
+.active-session-sidebar-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: 12px;
+}
+
+.active-session-sidebar-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 850;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.active-session-sidebar-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.session-navigation-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.session-nav-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 32px;
+    aspect-ratio: 1;
+    height: auto;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none !important;
+    position: relative;
+}
+
+.session-nav-circle:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Círculo Ativo */
+.session-nav-circle.active {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+/* Círculos Correto / Errado / Não Respondido */
+.session-nav-circle.correct {
+    background-color: var(--correta) !important;
+    color: #ffffff !important;
+}
+
+.session-nav-circle.wrong {
+    background-color: var(--errada) !important;
+    color: #ffffff !important;
+}
+
+.session-nav-circle.unanswered {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+}
+
+/* Estrela de Favoritado/Marcada no Círculo */
+.session-nav-circle .star-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    font-size: 0.72rem;
+    color: #eab308;
+    line-height: 1;
+}
+
+/* Legenda de cores */
+.session-legend-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding-top: 10px;
+}
+
+.session-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.session-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.session-legend-dot.green { background-color: #4ade80; }
+.session-legend-dot.grey { background-color: #cbd5e1; }
+.session-legend-dot.blue { background-color: var(--accent); }
+.session-legend-star { color: #eab308; font-size: 0.85rem; line-height: 1; }
+
+/* Cabeçalhos internos da Sidebar */
+.active-session-sidebar-heading {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 850;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin: 0 0 4px 0;
+}
+
+.active-session-sidebar-desc {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    margin: 0 0 12px 0;
+}
+
+/* Filtros de Origem (Bancas) */
+.session-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.session-filter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    border: none !important;
+    background-color: transparent !important;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.session-filter-item:hover {
+    color: var(--accent);
+}
+
+.session-filter-item.active {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.session-filter-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.session-filter-count {
+    display: none !important;
+}
+
+/* Filtros de Ano */
+.session-year-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.session-year-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-primary);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.session-year-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.session-year-btn.active {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+/* Footer de Navegação da Questão Ativa */
+
+.session-nav-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Ajustes Responsivos para Tela da Sessão */
+@media (max-width: 992px) {
+    .active-session-layout {
+        grid-template-columns: 1fr;
+        margin-top: 130px !important;
+        padding: 15px !important;
+    }
+    .active-caderno-bar-dark {
+        padding: 15px 20px !important;
+        height: auto !important;
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

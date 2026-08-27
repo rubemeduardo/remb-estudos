@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brandGrad" x1="122" y1="112" x2="390" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <filter id="shadow" x="32" y="42" width="448" height="448" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="26" stdDeviation="26" flood-color="#0f172a" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#f8fafc"/>
+  <g filter="url(#shadow)">
+    <rect x="96" y="96" width="320" height="320" rx="72" fill="#0f172a"/>
+    <path d="M168 152H252C301.706 152 342 192.294 342 242C342 281.634 316.357 315.272 280.361 327.061L333.728 380.427C338.121 384.821 338.121 391.944 333.728 396.337C329.335 400.731 322.212 400.731 317.818 396.337L257.868 336.387V354C257.868 360.213 252.831 365.25 246.618 365.25C240.405 365.25 235.368 360.213 235.368 354V332H168C161.787 332 156.75 326.963 156.75 320.75V163.25C156.75 157.037 161.787 152 168 152ZM235.368 174.5V309.5H252C289.279 309.5 319.5 279.279 319.5 242C319.5 204.721 289.279 174.5 252 174.5H235.368Z" fill="url(#brandGrad)"/>
+    <path d="M187 287L232 332L331 215" stroke="#10b981" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+

@@ -1,0 +1,218 @@
+.ext-1 { transform: scaleX(-1); }
+.ext-2 { display: none; }
+.ext-3 { margin-right: 6px; }
+.ext-4 { flex-shrink: 0; }
+.ext-5 { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background-color: rgba(255, 255, 255, 0.02); color: #fff; }
+.ext-6 { width: 32px; height: 32px; border-radius: 50%; background-color: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+.ext-7 { display: flex; flex-direction: column; text-align: left; line-height: 1.2; }
+.ext-8 { font-size: 0.82rem; font-weight: 800; }
+.ext-9 { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+.ext-10 { color: #fb923c; }
+.ext-11 { padding: 10px 12px; }
+.ext-12 { display: block; font-weight:700; }
+.ext-13 { padding: 15px 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 4px; }
+.ext-14 { display: flex; flex-direction: column; gap: 8px; padding: 10px 16px; width: 100%; }
+.ext-15 { background: none; border: none; color: #94a3b8; width: 100%; transition: color 0.2s; padding: 10px 16px; }
+.ext-16 { flex: 1 !important; }
+.ext-17 { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; padding: 25px 30px; border-radius: 16px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); position: relative; overflow: hidden; }
+.ext-18 { z-index: 2; }
+.ext-19 { font-family: }
+.ext-20 { font-size: 0.95rem; opacity: 0.9; margin: 0; color: rgba(255,255,255,0.95); }
+.ext-21 { z-index: 2; text-align: right; max-width: 320px; border: 1px solid rgba(255,255,255,0.25); background-color: rgba(255,255,255,0.06); padding: 10px 16px; border-radius: 8px; font-style: italic; }
+.ext-22 { font-size: 0.85rem; margin: 0; color: rgba(255,255,255,0.95); font-weight: 500; text-align: left; }
+.ext-23 { position: absolute; right: -20px; bottom: -20px; font-size: 8rem; opacity: 0.15; transform: rotate(-20deg); user-select: none; }
+.ext-24 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+.ext-25 { background-color: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; }
+.ext-26 { background-color: #eff6ff; color: #3b82f6; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ext-27 { font-size: 0.78rem; color: var(--text-secondary); font-weight: 600; }
+.ext-28 { font-size: 1.3rem; font-weight: 800; font-family: }
+.ext-29 { font-size:0.75rem; font-weight:500; color:var(--text-secondary); }
+.ext-30 { background-color: #ecfdf5; color: #10b981; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ext-31 { font-size: 0.7rem; background-color: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 6px; font-weight: 700; margin-left: 5px; }
+.ext-32 { background-color: #fff7ed; color: #f97316; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ext-33 { background-color: #f5f3ff; color: #8b5cf6; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ext-34 { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.ext-35 { width: 100%; background-color: var(--border); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.ext-36 { width: 60%; background-color: var(--accent); height: 100%; transition: width 0.3s ease; }
+.ext-37 { margin-bottom: 12px; }
+.ext-38 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 700; }
+.ext-39 { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); }
+.ext-40 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.ext-41 { cursor: pointer; }
+.ext-42 { display: flex; justify-content: center; align-items: center; }
+.ext-43 { margin-bottom: 5px; }
+.ext-44 { width: 100%; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.88rem; }
+.ext-45 { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.ext-46 { font-weight:700; background-color: #ef4444; color: #fff; padding: 2px 6px; border-radius: 50%; font-size: 0.72rem; }
+.ext-47 { display: flex; flex-direction: column; gap: 12px; }
+.ext-48 { margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+.ext-49 { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); margin: 0; }
+.ext-50 { font-size: 0.72rem; color: var(--text-secondary); }
+.ext-51 { height: 15%; }
+.ext-52 { height: 30%; }
+.ext-53 { height: 45%; }
+.ext-54 { height: 25%; }
+.ext-55 { height: 60%; }
+.ext-56 { height: 50%; }
+.ext-57 { height: 70%; }
+.ext-58 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.ext-59 { background-color: var(--bg-primary); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; }
+.ext-60 { background-color: #eff6ff; color: #2563eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ext-61 { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+.ext-62 { margin-top: 10px; margin-bottom: 25px; }
+.ext-63 { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow); }
+.ext-64 { background-color: var(--accent-light); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 12px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; }
+.ext-65 { display: flex; align-items: center; gap: 15px; }
+.ext-66 { background-color: #fef3c7; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.ext-67 { display: flex; flex-direction: column; gap: 2px; }
+.ext-68 { font-weight: 800; color: #1e3a8a; font-family: }
+.ext-69 { color: #64748b; font-size: 0.8rem; font-weight: 500; }
+.ext-70 { padding: 10px 20px; font-size: 0.88rem; font-weight: 700; border-radius: 8px; }
+.ext-71 { background-color: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); padding: 25px; border-radius: 12px; margin-bottom: 20px; }
+.ext-72 { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+.ext-73 { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 25px; }
+.ext-74 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.ext-75 { display: flex; gap: 5px; }
+.ext-76 { width: 70px; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-weight: 700; text-align: center; }
+.ext-77 { flex: 1; padding: 8px; border-radius: 8px; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 5px; border: 1.5px solid var(--border); background-color: var(--bg-primary); color: var(--text-primary); }
+.ext-78 { background-color: var(--bg-primary); border: 1.5px dashed var(--border); padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+.ext-79 { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between; }
+.ext-80 { color: var(--accent); font-weight: 800; }
+.ext-81 { display: flex; flex-wrap: wrap; gap: 10px; }
+.ext-82 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; padding-top: 15px; border-top: 1px solid var(--border); }
+.ext-83 { width:100%; }
+.ext-84 { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.ext-85 { display:flex; align-items:center; gap:8px; }
+.ext-86 { font-weight: 700; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; gap: 5px; margin-bottom: 0; }
+.ext-87 { margin-bottom: 25px; padding-top: 15px; border-top: 1px solid var(--border); }
+.ext-88 { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px; }
+.ext-89 { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+.ext-90 { display: flex; gap: 10px; max-width: 450px; }
+.ext-91 { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.85rem; }
+.ext-92 { font-size: 0.85rem; font-weight: 700; padding: 8px 15px; border: 1.5px solid var(--border); background-color: var(--bg-primary); color: var(--text-primary); }
+.ext-93 { width: 100%; padding: 15px; border-radius: 12px; font-size: 1.15rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 10px; border: none; box-shadow: var(--shadow); color:#fff; background-color: var(--accent); }
+.ext-94 { display: none; flex-direction: column; gap: 20px; }
+.ext-95 { display: flex; align-items: center; gap: 15px; text-align: left; }
+.ext-96 { width: 1px; height: 24px; background-color: rgba(255,255,255,0.15); margin: 0 5px; }
+.ext-97 { display: flex; align-items: center; gap: 12px; background-color: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px; }
+.ext-98 { color: #ffffff; }
+.ext-99 { font-size: 0.92rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px; }
+.ext-100 { color: #10b981; font-size: 0.75rem; }
+.ext-101 { font-size: 0.72rem; color: rgba(255,255,255,0.65); font-weight: 600; }
+.ext-102 { display: flex; flex-direction: column; gap: 4px; }
+.ext-103 { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.ext-104 { display: flex; align-items: center; gap: 10px; }
+.ext-105 { width: 60px; height: 6px; background-color: rgba(255,255,255,0.12); border-radius: 3px; overflow: hidden; margin: 2px 0; }
+.ext-106 { height: 100%; width: 0%; background-color: var(--accent); transition: width 0.3s ease; }
+.ext-107 { font-size: 0.95rem; font-weight: 800; color: #ffffff; font-family: }
+.ext-108 { display: flex; align-items: center; gap: 12px; }
+.ext-109 { display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; color: #ffffff; background: transparent; font-family: }
+.ext-110 { font-family: monospace; font-weight: 800; color: #ffffff; }
+.ext-111 { background: none; border: none; font-size: 0.8rem; cursor: pointer; padding: 2px; line-height: 1; margin-left: 4px; }
+.ext-112 { display: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #ef4444; color: #ef4444; background: transparent; transition: all 0.2s; }
+.ext-113 { padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid rgba(255,255,255,0.15); color: #ffffff; background: transparent; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+.ext-114 { vertical-align: middle; color: #ffffff; }
+.ext-115 { padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: none; color: #ffffff; background-color: var(--accent); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+.ext-116 { display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 15px; }
+.ext-117 { margin-left: 10px; }
+.ext-118 { display: none; margin-top: 10px; padding: 8px 12px; background-color: var(--accent-light); color: var(--accent); border-radius: 8px; font-size: 0.82rem; font-weight: 700; align-items: center; justify-content: space-between; gap: 15px; border: 1.5px solid var(--border); }
+.ext-119 { padding: 2px 8px; font-size: 0.72rem; font-weight: 800; border-radius: 6px; border-width: 1.5px; }
+.ext-120 { padding: 12px 24px; border-radius:12px; font-size:1rem; border:none; box-shadow: var(--shadow); font-weight:700; }
+.ext-121 { border: 2px dashed var(--accent); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px; background-color: var(--bg-card); cursor: pointer; transition: background-color 0.2s ease; }
+.ext-122 { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+.ext-123 { font-size: 0.9rem; color: var(--text-primary); display: block; }
+.ext-124 { font-size: 0.78rem; color: var(--text-secondary); }
+.ext-125 { display:flex; align-items:center; gap:15px; margin-top:10px; }
+.ext-126 { flex:1; cursor:pointer; }
+.ext-127 { font-weight:700; width:45px; text-align:right; }
+.ext-128 { margin-top:20px; }
+.ext-129 { margin-top:10px; display:flex; align-items:center; gap:8px; }
+.ext-130 { cursor:pointer; }
+.ext-131 { font-weight:600; cursor:pointer; margin-bottom:0; }
+.ext-132 { font-size:1.6rem; }
+.ext-133 { font-size:1.6rem; color:#3b82f6; }
+.ext-134 { font-size:1.6rem; color:#f59e0b; }
+.ext-135 { font-size:1.6rem; color:#10b981; }
+.ext-136 { font-size:1.6rem; color:#ec4899; }
+.ext-137 { font-size:1.6rem; color:#a855f7; }
+.ext-138 { margin-bottom: 25px; padding: 15px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border: 1.5px solid var(--border); border-radius: 12px; background-color: var(--bg-card); }
+.ext-139 { flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 4px; }
+.ext-140 { font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); }
+.ext-141 { width: 100%; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); cursor: pointer; font-size: 0.88rem; }
+.ext-142 { flex: 3; min-width: 250px; display: flex; flex-direction: column; gap: 4px; }
+.ext-143 { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); font-size: 0.88rem; }
+.ext-144 { display: flex; flex-wrap: wrap; gap: 20px; }
+.ext-145 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 30px rgba(16, 185, 129, 0.15); border: none; margin-bottom: 25px; }
+.ext-146 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.ext-147 { border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card); display: flex; flex-direction: column; justify-content: space-between; }
+.ext-148 { font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.ext-149 { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 15px; }
+.ext-150 { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+.ext-151 { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); }
+.ext-152 { width: 100%; padding: 10px; font-weight: 700; border-radius: 8px; background-color: var(--accent); border-color: var(--accent); color: #fff; }
+.ext-153 { font-size: 1.2rem; font-weight: 850; margin-bottom: 15px; border-bottom: 1.5px solid var(--border); padding-bottom: 10px; }
+.ext-154 { background: linear-gradient(135deg, #8b5cf6 0%, var(--accent) 100%); box-shadow: 0 8px 30px rgba(139, 92, 246, 0.15); border: none; }
+.ext-155 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.ext-156 { border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; background-color: var(--bg-card); }
+.ext-157 { font-size: 2.2rem; display: block; margin-bottom: 8px; }
+.ext-158 { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.ext-159 { font-size: 1.7rem; font-weight: 850; color: var(--text-primary); }
+.ext-160 { font-size: 1.25rem; font-weight: 850; color: var(--text-primary); display: flex; justify-content: center; gap: 10px; margin-top: 4px; }
+.ext-161 { color: var(--errada); }
+.ext-162 { color: var(--text-secondary); }
+.ext-163 { color: var(--correta); }
+.ext-164 { font-size: 1.6rem; font-weight: 850; color: var(--text-primary); }
+.ext-165 { font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; }
+.ext-166 { color: var(--correta); font-weight: 700; }
+.ext-167 { color: var(--errada); font-weight: 700; }
+.ext-168 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.ext-169 { border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card); min-height: 320px; display: flex; flex-direction: column; }
+.ext-170 { font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; }
+.ext-171 { flex: 1; position: relative; }
+.ext-172 { border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card); }
+.ext-173 { padding: 0; overflow: hidden; background: transparent; border: none; }
+.ext-174 { width: 100%; height: calc(100vh - 40px); border: none; border-radius: 12px; background: transparent; }
+.ext-175 { font-size: 0.88rem; color: var(--text-secondary); margin: 0; }
+.ext-176 { display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
+.ext-177 { border-top: 1.5px solid var(--border); padding-top: 15px; margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
+.ext-178 { display: flex; gap: 10px; }
+.ext-179 { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); font-size: 0.88rem; }
+.ext-180 { font-weight: 700; background-color: var(--accent); border-color: var(--accent); color: #fff; border-radius: 8px; padding: 0 15px; }
+.ext-181 { max-width: 800px; height: 80vh; }
+.ext-182 { background-color: var(--bg-primary); }
+.ext-183 { font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; display: block; margin-top: 2px; }
+.ext-184 { background-color: var(--bg-app); padding: 15px; }
+.ext-185 { display: flex; flex-direction: column; gap: 15px; }
+.ext-186 { max-width: 480px; max-height: 90vh; display: flex; flex-direction: column; }
+.ext-187 { background-color: var(--bg-app); padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+.ext-188 { display: flex; flex-direction: column; gap: 6px; }
+.ext-189 { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left; }
+.ext-190 { padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem; }
+.ext-191 { padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem; resize:vertical; }
+.ext-192 { border: none; box-shadow: var(--shadow); font-weight: 700; border-radius: 8px; color: #fff; background-color: var(--accent); padding: 6px 16px; }
+.ext-193 { display: none; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.ext-194 { font-size: 1rem; color: var(--text-secondary); cursor: grab; user-select: none; margin-bottom: 4px; }
+.ext-195 { font-size: 0.55rem; font-weight: 850; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; writing-mode: vertical-lr; margin-bottom: 6px; user-select: none; }
+.ext-196 { background-color: var(--accent-light); color: var(--accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; user-select: none; transition: all 0.2s; }
+.ext-197 { color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+.ext-198 { background-color: var(--accent); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; box-shadow: var(--shadow-sm); font-weight: bold; }
+.ext-199 { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+.ext-200 { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.ext-201 { font-size: 1.1rem; color: var(--text-secondary); cursor: grab; user-select: none; }
+.ext-202 { display: flex; gap: 8px; align-items: center; }
+.ext-203 { background-color: #f3e8ff; color: #a855f7; border: none; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; cursor: pointer; }
+.ext-204 { background: none; border: none; color: var(--text-secondary); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ext-205 { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px; }
+.ext-206 { background-color: #eab308; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; }
+.ext-207 { background-color: #10b981; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; }
+.ext-208 { background-color: #3b82f6; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; }
+.ext-209 { background-color: #ec4899; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; }
+.ext-210 { background-color: #f97316; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; }
+.ext-211 { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.ext-212 { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.ext-213 { width: 100%; height: 6px; border-radius: 3px; background: var(--border); outline: none; -webkit-appearance: none; cursor: pointer; }
+.ext-214 { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.ext-215 { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s; }
+.ext-216 { font-weight: 800; font-size: 1.05rem; text-decoration: underline; text-underline-offset: 3px; line-height: 1; }
+.ext-217 { font-weight: 800; font-size: 1.05rem; line-height: 1; }
+.ext-218 { border-top: 1.5px solid var(--border); padding-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; user-select: none; }

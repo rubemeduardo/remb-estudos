@@ -1,0 +1,59 @@
+<svg width="960" height="620" viewBox="0 0 960 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="620" rx="24" fill="#f8fafc"/>
+  <text x="48" y="70" font-family="Outfit, Inter, Arial, sans-serif" font-size="34" font-weight="900" fill="#0f172a">Paleta visual REMB Estudos</text>
+  <text x="48" y="102" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#64748b">Cores identificadas na aplicacao principal e no planner.</text>
+
+  <g font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">
+    <rect x="48" y="150" width="130" height="100" rx="14" fill="#0f172a"/>
+    <text x="48" y="274" fill="#0f172a">Navy</text>
+    <text x="48" y="296" fill="#64748b">#0f172a</text>
+
+    <rect x="202" y="150" width="130" height="100" rx="14" fill="#2563eb"/>
+    <text x="202" y="274" fill="#0f172a">Azul principal</text>
+    <text x="202" y="296" fill="#64748b">#2563eb</text>
+
+    <rect x="356" y="150" width="130" height="100" rx="14" fill="#06b6d4"/>
+    <text x="356" y="274" fill="#0f172a">Ciano marca</text>
+    <text x="356" y="296" fill="#64748b">#06b6d4</text>
+
+    <rect x="510" y="150" width="130" height="100" rx="14" fill="#10b981"/>
+    <text x="510" y="274" fill="#0f172a">Sucesso</text>
+    <text x="510" y="296" fill="#64748b">#10b981</text>
+
+    <rect x="664" y="150" width="130" height="100" rx="14" fill="#ef4444"/>
+    <text x="664" y="274" fill="#0f172a">Erro</text>
+    <text x="664" y="296" fill="#64748b">#ef4444</text>
+
+    <rect x="818" y="150" width="94" height="100" rx="14" fill="#f59e0b"/>
+    <text x="818" y="274" fill="#0f172a">Alerta</text>
+    <text x="818" y="296" fill="#64748b">#f59e0b</text>
+  </g>
+
+  <text x="48" y="366" font-family="Outfit, Inter, Arial, sans-serif" font-size="24" font-weight="900" fill="#0f172a">Neutros e superficies</text>
+  <g font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">
+    <rect x="48" y="396" width="130" height="76" rx="14" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="48" y="496" fill="#0f172a">Fundo claro</text>
+    <text x="48" y="518" fill="#64748b">#f1f5f9</text>
+
+    <rect x="202" y="396" width="130" height="76" rx="14" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="202" y="496" fill="#0f172a">Card</text>
+    <text x="202" y="518" fill="#64748b">#ffffff</text>
+
+    <rect x="356" y="396" width="130" height="76" rx="14" fill="#cbd5e1"/>
+    <text x="356" y="496" fill="#0f172a">Borda</text>
+    <text x="356" y="518" fill="#64748b">#cbd5e1</text>
+
+    <rect x="510" y="396" width="130" height="76" rx="14" fill="#090d16"/>
+    <text x="510" y="496" fill="#0f172a">Escuro app</text>
+    <text x="510" y="518" fill="#64748b">#090d16</text>
+
+    <rect x="664" y="396" width="130" height="76" rx="14" fill="#6366f1"/>
+    <text x="664" y="496" fill="#0f172a">Planner 1</text>
+    <text x="664" y="518" fill="#64748b">#6366f1</text>
+
+    <rect x="818" y="396" width="94" height="76" rx="14" fill="#a855f7"/>
+    <text x="818" y="496" fill="#0f172a">Planner 2</text>
+    <text x="818" y="518" fill="#64748b">#a855f7</text>
+  </g>
+</svg>
+

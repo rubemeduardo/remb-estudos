@@ -1,0 +1,20 @@
+<svg width="720" height="220" viewBox="0 0 720 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGrad" x1="48" y1="44" x2="176" y2="176" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <filter id="softShadow" x="0" y="0" width="220" height="220" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect width="720" height="220" rx="24" fill="#f8fafc"/>
+  <g filter="url(#softShadow)">
+    <rect x="44" y="44" width="132" height="132" rx="28" fill="#0f172a"/>
+    <path d="M80 70H116C136.987 70 154 87.0132 154 108C154 124.789 143.108 139.023 127.867 144.004L150.396 166.533C152.251 168.388 152.251 171.396 150.396 173.251C148.541 175.106 145.533 175.106 143.678 173.251L118.368 147.941V155.5C118.368 158.124 116.241 160.25 113.618 160.25C110.994 160.25 108.868 158.124 108.868 155.5V146H80C77.3766 146 75.25 143.873 75.25 141.25V74.75C75.25 72.1266 77.3766 70 80 70ZM108.868 79.5V136.5H116C131.74 136.5 144.5 123.74 144.5 108C144.5 92.2599 131.74 79.5 116 79.5H108.868Z" fill="url(#logoGrad)"/>
+  </g>
+  <text x="210" y="112" font-family="Outfit, Inter, Arial, sans-serif" font-size="56" font-weight="900" fill="#0f172a">REMB</text>
+  <text x="210" y="158" font-family="Outfit, Inter, Arial, sans-serif" font-size="38" font-weight="500" fill="#2563eb">Estudos</text>
+  <text x="410" y="154" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="600" fill="#64748b">Central Premium de Concursos</text>
+</svg>
+

@@ -1,0 +1,15 @@
+{
+  "name": "remb-estudos-sala",
+  "version": "2.0.0",
+  "description": "REMB Concursos - Plataforma de Estudos",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node dev_server.js",
+    "migrate:data": "node js/migrate_data.js"
+  }
+}

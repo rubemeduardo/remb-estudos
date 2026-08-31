@@ -3,7 +3,13 @@
 
 <head>
     <base href="../">
-    <script>localStorage.setItem("remb_demo_profile", "luciana");</script>
+    <script>
+        localStorage.setItem("remb_demo_profile", "luciana");
+        localStorage.removeItem("remb_demo_progress_demo_luciana");
+        localStorage.removeItem("remb_caderno_ativo");
+        localStorage.removeItem("remb_session_source_context");
+        localStorage.removeItem("remb_estudos_tempo");
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REMB Estudos - LUCIANA</title>
@@ -2050,7 +2056,7 @@
 
     <!-- JS SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/app.js?v=1787423300000"></script>
+    <script src="js/app.js?v=1787423300001"></script>
     <script src="js/session.js?v=1787423300000"></script>
 </body>
 

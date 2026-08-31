@@ -287,13 +287,8 @@ async function handleDemoApiRequest(path, options = {}) {
     }
 
     if (url.pathname === "/api/progress") {
-        if (method === "PUT") {
-            const body = JSON.parse(options.body || "{}");
-            localStorage.setItem(getDemoProgressKey(), JSON.stringify({ dados: body.dados || {}, tempoSegundos: body.tempoSegundos || 0 }));
-            return { ok: true };
-        }
-        const saved = JSON.parse(localStorage.getItem(getDemoProgressKey()) || "{}");
-        return { dados: saved.dados || {}, tempoSegundos: saved.tempoSegundos || 0 };
+        if (method === "PUT") return { ok: true };
+        return { dados: {}, tempoSegundos: 0 };
     }
 
     if (url.pathname === "/api/lists") {
@@ -3699,281 +3694,147 @@ function removerBalaoNota(questionId, idx) {
 // SEÇÃO 1: PAINEL PRINCIPAL (DASHBOARD)
 // ==========================================================================
 function atualizarEstatisticasDashboard() {
-    // 1. Obter dados dinâmicos do progressoUsuario
-    const totalRespondidasGeral = Object.keys(progressoUsuario.respondidas).length;
-    const totalAcertosGeral = Object.values(progressoUsuario.respondidas).filter(r => r.correta).length;
+    const totalRespondidasGeral = Object.keys(progressoUsuario.respondidas || {}).length;
+    const totalAcertosGeral = Object.values(progressoUsuario.respondidas || {}).filter(r => r.correta).length;
     const totalErrosGeral = totalRespondidasGeral - totalAcertosGeral;
+    const demoEntry = REMB_DEMO_MODE ? getDemoUserEntry() : null;
+    const demoProfile = localStorage.getItem("remb_demo_profile") || REMB_DEMO_PROFILE;
+    const primeiroAcessoDemo = Boolean(demoEntry) && totalRespondidasGeral === 0;
 
-    // Calcular respondidas hoje
-    const hojeStr = new Date().toDateString();
-    const respondidasHoje = Object.values(progressoUsuario.respondidas).filter(r => {
-        if (!r.respondidaEm) return false;
-        return new Date(r.respondidaEm).toDateString() === hojeStr;
-    }).length;
-
-    // Horário do dia para saudação
     const hora = new Date().getHours();
-    let periodo = "noite";
     let saudacao = "Boa noite";
-    if (hora >= 6 && hora < 12) {
-        periodo = "manhã";
-        saudacao = "Bom dia";
-    } else if (hora >= 12 && hora < 18) {
-        periodo = "tarde";
-        saudacao = "Boa tarde";
-    }
+    if (hora >= 6 && hora < 12) saudacao = "Bom dia";
+    else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
 
-    // Saudação personalizada
     const greetingEl = document.getElementById("home-greeting");
     const greetingSubEl = document.getElementById("home-greeting-sub");
-    const activeUserName = progressoUsuario.nome || "Rubem";
-    if (greetingEl) greetingEl.innerHTML = `${saudacao}, ${activeUserName}! 👋`;
-    if (greetingSubEl) greetingSubEl.innerHTML = `Vamos continuar seus estudos? O foco de hoje te aproxima da sua aprovação.`;
+    const activeUserName = progressoUsuario.nome || demoEntry?.user?.nome || "Rubem";
+    if (greetingEl) greetingEl.innerHTML = primeiroAcessoDemo
+        ? `${saudacao}, ${activeUserName}! Seja bem-vindo ao REMB Estudos.`
+        : `${saudacao}, ${activeUserName}! 👋`;
+    if (greetingSubEl) greetingSubEl.innerHTML = primeiroAcessoDemo
+        ? "Este é seu primeiro acesso. Explore o ambiente com calma e teste a navegação pelo conteúdo liberado para você."
+        : "Vamos continuar seus estudos? O foco de hoje te aproxima da sua aprovação.";
 
-    // 2. Preencher KPI Cards
+    const hojeStr = new Date().toDateString();
+    const respondidasHoje = Object.values(progressoUsuario.respondidas || {}).filter(r => r.respondidaEm && new Date(r.respondidaEm).toDateString() === hojeStr).length;
+
+    const respondidas30d = primeiroAcessoDemo ? 0 : totalRespondidasGeral + 482;
+    const acertos30d = primeiroAcessoDemo ? 0 : totalAcertosGeral + 342;
+    const aproveitamento30d = respondidas30d > 0 ? Math.round((acertos30d / respondidas30d) * 100) : 0;
+    const metaDiaria = progressoUsuario.planner?.config ? (progressoUsuario.planner.progresso?.historicoDias?.[new Date().toISOString().split('T')[0]]?.planejado || 20) : 20;
+    const realizadasHoje = primeiroAcessoDemo ? 0 : respondidasHoje;
+    const percMeta = Math.min(100, Math.round((realizadasHoje / metaDiaria) * 100));
+
     const kpiRespondidas = document.getElementById("kpi-respondidas");
     const kpiAproveitamento = document.getElementById("kpi-aproveitamento");
     const kpiSequencia = document.getElementById("kpi-sequencia");
     const kpiMetaText = document.getElementById("kpi-meta-text");
     const kpiMetaBar = document.getElementById("kpi-meta-progress-bar");
-
-    // Simulando base de 30 dias para dar visual premium
-    const respondidas30d = totalRespondidasGeral + 482;
-    const acertos30d = totalAcertosGeral + 342;
-    const aproveitamento30d = respondidas30d > 0 ? Math.round((acertos30d / respondidas30d) * 100) : 71;
-
     if (kpiRespondidas) kpiRespondidas.innerHTML = `${respondidas30d} <span style="font-size:0.75rem; font-weight:500; color:var(--text-secondary);">(30 dias)</span>`;
-    if (kpiAproveitamento) kpiAproveitamento.innerHTML = `${aproveitamento30d}% <span style="font-size: 0.7rem; background-color: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 6px; font-weight: 700; margin-left: 5px;">+6%</span>`;
-    if (kpiSequencia) kpiSequencia.innerHTML = `12 dias <span style="font-size:0.75rem; font-weight:500; color:var(--text-secondary);">seguidos 🔥</span>`;
-
-    // Meta diária (se planner estiver ativo usar as metas do planner, senão 20 de meta)
-    let metaDiaria = 20;
-    let realizadasHoje = respondidasHoje;
-    if (progressoUsuario.planner && progressoUsuario.planner.config) {
-        const hojeKey = new Date().toISOString().split('T')[0];
-        const diaHoje = progressoUsuario.planner.progresso.historicoDias[hojeKey];
-        if (diaHoje) {
-            metaDiaria = diaHoje.planejado || 20;
-            realizadasHoje = Math.max(diaHoje.realizado || 0, respondidasHoje);
-        }
-    }
-    // Para efeito estético inicial se o usuário for novo e tiver 0 respostas reais
-    if (realizadasHoje === 0 && totalRespondidasGeral === 0) {
-        realizadasHoje = 12;
-    }
-    const percMeta = Math.min(100, Math.round((realizadasHoje / metaDiaria) * 100));
+    if (kpiAproveitamento) kpiAproveitamento.innerHTML = primeiroAcessoDemo ? "0%" : `${aproveitamento30d}% <span style="font-size: 0.7rem; background-color: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 6px; font-weight: 700; margin-left: 5px;">+6%</span>`;
+    if (kpiSequencia) kpiSequencia.innerHTML = primeiroAcessoDemo ? `0 dias <span style="font-size:0.75rem; font-weight:500; color:var(--text-secondary);">seguidos</span>` : `12 dias <span style="font-size:0.75rem; font-weight:500; color:var(--text-secondary);">seguidos 🔥</span>`;
     if (kpiMetaText) kpiMetaText.innerText = `${realizadasHoje} / ${metaDiaria} q.`;
     if (kpiMetaBar) kpiMetaBar.style.width = `${percMeta}%`;
 
-    // 3. Bloco "Continue de onde parou"
     const continueBox = document.getElementById("home-continue-box");
     if (continueBox) {
         continueBox.innerHTML = "";
-        
         let estudoAtivo = null;
-        if (window.cadernoGerado && window.cadernoQuestoes && window.cadernoQuestoes.length > 0) {
+        if (!primeiroAcessoDemo && window.cadernoGerado && window.cadernoQuestoes && window.cadernoQuestoes.length > 0) {
             const totalQ = window.cadernoQuestoes.length;
             const resolvidasQ = window.cadernoQuestoes.filter(q => progressoUsuario.respondidas[q.id]).length;
-            const pct = Math.round((resolvidasQ / totalQ) * 100);
-            estudoAtivo = {
-                tipo: "Caderno ativo",
-                titulo: "Caderno de Estudos — Sessão",
-                subtitulo: window.cadernoQuestoes[0].disciplina || "Disciplinas Variadas",
-                questaoAtual: Math.min(totalQ, resolvidasQ + 1),
-                totalQuestoes: totalQ,
-                percentual: pct,
-                action: () => navegarPara('questoes')
-            };
-        } else {
+            estudoAtivo = { titulo: "Caderno de Estudos — Sessão", questaoAtual: Math.min(totalQ, resolvidasQ + 1), totalQuestoes: totalQ, percentual: Math.round((resolvidasQ / totalQ) * 100), action: () => navegarPara('questoes') };
+        } else if (!primeiroAcessoDemo) {
             const listasIds = Object.keys(progressoUsuario.listas || {});
-            if (listasIds.length > 0) {
-                const lastListId = listasIds[listasIds.length - 1];
-                const list = progressoUsuario.listas[lastListId];
-                if (list.questoes && list.questoes.length > 0) {
-                    const totalQ = list.questoes.length;
-                    const resolvidasQ = list.questoes.filter(q => progressoUsuario.respondidas[q.id]).length;
-                    const pct = Math.round((resolvidasQ / totalQ) * 100);
-                    estudoAtivo = {
-                        tipo: list.tipo === 'precarregada' ? "Simulado" : "Lista em andamento",
-                        titulo: list.nome,
-                        subtitulo: list.questoes[0].disciplina || "Disciplinas Variadas",
-                        questaoAtual: Math.min(totalQ, resolvidasQ + 1),
-                        totalQuestoes: totalQ,
-                        percentual: pct,
-                        action: () => {
-                            window.visualizarLista(lastListId);
-                        }
-                    };
-                }
+            const lastListId = listasIds[listasIds.length - 1];
+            const list = lastListId ? progressoUsuario.listas[lastListId] : null;
+            if (list?.questoes?.length) {
+                const totalQ = list.questoes.length;
+                const resolvidasQ = list.questoes.filter(q => progressoUsuario.respondidas[q.id]).length;
+                estudoAtivo = { titulo: list.nome, questaoAtual: Math.min(totalQ, resolvidasQ + 1), totalQuestoes: totalQ, percentual: Math.round((resolvidasQ / totalQ) * 100), action: () => window.visualizarLista(lastListId) };
             }
         }
 
         if (estudoAtivo) {
             continueBox.innerHTML = `
                 <div style="background-color: var(--bg-primary); border: 1.5px solid var(--border); padding: 15px; border-radius: 12px; display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-                    <div style="background-color: #eff6ff; color: #3b82f6; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;">
-                        <h4 style="font-size: 0.92rem; font-weight: 800; font-family: 'Outfit', sans-serif; margin: 0; color: var(--text-primary);">${estudoAtivo.titulo}</h4>
-                        <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">Questão ${estudoAtivo.questaoAtual} de ${estudoAtivo.totalQuestoes}</p>
-                        <div style="width: 100%; background-color: var(--border); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 5px;">
-                            <div style="width: ${estudoAtivo.percentual}%; background-color: var(--accent); height: 100%;"></div>
-                        </div>
-                    </div>
+                    <div style="background-color: #eff6ff; color: #3b82f6; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><h4 style="font-size: 0.92rem; font-weight: 800; font-family: 'Outfit', sans-serif; margin: 0; color: var(--text-primary);">${escapeHtml(estudoAtivo.titulo)}</h4><p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">Questão ${estudoAtivo.questaoAtual} de ${estudoAtivo.totalQuestoes}</p><div style="width: 100%; background-color: var(--border); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 5px;"><div style="width: ${estudoAtivo.percentual}%; background-color: var(--accent); height: 100%;"></div></div></div>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-primary" id="btn-home-continue-action" style="flex: 1.2; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none;">Continuar estudos <span style="font-size: 0.95rem;">›</span></button>
-                    <button class="btn btn-outline-secondary" id="btn-home-continue-details" style="flex: 0.8; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.85rem; border: 1.5px solid var(--border); color: var(--text-primary); background: transparent; cursor: pointer;">Ver detalhes</button>
-                </div>
-            `;
+                <div style="display: flex; gap: 10px;"><button class="btn-primary" id="btn-home-continue-action" style="flex: 1.2; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none;">Continuar estudos <span style="font-size: 0.95rem;">›</span></button><button class="btn btn-outline-secondary" id="btn-home-continue-details" style="flex: 0.8; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.85rem; border: 1.5px solid var(--border); color: var(--text-primary); background: transparent; cursor: pointer;">Ver detalhes</button></div>`;
             document.getElementById("btn-home-continue-action").onclick = estudoAtivo.action;
             document.getElementById("btn-home-continue-details").onclick = estudoAtivo.action;
         } else {
-            // Caso estático mockup se for o primeiro carregamento
+            const alvo = demoProfile === "luciana" ? "a prova VUNESP liberada para você" : "suas listas de exercícios liberadas";
             continueBox.innerHTML = `
-                <div style="background-color: var(--bg-primary); border: 1.5px solid var(--border); padding: 15px; border-radius: 12px; display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-                    <div style="background-color: #eff6ff; color: #3b82f6; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;">
-                        <h4 style="font-size: 0.92rem; font-weight: 800; font-family: 'Outfit', sans-serif; margin: 0; color: var(--text-primary);">Caderno de Estudos — Sessão</h4>
-                        <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">Questão 1 de 10</p>
-                        <div style="width: 100%; background-color: var(--border); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 5px;">
-                            <div style="width: 10%; background-color: var(--accent); height: 100%;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-primary" id="btn-home-continue-action" style="flex: 1.2; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none;">Continuar estudos <span style="font-size: 0.95rem;">›</span></button>
-                    <button class="btn btn-outline-secondary" id="btn-home-continue-details" style="flex: 0.8; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.85rem; border: 1.5px solid var(--border); color: var(--text-primary); background: transparent; cursor: pointer;">Ver detalhes</button>
-                </div>
-            `;
-            const actBtn = document.getElementById("btn-home-continue-action");
-            const detBtn = document.getElementById("btn-home-continue-details");
-            if (actBtn) actBtn.onclick = () => navegarPara('questoes');
-            if (detBtn) detBtn.onclick = () => navegarPara('questoes');
+                <div style="background-color: var(--bg-primary); border: 1.5px dashed var(--border); padding: 22px; border-radius: 12px; min-height: 120px; display: flex; flex-direction: column; justify-content: center; gap: 8px;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin: 0; color: var(--text-primary);">Nenhum estudo em andamento</h4>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Como este é o primeiro acesso, ainda não há ponto de continuação. Comece por ${alvo}.</p>
+                    <button class="btn-primary" id="btn-home-start-first-access" style="align-self: flex-start; margin-top: 8px; border-radius: 8px; font-weight: 700; padding: 10px 18px; font-size: 0.85rem; cursor: pointer; border: none;">Começar agora</button>
+                </div>`;
+            const btn = document.getElementById("btn-home-start-first-access");
+            if (btn) btn.onclick = () => navegarPara(demoProfile === "luciana" ? 'provas' : 'listas');
         }
     }
 
-    // 4. Desempenho (7 dias)
     const lblRespondidas7d = document.getElementById("lblHomeRespondidas7d");
     const lblAcertos7d = document.getElementById("lblHomeAcertos7d");
     const lblErros7d = document.getElementById("lblHomeErros7d");
     const lblAprov7d = document.getElementById("lblHomeAproveitamento7d");
-
-    const r7d = totalRespondidasGeral > 0 ? totalRespondidasGeral : 214;
-    const a7d = totalRespondidasGeral > 0 ? totalAcertosGeral : 158;
-    const e7d = totalRespondidasGeral > 0 ? totalErrosGeral : 56;
-    const ap7d = r7d > 0 ? Math.round((a7d / r7d) * 100) : 74;
-
+    const r7d = primeiroAcessoDemo ? 0 : (totalRespondidasGeral || 214);
+    const a7d = primeiroAcessoDemo ? 0 : (totalRespondidasGeral ? totalAcertosGeral : 158);
+    const e7d = primeiroAcessoDemo ? 0 : (totalRespondidasGeral ? totalErrosGeral : 56);
+    const ap7d = r7d > 0 ? Math.round((a7d / r7d) * 100) : 0;
     if (lblRespondidas7d) lblRespondidas7d.innerText = r7d;
     if (lblAcertos7d) lblAcertos7d.innerText = a7d;
     if (lblErros7d) lblErros7d.innerText = e7d;
     if (lblAprov7d) lblAprov7d.innerText = `${ap7d}%`;
 
-    // 5. Revisões pendentes
+    const totalFavs = (progressoUsuario.favoritas || []).length;
+    const totalNotes = Object.keys(progressoUsuario.anotacoes || {}).length;
     const revErros = document.getElementById("home-rev-erros");
     const revFavoritas = document.getElementById("home-rev-favoritas");
     const revAnotacoes = document.getElementById("home-rev-anotacoes");
+    if (revErros) revErros.innerText = primeiroAcessoDemo ? "" : (totalRespondidasGeral ? totalErrosGeral : 28);
+    if (revFavoritas) revFavoritas.innerText = primeiroAcessoDemo ? "" : (totalRespondidasGeral ? totalFavs : 14);
+    if (revAnotacoes) revAnotacoes.innerText = primeiroAcessoDemo ? "" : (totalRespondidasGeral ? totalNotes : 9);
 
-    const totalErros = Object.values(progressoUsuario.respondidas).filter(r => !r.correta).length;
-    const totalFavs = (progressoUsuario.favoritas || []).length;
-    const totalNotes = Object.keys(progressoUsuario.anotacoes || {}).length;
+    if (primeiroAcessoDemo) {
+        document.querySelectorAll("#weeklyHomeChart .chart-bar-val").forEach(bar => {
+            bar.style.height = "8%";
+            bar.classList.remove("active");
+        });
+    }
 
-    const displayErros = totalRespondidasGeral > 0 ? totalErros : 28;
-    const displayFavs = totalRespondidasGeral > 0 ? totalFavs : 14;
-    const displayNotes = totalRespondidasGeral > 0 ? totalNotes : 9;
-
-    if (revErros) revErros.innerText = displayErros;
-    if (revFavoritas) revFavoritas.innerText = displayFavs;
-    if (revAnotacoes) revAnotacoes.innerText = displayNotes;
-
-    // 6. Feed de Novidades
     const newsFeed = document.getElementById("home-news-feed");
     if (newsFeed) {
+        const novidades = demoProfile === "luciana"
+            ? [{ titulo: "Prova VUNESP de Promotor de Justiça disponível", desc: "Liberada para seu teste", action: () => navegarPara('provas') }]
+            : [{ titulo: "Listas de exercícios do Prof. Callado disponíveis", desc: "Liberadas para seu teste", action: () => navegarPara('listas') }];
         newsFeed.innerHTML = "";
-        const novidades = [
-            {
-                titulo: "Nova lista de Direito Constitucional disponível",
-                desc: "há 2h",
-                action: () => navegarPara('listas')
-            },
-            {
-                titulo: "Seu simulado agendado começa amanhã às 8h",
-                desc: "há 5h",
-                action: () => navegarPara('questoes')
-            },
-            {
-                titulo: "Você bateu 12 dias de sequência — parabéns!",
-                desc: "ontem",
-                action: () => navegarPara('dashboard')
-            }
-        ];
-
         novidades.forEach(item => {
             const feedItem = document.createElement("div");
-            feedItem.style.cssText = "display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer;";
+            feedItem.style.cssText = "display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; cursor: pointer;";
             feedItem.onclick = item.action;
-            feedItem.innerHTML = `
-                <div style="background-color: var(--accent); width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;"></div>
-                <div style="flex: 1;">
-                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); line-height: 1.3;">${item.titulo}</div>
-                    <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px;">${item.desc}</div>
-                </div>
-            `;
+            feedItem.innerHTML = `<div style="background-color: var(--accent); width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;"></div><div style="flex: 1;"><div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); line-height: 1.3;">${escapeHtml(item.titulo)}</div><div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px;">${escapeHtml(item.desc)}</div></div>`;
             newsFeed.appendChild(feedItem);
         });
     }
 
-    // 7. Recomendado para você
     const recommendationsFeed = document.getElementById("home-recommendations-feed");
     if (recommendationsFeed) {
+        const listas = Object.values(progressoUsuario.listas || {}).slice(0, 4);
+        const recomendados = demoProfile === "luciana"
+            ? [{ titulo: "VUNESP - Promotor de Justiça Substituto", desc: "Prova preambular objetiva", action: () => navegarPara('provas'), color: "#2563eb", bgColor: "#dbeafe" }]
+            : (listas.length ? listas.map(lista => ({ titulo: lista.nome, desc: `${lista.questoes?.length || lista.totalQuestoes || 0} questões`, action: () => window.visualizarLista(lista.id), color: "#059669", bgColor: "#d1fae5" })) : [{ titulo: "Listas de exercícios", desc: "Conteúdo liberado para seu teste", action: () => navegarPara('listas'), color: "#059669", bgColor: "#d1fae5" }]);
         recommendationsFeed.innerHTML = "";
-        const recomendados = [
-            {
-                disciplina: "Direito Administrativo",
-                desc: "Atos administrativos",
-                color: "#ef4444",
-                bgColor: "#fee2e2"
-            },
-            {
-                disciplina: "Direito Constitucional",
-                desc: "Direitos fundamentais",
-                color: "#2563eb",
-                bgColor: "#dbeafe"
-            },
-            {
-                disciplina: "Português",
-                desc: "Interpretação de texto",
-                color: "#d97706",
-                bgColor: "#fef3c7"
-            },
-            {
-                disciplina: "Raciocínio Lógico",
-                desc: "Proposições lógicas",
-                color: "#059669",
-                bgColor: "#d1fae5"
-            }
-        ];
-
         recomendados.forEach((item, index) => {
             const feedItem = document.createElement("div");
             feedItem.style.cssText = `display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: ${index === recomendados.length - 1 ? 'none' : '1px solid var(--border)'}; cursor: pointer; transition: background-color 0.2s;`;
             feedItem.className = "recommendation-row-item";
-            feedItem.onclick = () => navegarPara('listas');
-            feedItem.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="background-color: ${item.bgColor}; color: ${item.color}; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">${item.disciplina}</div>
-                        <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">${item.desc}</div>
-                    </div>
-                </div>
-                <div style="color: var(--text-secondary); font-size: 1.1rem; padding-right: 5px;">›</div>
-            `;
+            feedItem.onclick = item.action;
+            feedItem.innerHTML = `<div style="display: flex; align-items: center; gap: 15px;"><div style="background-color: ${item.bgColor}; color: ${item.color}; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div><div><div style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">${escapeHtml(item.titulo)}</div><div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(item.desc)}</div></div></div><div style="color: var(--text-secondary); font-size: 1.1rem; padding-right: 5px;">›</div>`;
             recommendationsFeed.appendChild(feedItem);
         });
     }

@@ -3,6 +3,21 @@
 var BANCO_QUESTOES = window.BANCO_QUESTOES || [];
 var QUESTOES_CESPE_TRATADAS = window.QUESTOES_CESPE_TRATADAS || [];
 
+const REMB_DEMO_MODE = window.location.hostname.endsWith("github.io") || Boolean(localStorage.getItem("remb_demo_profile")) || Boolean(new URLSearchParams(window.location.search).get("demo"));
+const REMB_DEMO_PROFILE = localStorage.getItem("remb_demo_profile") || new URLSearchParams(window.location.search).get("demo") || "";
+const REMB_DEMO_PROVA_ID = "vunesp-mpsc-promotor-2026";
+const REMB_DEMO_USERS = {
+    luciana: {
+        user: { id: "demo_luciana", nome: "LUCIANA", email: "luciana@remb.local", nivel: "COMUM", status: "ATIVO" },
+        scope: { restricted: true, provas: [REMB_DEMO_PROVA_ID], listas: [] }
+    },
+    callado: {
+        user: { id: "demo_callado", nome: "CALLADO", email: "callado@remb.local", nivel: "COMUM", status: "ATIVO" },
+        scope: { restricted: true, provas: [], listas: [] }
+    }
+};
+const REMB_DEMO_CACHE = { provaQuestoes: null, calladoQuestoes: null, calladoLists: null };
+
 // ==========================================================================
 // API DE PRODUÇÃO (AUTENTICAÇÃO, PERFIL E PROGRESSO)
 // ==========================================================================
@@ -12,6 +27,10 @@ const REMB_API = {
     progressSaveInFlight: false,
 
     async request(path, options = {}) {
+        if (REMB_DEMO_MODE && path.startsWith("/api/")) {
+            return handleDemoApiRequest(path, options);
+        }
+
         const response = await fetch(path, {
             credentials: "include",
             headers: {
@@ -95,6 +114,220 @@ const REMB_API = {
 };
 
 window.REMB_API = REMB_API;
+
+function getDemoUserEntry() {
+    const profile = localStorage.getItem("remb_demo_profile") || REMB_DEMO_PROFILE;
+    return REMB_DEMO_USERS[profile] || null;
+}
+
+function getDemoProgressKey() {
+    const user = getDemoUserEntry();
+    return `remb_demo_progress_${user?.user?.id || "anon"}`;
+}
+
+async function carregarDemoJson(file, fallback) {
+    try {
+        const response = await fetch(file, { cache: "no-store" });
+        if (!response.ok) return fallback;
+        return await response.json();
+    } catch (error) {
+        console.warn("Dados de demonstração indisponíveis:", file, error);
+        return fallback;
+    }
+}
+
+async function carregarDemoProvaQuestoes() {
+    if (!REMB_DEMO_CACHE.provaQuestoes) {
+        const data = await carregarDemoJson("dados/provas/vunesp-mpsc-promotor-2026.json", []);
+        REMB_DEMO_CACHE.provaQuestoes = Array.isArray(data) ? data : (data.questoes || []);
+    }
+    return REMB_DEMO_CACHE.provaQuestoes;
+}
+
+async function carregarDemoQuestoesCallado() {
+    if (!REMB_DEMO_CACHE.calladoQuestoes) {
+        const data = await carregarDemoJson("dados/questoes_importadas_novas.json", []);
+        REMB_DEMO_CACHE.calladoQuestoes = (Array.isArray(data) ? data : []).map((q, idx) => ({
+            ...q,
+            id: q.id || `callado_demo_${idx + 1}`,
+            disciplina: q.disciplina || q.origem_importacao?.disciplina || "Listas Callado",
+            assunto: q.assunto || q.origem_importacao?.arquivo || "Geral",
+            origem_questao: q.origem_questao || { banca: "", orgao: "", cargo: "", ano: "", prova: "" },
+            origem_importacao: { ...(q.origem_importacao || {}), prova_id: "listas-callado" }
+        }));
+    }
+    return REMB_DEMO_CACHE.calladoQuestoes;
+}
+
+async function carregarDemoListasCallado() {
+    if (REMB_DEMO_CACHE.calladoLists) return REMB_DEMO_CACHE.calladoLists;
+    const relatorio = await carregarDemoJson("dados/listas_callado_importacao_db.json", { importedLists: [] });
+    const questoes = await carregarDemoQuestoesCallado();
+    const listasBase = Array.isArray(relatorio.importedLists) ? relatorio.importedLists : [];
+    const totalInformado = listasBase.reduce((sum, item) => sum + Math.max(0, Number(item.questoes || 0)), 0) || questoes.length || 1;
+    let cursor = 0;
+
+    REMB_DEMO_CACHE.calladoLists = listasBase.map((item, index) => {
+        const quantidade = Math.max(0, Number(item.questoes || 0));
+        const tamanho = Math.max(1, Math.round((quantidade / totalInformado) * questoes.length));
+        const bloco = questoes.slice(cursor, cursor + tamanho);
+        cursor += tamanho;
+        return {
+            id: item.id || `callado_lista_${index + 1}`,
+            nome: item.nome || `Lista Callado ${index + 1}`,
+            tags: ["callado", "lista-importada"],
+            criadaEm: relatorio.generatedAt || new Date().toISOString(),
+            atualizadaEm: relatorio.generatedAt || new Date().toISOString(),
+            tipo: "lista_usuario",
+            isPublica: false,
+            usarNaResolucao: false,
+            compartilhamentoStatus: "privada",
+            gabaritosPendentes: Number(item.pendentes || 0),
+            totalQuestoes: bloco.length,
+            origemLista: { tipo: "arquivo_usuario", arquivo: item.origem || "", visibilidade: "privada", persistencia: "publicacao_estatica" },
+            questoes: bloco
+        };
+    });
+
+    if (questoes.length && REMB_DEMO_CACHE.calladoLists.length) {
+        const ultima = REMB_DEMO_CACHE.calladoLists[REMB_DEMO_CACHE.calladoLists.length - 1];
+        ultima.questoes = [...ultima.questoes, ...questoes.slice(cursor)];
+        ultima.totalQuestoes = ultima.questoes.length;
+    }
+    REMB_DEMO_USERS.callado.scope.listas = REMB_DEMO_CACHE.calladoLists.map(lista => lista.id);
+    return REMB_DEMO_CACHE.calladoLists;
+}
+
+function publicDemoQuestion(question, includeAnswer = false) {
+    const correta = question.gabarito || question.resposta_correta || "";
+    const alternativas = (question.alternativas || []).map((alt, idx) => ({
+        letra: String(alt.letra || String.fromCharCode(65 + idx)).toUpperCase().slice(0, 1),
+        texto: alt.texto || "",
+        is_correta: includeAnswer ? Boolean(alt.is_correta || alt.correta || alt.letra === correta) : false,
+        correta: includeAnswer ? Boolean(alt.is_correta || alt.correta || alt.letra === correta) : false,
+        ordem: alt.ordem || idx + 1
+    }));
+    const payload = {
+        ...question,
+        alternativas,
+        tipo: question.tipo || question.tipo_questao || "multipla_escolha",
+        disciplina: question.disciplina || "Geral",
+        assunto: question.assunto || "Geral"
+    };
+    if (!includeAnswer) {
+        delete payload.gabarito;
+        delete payload.resposta_correta;
+    }
+    return payload;
+}
+
+async function getDemoQuestionsForUser(profile) {
+    if (profile === "luciana") return carregarDemoProvaQuestoes();
+    if (profile === "callado") return carregarDemoQuestoesCallado();
+    return [];
+}
+
+function filtrarDemoQuestoes(questoes, params) {
+    const matchParam = (value, selected) => !selected || selected === "todas" || selected === "todos" || String(value || "") === selected;
+    const termo = String(params.get("search") || params.get("q") || "").trim().toLowerCase();
+    return questoes.filter(q => {
+        if (!matchParam(q.disciplina, params.get("disciplina"))) return false;
+        if (!matchParam(q.assunto, params.get("assunto"))) return false;
+        const banca = q.banca || q.origem_questao?.banca || "";
+        if (!matchParam(banca, params.get("banca"))) return false;
+        const ano = q.ano || q.origem_questao?.ano || "";
+        if (!matchParam(ano, params.get("ano"))) return false;
+        if (!termo) return true;
+        return [q.enunciado, q.disciplina, q.assunto, banca, ano].some(value => String(value || "").toLowerCase().includes(termo));
+    });
+}
+
+function criarDemoMeta(questoes) {
+    const unique = (values) => [...new Set(values.map(value => String(value || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    return {
+        total: questoes.length,
+        disciplinas: unique(questoes.map(q => q.disciplina || "Geral")),
+        assuntos: unique(questoes.map(q => q.assunto || "Geral")),
+        bancas: unique(questoes.map(q => q.banca || q.origem_questao?.banca || "")),
+        anos: unique(questoes.map(q => q.ano || q.origem_questao?.ano || ""))
+    };
+}
+
+async function handleDemoApiRequest(path, options = {}) {
+    const url = new URL(path, window.location.origin);
+    const method = String(options.method || "GET").toUpperCase();
+    const profile = localStorage.getItem("remb_demo_profile") || REMB_DEMO_PROFILE;
+    const entry = REMB_DEMO_USERS[profile] || null;
+
+    if (url.pathname === "/api/auth/logout") {
+        localStorage.removeItem("remb_demo_profile");
+        REMB_API.currentUser = null;
+        return { ok: true };
+    }
+
+    if (url.pathname === "/api/auth/login" && method === "POST") {
+        throw new Error("Use os endereços públicos /callado/ ou /luciana/ para entrar na versão de teste.");
+    }
+
+    if (url.pathname === "/api/auth/register") {
+        throw new Error("Cadastro indisponível na publicação de teste.");
+    }
+
+    if (!entry) throw new Error("Não autenticado.");
+
+    if (url.pathname === "/api/auth/me") {
+        REMB_API.currentUser = entry.user;
+        if (profile === "callado") await carregarDemoListasCallado();
+        return { user: entry.user };
+    }
+
+    if (url.pathname === "/api/access/scope") {
+        if (profile === "callado") await carregarDemoListasCallado();
+        return entry.scope;
+    }
+
+    if (url.pathname === "/api/progress") {
+        if (method === "PUT") {
+            const body = JSON.parse(options.body || "{}");
+            localStorage.setItem(getDemoProgressKey(), JSON.stringify({ dados: body.dados || {}, tempoSegundos: body.tempoSegundos || 0 }));
+            return { ok: true };
+        }
+        const saved = JSON.parse(localStorage.getItem(getDemoProgressKey()) || "{}");
+        return { dados: saved.dados || {}, tempoSegundos: saved.tempoSegundos || 0 };
+    }
+
+    if (url.pathname === "/api/lists") {
+        if (profile !== "callado") return { lists: [] };
+        let lists = await carregarDemoListasCallado();
+        const search = String(url.searchParams.get("search") || "").toLowerCase();
+        if (search) lists = lists.filter(lista => [lista.nome, ...(lista.tags || [])].some(value => String(value || "").toLowerCase().includes(search)));
+        const includeQuestions = url.searchParams.get("includeQuestions") === "true";
+        return { lists: includeQuestions ? lists : lists.map(({ questoes, ...lista }) => lista) };
+    }
+
+    if (url.pathname === "/api/questions-meta") {
+        const questoes = filtrarDemoQuestoes(await getDemoQuestionsForUser(profile), url.searchParams);
+        return criarDemoMeta(questoes);
+    }
+
+    if (url.pathname === "/api/questions") {
+        const includeAnswer = url.searchParams.get("includeAnswer") === "true";
+        const page = Math.max(1, Number(url.searchParams.get("page") || 1));
+        const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit") || 20)));
+        const filtered = filtrarDemoQuestoes(await getDemoQuestionsForUser(profile), url.searchParams);
+        const start = (page - 1) * limit;
+        return {
+            data: filtered.slice(start, start + limit).map(q => publicDemoQuestion(q, includeAnswer)),
+            pagination: { page, limit, total: filtered.length, totalPages: Math.ceil(filtered.length / limit) }
+        };
+    }
+
+    if (url.pathname.startsWith("/api/admin/")) {
+        throw new Error("Área administrativa indisponível na publicação de teste.");
+    }
+
+    throw new Error("Recurso indisponível na publicação de teste.");
+}
 
 const QUESTOES_API = {
     meta: null,
@@ -11445,6 +11678,8 @@ window.fecharExplicacaoAlternativa = function() {
         document.body.appendChild(popup);
     }
 };
+
+
 
 
 

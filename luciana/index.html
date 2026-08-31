@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+
+<head>
+    <base href="../">
+    <script>localStorage.setItem("remb_demo_profile", "luciana");</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REMB Estudos - LUCIANA</title>
+
+    <!-- Meta tags SEO -->
+    <meta name="description" content="Plataforma de estudos ativa e de alto rendimento para concursos públicos.">
+    <meta name="keywords" content="sala de questões, concurso público, estudo ativo, lei seca, mnemônicos">
+
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Swiper 11 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <link rel="stylesheet" href="css/style.css?v=1787423300000">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/session.css?v=1787423300000">
+
+    <!-- Elemento para estilo dinâmico de seleção de texto -->
+    <style id="dynamic-selection-style"></style>
+</head>
+
+<body>
+
+    <!-- Topbar Mobile -->
+    <div class="mobile-topbar">
+        <button class="btn-burger" onclick="toggleMobileSidebar()">☰</button>
+        <div class="app-logo-mobile">
+            🎓 REMB <span>ESTUDOS</span>
+        </div>
+    </div>
+
+    <!-- Backdrop do Menu Lateral no Mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
+    <!-- TELA DE LOGIN / SIGNUP PREMIUM -->
+    <div id="login-container">
+        <!-- Card de Login -->
+        <div class="card-base login-card" id="login-card">
+            <div class="login-logo-outer">
+                <!-- Logo REMB com gradiente e checkmark -->
+                <div class="login-logo-box">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M5 20V4H12C14.7614 4 17 6.23858 17 9C17 11.2307 15.5135 13.1147 13.4862 13.7383L18 20H13.5L9.5 14H7V20H5ZM7 6V11.5H12C13.3807 11.5 14.5 10.3807 14.5 9C14.5 7.61929 13.3807 6.5 12 6H7Z"
+                            fill="white" />
+                        <path d="M8 14.5L11.5 18L19.5 8" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M16 8H19.5V11.5" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <h1 class="login-brand-title">REMB <span>Estudos</span></h1>
+                <p class="login-brand-subtitle">Central Premium de Concursos</p>
+            </div>
+
+            <!-- FORMULÁRIO DE LOGIN -->
+            <div id="login-form" class="login-form-block">
+                <h2 class="login-form-heading">Entrar na sua conta</h2>
+
+                <!-- Email Field -->
+                <div class="login-field-group">
+                    <label class="login-label">E-mail</label>
+                    <div class="login-input-wrapper">
+                        <span class="login-input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <path d="M22 6l-10 7L2 6" />
+                            </svg>
+                        </span>
+                        <input type="email" id="login-email" class="login-input" placeholder="seuemail@exemplo.com">
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="login-field-group">
+                    <div class="login-field-header">
+                        <label class="login-label">Senha</label>
+                        <a href="#" class="login-link-forgot">Esqueceu a senha?</a>
+                    </div>
+                    <div class="login-input-wrapper">
+                        <span class="login-input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                        </span>
+                        <input type="password" id="login-senha" class="login-input" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <!-- Login Button -->
+                <button onclick="window.realizarLogin()" class="login-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                        style="transform: scaleX(-1);">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                        <polyline points="10 17 15 12 10 7" />
+                        <line x1="15" y1="12" x2="3" y2="12" />
+                    </svg>
+                    Entrar
+                </button>
+
+                <!-- Divider OU -->
+                <div class="login-divider">
+                    <div class="login-divider-line"></div>
+                    <span class="login-divider-text">OU</span>
+                    <div class="login-divider-line"></div>
+                </div>
+
+                <!-- Google OAuth Mock Button -->
+                <button onclick="window.realizarLogin()" class="login-btn-google">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                            fill="#4285F4" />
+                        <path
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            fill="#34A853" />
+                        <path
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z"
+                            fill="#FBBC05" />
+                        <path
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z"
+                            fill="#EA4335" />
+                    </svg>
+                    Continuar com Google
+                </button>
+
+                <p class="login-footer-text">
+                    Não tem uma conta? <a href="#" onclick="window.alternarFormLogin(false)">Cadastre-se</a>
+                </p>
+            </div>
+
+            <!-- FORMULÁRIO DE REGISTRO (SIGNUP) -->
+            <div id="signup-form" class="login-form-block" style="display: none;">
+                <h2 class="login-form-heading">Criar uma nova conta</h2>
+
+                <!-- Full Name Field -->
+                <div class="login-field-group">
+                    <label class="login-label">Nome Completo</label>
+                    <div class="login-input-wrapper">
+                        <span class="login-input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </span>
+                        <input type="text" id="signup-nome" class="login-input" placeholder="Seu nome...">
+                    </div>
+                </div>
+
+                <!-- Email Field -->
+                <div class="login-field-group">
+                    <label class="login-label">E-mail</label>
+                    <div class="login-input-wrapper">
+                        <span class="login-input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <path d="M22 6l-10 7L2 6" />
+                            </svg>
+                        </span>
+                        <input type="email" id="signup-email" class="login-input" placeholder="seuemail@exemplo.com">
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="login-field-group">
+                    <label class="login-label">Senha</label>
+                    <div class="login-input-wrapper">
+                        <span class="login-input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                        </span>
+                        <input type="password" id="signup-senha" class="login-input" placeholder="Mínimo 8 caracteres">
+                    </div>
+                </div>
+
+                <!-- Signup Button -->
+                <button onclick="window.realizarCadastro()" class="login-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                        style="margin-right: 6px;">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="8.5" cy="7" r="4" />
+                        <line x1="20" y1="8" x2="20" y2="14" />
+                        <line x1="23" y1="11" x2="17" y2="11" />
+                    </svg>
+                    Cadastrar e Entrar
+                </button>
+
+                <p class="login-footer-text">
+                    Já tem uma conta? <a href="#" onclick="window.alternarFormLogin(true)">Entre aqui</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- APLICATIVO SPA CONTAINER -->
+    <div class="app-layout">
+
+        <!-- SIDEBAR DE NAVEGAÇÃO -->
+        <aside class="app-sidebar">
+            <button class="btn-collapse-sidebar" onclick="toggleSidebarCollapse()" title="Recolher/Expandir menu"
+                id="btnCollapseSidebar">
+                <span class="icon-arrow">◀</span>
+            </button>
+            <div class="sidebar-header">
+                <div class="app-logo" onclick="navegarPara('dashboard')">
+                    <!-- Stylized Ribbon R Logo -->
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="flex-shrink: 0;">
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#06b6d4" />
+                                <stop offset="100%" stop-color="#2563eb" />
+                            </linearGradient>
+                        </defs>
+                        <path
+                            d="M4 3H12C16.4183 3 20 6.58172 20 11C20 14.5323 17.7082 17.5289 14.5 18.5778L19.2426 23.3204C19.6332 23.711 19.6332 24.3441 19.2426 24.7347C18.8521 25.1252 18.219 25.1252 17.8284 24.7347L12.5 19.4062V21C12.5 21.5523 12.0523 22 11.5 22C10.9477 22 10.5 21.5523 10.5 21V19H4C3.44772 19 3 18.5523 3 18V4C3 3.44772 3.44772 3 4 3ZM10.5 5V17H12C15.3137 17 18 14.3137 18 11C18 7.68629 15.3137 5 12 5H10.5Z"
+                            fill="url(#logoGrad)" />
+                    </svg>
+                    <!-- Logo Text -->
+                    <span>
+                        REMB
+                        <span>Estudos</span>
+                    </span>
+                </div>
+                <div class="portal-selector-wrapper">
+
+                    <button class="portal-btn active" id="portal-btn-student" onclick="window.setPortalMode('student')">
+                        Sessão
+                    </button>
+
+                    <button class="portal-btn" id="portal-btn-admin" onclick="window.setPortalMode('admin')">
+                        Admin
+                    </button>
+
+                </div>
+                <div class="user-profile-wrapper"
+                    style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background-color: rgba(255, 255, 255, 0.02); color: #fff;">
+                    <!-- Avatar circle initials display -->
+                    <div id="activeUserAvatarDisplay"
+                        style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">
+                        R</div>
+                    <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.2;">
+                        <span id="activeUserNameDisplay" style="font-size: 0.82rem; font-weight: 800;">Rubem (Build 2.0)</span>
+                        <div
+                            style="display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;">
+                            <span id="activeUserRoleDisplay">CEO / Proprietário</span>
+                            <span>•</span>
+                            <span id="activeUserStreakDisplay" style="color: #fb923c;">🔥 0d</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+               <nav class="sidebar-menu" style="padding: 10px 12px;">
+                <!-- ESTUDOS -->
+                <div class="sidebar-section-header pedagogical-only">Estudos</div>
+                <button class="menu-item active pedagogical-only" id="btn-nav-dashboard"
+                    onclick="navegarPara('dashboard')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg></span>
+                    <span class="menu-label">Início</span>
+                </button>
+                <hr class="sidebar-divider pedagogical-only">
+
+                <!-- QUESTÕES -->
+                <div class="sidebar-section-header pedagogical-only">Questões</div>
+                <button class="menu-item pedagogical-only" id="btn-nav-questoes" onclick="navegarPara('questoes')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg></span>
+                    <span class="menu-label">Filtro</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-provas" onclick="navegarPara('provas')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg></span>
+                    <span class="menu-label">Provas</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-listas" onclick="navegarPara('listas')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg></span>
+                    <span class="menu-label">Listas</span>
+                </button>
+                <hr class="sidebar-divider pedagogical-only">
+
+                <!-- ACOMPANHAMENTO -->
+                <div class="sidebar-section-header pedagogical-only">Acompanhamento</div>
+                <button class="menu-item pedagogical-only" id="btn-nav-estatisticas"
+                    onclick="navegarPara('estatisticas')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg></span>
+                    <span class="menu-label">Estatísticas</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-planner" onclick="navegarPara('planner')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg></span>
+                    <span class="menu-label">Planejamento</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-minhas-notas"
+                    onclick="navegarPara('minhas-notas')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg></span>
+                    <span class="menu-label">Minhas Notas</span>
+                </button>
+                <hr class="sidebar-divider pedagogical-only">
+
+                <!-- SISTEMA -->
+                <div class="sidebar-section-header pedagogical-only">Sistema</div>
+                <button class="menu-item pedagogical-only" id="btn-nav-configuracoes"
+                    onclick="navegarPara('configuracoes')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg></span>
+                    <span class="menu-label">Ajustes</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-assinatura"
+                    onclick="navegarPara('assinatura')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                        </svg></span>
+                    <span class="menu-label">Minha Assinatura</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-notificacoes"
+                    onclick="navegarPara('notificacoes')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg></span>
+                    <span class="menu-label">Notificações</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-integracoes"
+                    onclick="navegarPara('integracoes')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 10h-1.25c-.48 0-.96.2-1.31.54l-2.38 2.38a2.53 2.53 0 0 1-3.58 0l-1.42-1.42a2.53 2.53 0 0 1 0-3.58l2.38-2.38c.35-.35.54-.83.54-1.31V3h-1.25M6 14h1.25c.48 0 .96-.2 1.31-.54l2.38-2.38a2.53 2.53 0 0 0 0-3.58L9.52 6.08a2.53 2.53 0 0 0-3.58 0L3.56 8.46c-.35.35-.54.83-.54 1.31V11h1.25M2 22l6-6M22 2l-6 6"></path>
+                        </svg></span>
+                    <span class="menu-label">Integrações</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-backup"
+                    onclick="navegarPara('backup')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg></span>
+                    <span class="menu-label">Backup / Exportar</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-suporte"
+                    onclick="navegarPara('suporte')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                            <line x1="19.07" y1="4.93" x2="14.83" y2="9.17"></line>
+                            <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                            <line x1="9.17" y1="14.83" x2="4.93" y2="19.07"></line>
+                        </svg></span>
+                    <span class="menu-label">Suporte e Ajuda</span>
+                </button>
+                <button class="menu-item pedagogical-only" id="btn-nav-termos"
+                    onclick="navegarPara('termos')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg></span>
+                    <span class="menu-label">Termos e Privacidade</span>
+                </button>
+                <hr class="sidebar-divider pedagogical-only">
+
+                <!-- MENU ADMINISTRATIVO -->
+                <button class="menu-item admin-only" id="btn-nav-admin-status"
+                    onclick="window.navegarAdminTab('geral')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg></span>
+                    <span class="menu-label">Status REMB</span>
+                </button>
+                <button class="menu-item admin-only" id="btn-nav-admin-users"
+                    onclick="window.navegarAdminTab('usuarios')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg></span>
+                    <span class="menu-label">Gestão Usuários</span>
+                </button>
+                <button class="menu-item admin-only" id="btn-nav-admin-access"
+                    onclick="window.navegarAdminTab('acessos')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
+                            </path>
+                        </svg></span>
+                    <span class="menu-label">Acessos & APIs</span>
+                </button>
+                <button class="menu-item admin-only" id="btn-nav-admin-finance"
+                    onclick="window.navegarAdminTab('financeiro')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg></span>
+                    <span class="menu-label">Financeiro</span>
+                </button>
+                <button class="menu-item admin-only" id="btn-nav-admin-pipeline"
+                    onclick="window.navegarAdminTab('pipeline')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h6l2 3h10"></path>
+                            <path d="M3 12h8l2 3h8"></path>
+                            <path d="M3 18h10l2 3h6"></path>
+                        </svg></span>
+                    <span class="menu-label">Pipeline</span>
+                </button>
+                <button class="menu-item admin-only" id="btn-nav-admin-notificacoes"
+                    onclick="window.navegarAdminTab('notificacoes')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg></span>
+                    <span class="menu-label">Avisos Admin</span>
+                    <span class="badge bg-danger" id="badge-notificacoes-admin-menu"
+                        style="display:none; margin-left:auto; font-size:0.68rem;">0</span>
+                </button>
+                <button class="menu-item admin-only" id="btn-nav-admin-gabaritos"
+                    onclick="window.navegarAdminTab('gabaritos')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg></span>
+                    <span class="menu-label">Gabaritos</span>
+                </button>
+                <button class="menu-item admin-only" id="btn-nav-validacao" onclick="navegarPara('validacao')">
+                    <span class="menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4.7 19h14.6"></path>
+                            <path d="M9 3v13.5a3.5 3.5 0 0 0 7 0V3"></path>
+                            <path d="M9 3h6"></path>
+                        </svg></span>
+                    <span class="menu-label">Laboratório</span>
+                    <span class="badge bg-warning" id="badge-validacao"
+                        style="display: block; font-weight:700;">2524</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer"
+                style="padding: 8px 16px 4px 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 2px;">
+                <!-- Segmented Control de Tema -->
+                <div class="sidebar-footer-item theme-segmented-wrapper"
+                    style="display: flex; flex-direction: column; gap: 4px; padding: 4px 16px; width: 100%;">
+                    <span class="theme-menu-title">Aparência</span>
+                    <div class="theme-segmented-control">
+                        <button type="button" class="theme-btn" id="theme-btn-light"
+                            onclick="window.setThemeCustom('light')">
+                            ☀ Claro
+                        </button>
+                        <button type="button" class="theme-btn" id="theme-btn-dark"
+                            onclick="window.setThemeCustom('dark')">
+                            ☾ Escuro
+                        </button>
+                    </div>
+                </div>
+                <!-- Botão de Sair (Logout) -->
+                <button class="menu-item" onclick="window.realizarLogout()" id="btnLogout" title="Sair da conta"
+                    style="background: none; border: none; color: #94a3b8; width: 100%; transition: color 0.2s; padding: 6px 16px;">
+                    <span class="menu-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </span>
+                    <span class="menu-label">Sair da Conta</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="app-content" style="flex: 1 !important;">
+
+            <!-- SEÇÃO 1: DASHBOARD (HOME) -->
+            <section id="section-dashboard" class="content-section active">
+                <div class="home-hero-banner"
+                    style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; padding: 25px 30px; border-radius: 16px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); position: relative; overflow: hidden;">
+                    <div style="z-index: 2;">
+                        <h1 id="home-greeting"
+                            style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; color: #ffffff;">
+                            Boa tarde, Rubem! 👋</h1>
+                        <p id="home-greeting-sub"
+                            style="font-size: 0.95rem; opacity: 0.9; margin: 0; color: rgba(255,255,255,0.95);">Vamos
+                            continuar seus estudos? O foco de hoje te aproxima da sua aprovação.</p>
+                    </div>
+                    <div class="hero-quote-box"
+                        style="z-index: 2; text-align: right; max-width: 320px; border: 1px solid rgba(255,255,255,0.25); background-color: rgba(255,255,255,0.06); padding: 10px 16px; border-radius: 8px; font-style: italic;">
+                        <p
+                            style="font-size: 0.85rem; margin: 0; color: rgba(255,255,255,0.95); font-weight: 500; text-align: left;">
+                            “ Disciplina é o que transforma objetivo em conquista. ”</p>
+                    </div>
+                    <!-- Decorative background shape -->
+                    <div
+                        style="position: absolute; right: -20px; bottom: -20px; font-size: 8rem; opacity: 0.15; transform: rotate(-20deg); user-select: none;">
+                        ✍️</div>
+                </div>
+
+                <!-- Grid de Métricas Rápidas (KPI Cards) -->
+                <div class="home-kpi-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                    <div class="home-kpi-card"
+                        style="background-color: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 15px;">
+                        <div
+                            style="background-color: #eff6ff; color: #3b82f6; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 600;">Questões
+                                respondidas</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; font-family: 'Outfit', sans-serif;"
+                                id="kpi-respondidas">482 <span
+                                    style="font-size:0.75rem; font-weight:500; color:var(--text-secondary);">(30
+                                    dias)</span></div>
+                        </div>
+                    </div>
+                    <div class="home-kpi-card"
+                        style="background-color: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 15px;">
+                        <div
+                            style="background-color: #ecfdf5; color: #10b981; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                <polyline points="17 6 23 6 23 12"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 600;">
+                                Aproveitamento</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; font-family: 'Outfit', sans-serif;"
+                                id="kpi-aproveitamento">71% <span
+                                    style="font-size: 0.7rem; background-color: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 6px; font-weight: 700; margin-left: 5px;">+6%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="home-kpi-card"
+                        style="background-color: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 15px;">
+                        <div
+                            style="background-color: #fff7ed; color: #f97316; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 600;">Sequência
+                                de estudos</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; font-family: 'Outfit', sans-serif;"
+                                id="kpi-sequencia">12 dias <span
+                                    style="font-size:0.75rem; font-weight:500; color:var(--text-secondary);">seguidos</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="home-kpi-card"
+                        style="background-color: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 15px;">
+                        <div
+                            style="background-color: #f5f3ff; color: #8b5cf6; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="6"></circle>
+                                <circle cx="12" cy="12" r="2"></circle>
+                            </svg>
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                            <div style="font-size: 1.3rem; font-weight: 800; font-family: 'Outfit', sans-serif;"
+                                id="kpi-meta-text">12/20 q.</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 600;">Meta de
+                                hoje</div>
+                            <div
+                                style="width: 100%; background-color: var(--border); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 4px;">
+                                <div id="kpi-meta-progress-bar"
+                                    style="width: 60%; background-color: var(--accent); height: 100%; transition: width 0.3s ease;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Painel Principal de Três Colunas -->
+                <div class="home-layout-grid">
+                    <!-- Continue de onde parou -->
+                    <div class="home-panel-card grid-card-continue">
+                        <div class="panel-card-header" style="margin-bottom: 12px;">
+                            <h3 class="panel-card-title"
+                                style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 700;">
+                                Continue de onde parou</h3>
+                        </div>
+                        <div id="home-continue-box" class="home-continue-box-content">
+                            <!-- Preenchido dinamicamente por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Revisões pendentes -->
+                    <div class="home-panel-card grid-card-revisoes">
+                        <div class="panel-card-header" style="margin-bottom: 12px;">
+                            <h3 class="panel-card-title"
+                                style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary);">Revisões
+                                pendentes</h3>
+                        </div>
+                        <div
+                            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                            <div class="revision-mini-card errors" onclick="window.abrirQuestoesFiltradas('erradas')"
+                                style="cursor: pointer;">
+                                <div class="mini-card-icon"
+                                    style="display: flex; justify-content: center; align-items: center;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        style="margin-bottom: 5px;">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                </div>
+                                <div class="mini-card-count" id="home-rev-erros">0</div>
+                                <div class="mini-card-label">Erros</div>
+                            </div>
+                            <div class="revision-mini-card favs" onclick="window.abrirQuestoesFiltradas('favoritas')"
+                                style="cursor: pointer;">
+                                <div class="mini-card-icon"
+                                    style="display: flex; justify-content: center; align-items: center;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        style="margin-bottom: 5px;">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                        </polygon>
+                                    </svg>
+                                </div>
+                                <div class="mini-card-count" id="home-rev-favoritas">0</div>
+                                <div class="mini-card-label">Favoritas</div>
+                            </div>
+                            <div class="revision-mini-card notes" onclick="navegarPara('minhas-notes')"
+                                style="cursor: pointer;">
+                                <div class="mini-card-icon"
+                                    style="display: flex; justify-content: center; align-items: center;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        style="margin-bottom: 5px;">
+                                        <path d="M12 20h9"></path>
+                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                    </svg>
+                                </div>
+                                <div class="mini-card-count" id="home-rev-anotacoes">0</div>
+                                <div class="mini-card-label">Anotações</div>
+                            </div>
+                        </div>
+                        <button class="btn-primary"
+                            style="width: 100%; border-radius: 8px; font-weight: 700; padding: 10px; font-size: 0.88rem;"
+                            onclick="window.abrirQuestoesFiltradas('erradas')">
+                            Começar revisão ›
+                        </button>
+                    </div>
+
+                    <!-- Novidades para você -->
+                    <div class="home-panel-card grid-card-novidades">
+                        <div class="panel-card-header" style="margin-bottom: 12px;">
+                            <h3 class="panel-card-title"
+                                style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                Novidades
+                                <span class="badge bg-danger" id="home-novidades-badge"
+                                    style="font-weight:700; background-color: #ef4444; color: #fff; padding: 2px 6px; border-radius: 50%; font-size: 0.72rem;">3</span>
+                            </h3>
+                        </div>
+                        <div class="home-list-feed" id="home-news-feed"
+                            style="display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Injetado por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Desempenho (7 dias) -->
+                    <div class="home-panel-card grid-card-desempenho">
+                        <div class="panel-card-header"
+                            style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="panel-card-title"
+                                style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary); margin: 0;">
+                                Desempenho (7 dias)</h3>
+                            <span style="font-size: 0.72rem; color: var(--text-secondary);">Questões por dia</span>
+                        </div>
+                        <!-- Gráfico de Barras Semanais -->
+                        <div class="weekly-bar-chart" id="weeklyHomeChart">
+                            <div class="chart-bar-col">
+                                <div class="chart-bar-val" style="height: 15%;"></div>
+                                <div class="chart-bar-lbl">Qua</div>
+                            </div>
+                            <div class="chart-bar-col">
+                                <div class="chart-bar-val" style="height: 30%;"></div>
+                                <div class="chart-bar-lbl">Qui</div>
+                            </div>
+                            <div class="chart-bar-col">
+                                <div class="chart-bar-val" style="height: 45%;"></div>
+                                <div class="chart-bar-lbl">Sex</div>
+                            </div>
+                            <div class="chart-bar-col">
+                                <div class="chart-bar-val" style="height: 25%;"></div>
+                                <div class="chart-bar-lbl">Sáb</div>
+                            </div>
+                            <div class="chart-bar-col">
+                                <div class="chart-bar-val" style="height: 60%;"></div>
+                                <div class="chart-bar-lbl">Dom</div>
+                            </div>
+                            <div class="chart-bar-col">
+                                <div class="chart-bar-val" style="height: 50%;"></div>
+                                <div class="chart-bar-lbl">Seg</div>
+                            </div>
+                            <div class="chart-bar-col">
+                                <div class="chart-bar-val active" style="height: 70%;"></div>
+                                <div class="chart-bar-lbl">Hoje</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Atalhos rápidos -->
+                    <div class="home-panel-card grid-card-atalhos">
+                        <div class="panel-card-header" style="margin-bottom: 12px;">
+                            <h3 class="panel-card-title"
+                                style="font-size: 0.88rem; font-weight: 800; color: var(--text-primary);">Atalhos
+                                rápidos</h3>
+                        </div>
+                        <div class="home-shortcuts-grid"
+                            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <div class="shortcut-box" onclick="navegarPara('questoes')"
+                                style="background-color: var(--bg-primary); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;">
+                                <div
+                                    style="background-color: #eff6ff; color: #2563eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z">
+                                        </path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    </svg>
+                                </div>
+                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Resolver
+                                    questões</span>
+                            </div>
+                            <div class="shortcut-box" onclick="navegarPara('listas')"
+                                style="background-color: var(--bg-primary); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;">
+                                <div
+                                    style="background-color: #eff6ff; color: #2563eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                    </svg>
+                                </div>
+                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Explorar
+                                    listas</span>
+                            </div>
+                            <div class="shortcut-box" onclick="navegarPara('provas')"
+                                style="background-color: var(--bg-primary); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;">
+                                <div
+                                    style="background-color: #eff6ff; color: #2563eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
+                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Buscar
+                                    provas</span>
+                            </div>
+                            <div class="shortcut-box" onclick="navegarPara('planner')"
+                                style="background-color: var(--bg-primary); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;">
+                                <div
+                                    style="background-color: #eff6ff; color: #2563eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                </div>
+                                <span
+                                    style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Planejamento</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recomendado para você (Seção Full-Width abaixo do layout grid) -->
+                <div style="margin-top: 10px; margin-bottom: 25px;">
+                    <h3
+                        style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 15px;">
+                        Recomendado para você</h3>
+                    <div class="home-recommendations-list" id="home-recommendations-feed"
+                        style="background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow);">
+                        <!-- Preenchido dinamicamente por JS -->
+                    </div>
+                </div>
+
+                <!-- Alerta Inferior Trophy Banner -->
+                <div class="home-trophy-banner"
+                    style="background-color: var(--accent-light); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 12px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div
+                            style="background-color: #fef3c7; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            🏆</div>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <span
+                                style="font-weight: 800; color: #1e3a8a; font-family: 'Outfit', sans-serif; font-size: 0.95rem;">Você
+                                está no caminho certo!</span>
+                            <span style="color: #64748b; font-size: 0.8rem; font-weight: 500;">Consistência é a chave
+                                para a aprovação.</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary"
+                        style="padding: 10px 20px; font-size: 0.88rem; font-weight: 700; border-radius: 8px;"
+                        onclick="navegarPara('questoes')">
+                        Continuar estudando ›
+                    </button>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 2: SALA DE QUESTÕES -->
+            <section id="section-questoes" class="content-section">
+                <div class="prova-banner">
+                    <h1 class="prova-banner-title">Questões ✎</h1>
+                    <p class="prova-banner-desc">Resolva e analise questões com nosso assistente pedagógico integrado.</p>
+                </div>
+
+                <!-- CONFIGURADOR DO CADERNO (SETUP PANEL) -->
+                <div id="sala-setup-panel" class="setup-panel-container">
+                    <div class="setup-card"
+                        style="background-color: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); padding: 25px; border-radius: 12px; margin-bottom: 20px;">
+                        <h2
+                            style="font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 10px;">
+                            ⚙️ Configurar Nova Sessão de Questões
+                        </h2>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 25px;">
+                            Selecione as disciplinas, assuntos e bancas. Você pode empilhar múltiplos critérios clicando
+                            em <strong>+ Adicionar Filtro</strong>.
+                        </p>
+
+                        <!-- Filtros e Quantidade -->
+                        <div class="filter-setup-grid"
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div class="filter-group">
+                                <label for="filterDisciplina">Disciplina</label>
+                                <select id="filterDisciplina" onchange="window.atualizarAssuntosDropdown()"
+                                    autocomplete="off">
+                                    <option value="todas">Todas as Disciplinas</option>
+                                    <!-- Injetado por JS -->
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterAssunto">Assunto</label>
+                                <select id="filterAssunto" autocomplete="off">
+                                    <option value="todos">Todos os Assuntos</option>
+                                    <!-- Injetado por JS -->
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterBanca">Banca</label>
+                                <select id="filterBanca" autocomplete="off">
+                                    <option value="todas">Todas as Bancas</option>
+                                    <option value="FGV">FGV</option>
+                                    <option value="Cebraspe">Cebraspe</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterQtdQuestoes">Qtd. Questões</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="number" id="filterQtdQuestoes" min="1" max="100" value="10"
+                                        style="width: 70px; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-weight: 700; text-align: center;">
+                                    <button type="button" class="btn btn-secundario"
+                                        onclick="window.adicionarFiltroFila()"
+                                        style="flex: 1; padding: 8px; border-radius: 8px; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 5px; border: 1.5px solid var(--border); background-color: var(--bg-primary); color: var(--text-primary);">
+                                        ➕ Adicionar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila de Filtros Ativos -->
+                        <div class="active-queue-box"
+                            style="background-color: var(--bg-primary); border: 1.5px dashed var(--border); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <div
+                                style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                                <span>Fila de Filtros Acumulados</span>
+                                <span id="queue-total-count" style="color: var(--accent); font-weight: 800;">0
+                                    Questões</span>
+                            </div>
+                            <div id="activeFiltersQueue" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                <!-- Injetado por JS -->
+                            </div>
+                        </div>
+
+                        <!-- Configurações da Sessão (Tempo, Simulado, Status) -->
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
+                            <div class="filter-group">
+                                <label for="filterTempoLimite">Tempo de Resolução</label>
+                                <select id="filterTempoLimite" autocomplete="off" style="width:100%;">
+                                    <option value="0">Sem limite de tempo</option>
+                                    <option value="10">10 Minutos</option>
+                                    <option value="20">20 Minutos</option>
+                                    <option value="30">30 Minutos</option>
+                                    <option value="45">45 Minutos</option>
+                                    <option value="60">60 Minutos (1 Hora)</option>
+                                    <option value="90">90 Minutos</option>
+                                    <option value="120">120 Minutos (2 Horas)</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterStatusCaderno">Status das Questões</label>
+                                <select id="filterStatusCaderno" autocomplete="off" style="width:100%;">
+                                    <option value="todos">Todas (Incluir resolvidas)</option>
+                                    <option value="nao_respondidas">Apenas Não Respondidas</option>
+                                    <option value="erradas">Apenas Erradas anteriormente</option>
+                                    <option value="favoritas">Apenas Favoritas</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 10px; justify-content: center;">
+                                <div class="form-check form-switch" style="display:flex; align-items:center; gap:8px;">
+                                    <input class="form-check-input" type="checkbox" id="toggleModoSimulado"
+                                        onchange="window.alternarModoSimulado()">
+                                    <label class="form-check-label" for="toggleModoSimulado"
+                                        style="font-weight: 700; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                                        📝 Modo Simulado (Silencioso)
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch" style="display:flex; align-items:center; gap:8px;">
+                                    <input class="form-check-input" type="checkbox" id="toggleAssuntosCobrados">
+                                    <label class="form-check-label" for="toggleAssuntosCobrados"
+                                        style="font-weight: 700; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                                        🔥 Assuntos Mais Cobrados
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtros Salvos -->
+                        <div class="saved-configs-box"
+                            style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
+                            <div
+                                style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px;">
+                                💾 Filtros Salvos
+                            </div>
+                            <div id="savedFiltersList"
+                                style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                                <!-- Injetado por JS (pílulas de filtros salvos) -->
+                            </div>
+                            <div style="display: flex; gap: 10px; max-width: 450px;">
+                                <input type="text" id="inputSaveFilterName"
+                                    placeholder="Salvar configuração atual como..."
+                                    style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.85rem;">
+                                <button type="button" class="btn btn-secundario" onclick="window.salvarFiltroConfig()"
+                                    style="font-size: 0.85rem; font-weight: 700; padding: 8px 15px; border: 1.5px solid var(--border); background-color: var(--bg-primary); color: var(--text-primary);">
+                                    Salvar Filtro
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ação de Gerar -->
+                        <button type="button" class="btn btn-primary" onclick="window.gerarCadernoQuestoes()"
+                            style="width: 100%; padding: 15px; border-radius: 12px; font-size: 1.15rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 10px; border: none; box-shadow: var(--shadow); color:#fff; background-color: var(--accent);">
+                            🚀 Gerar Sessão e Iniciar Estudos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CADERNO ATIVO EM RESOLUÇÃO (ACTIVE PANEL) -->
+                <div id="sala-active-panel" class="active-panel-container"
+                    style="display: none; flex-direction: column; gap: 20px;">
+                    <!-- Barra de Informações da Sessão Ativa -->
+                    <div class="active-caderno-bar">
+                        <!-- Lado Esquerdo: Título Questões + Divisor + Card de Sessão -->
+                        <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
+                            <span style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 850; letter-spacing: 0.5px; color: #ffffff;">Questões</span>
+                            <div style="width: 1px; height: 24px; background-color: rgba(255,255,255,0.15); margin: 0 5px;"></div>
+                            
+                            <!-- Card de Sessão em Resolução -->
+                            <div style="display: flex; align-items: center; gap: 12px; background-color: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 16px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #ffffff;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                    <span style="font-size: 0.92rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+                                        <span style="color: #10b981; font-size: 0.75rem;">●</span>
+                                        Sessão em Resolução 
+                                    </span>
+                                    <span id="active-caderno-summary" style="font-size: 0.72rem; color: rgba(255,255,255,0.65); font-weight: 600;">Matérias incluídas: Contabilidade Pública</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Meio: Progresso + Barra de Progresso + Contagem -->
+                        <div style="display: flex; align-items: center; gap: 15px; text-align: left;">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Progresso</span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 60px; height: 6px; background-color: rgba(255,255,255,0.12); border-radius: 3px; overflow: hidden; margin: 2px 0;">
+                                        <div id="fillActiveCadernoProgress" style="height: 100%; width: 0%; background-color: var(--accent); transition: width 0.3s ease;"></div>
+                                    </div>
+                                    <span id="lblActiveCadernoCount" style="font-size: 0.95rem; font-weight: 800; color: #ffffff; font-family: 'Outfit', sans-serif;">0/10</span>
+                                </div>
+                            </div>
+                            <span id="lblActiveCadernoPercent" style="display: none;">0%</span>
+                        </div>
+
+                        <!-- Lado Direito: Temporizador, Refazer Lista, Nova Sessão -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <!-- Temporizador -->
+                            <div class="active-sessao-timer" style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; color: #ffffff; background: transparent; font-family: 'Inter', sans-serif;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #ffffff;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span>TEMPO: <span id="timerDisplay" style="font-family: monospace; font-weight: 800; color: #ffffff;">00:00:00</span></span>
+                                <button id="playPauseBtn" onclick="toggleTimer()" style="background: none; border: none; font-size: 0.8rem; cursor: pointer; padding: 2px; line-height: 1; margin-left: 4px;" title="Pausar/Retomar">⏸️</button>
+                            </div>
+
+                            <!-- Botões de Ação -->
+                            <button class="btn btn-outline-danger" id="btnFinalizarSimulado" onclick="finalizarSimulado()" style="display: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #ef4444; color: #ef4444; background: transparent; transition: all 0.2s;">
+                                🏁 Finalizar Simulado
+                            </button>
+                            
+                            <button type="button" class="btn" onclick="window.refazerCadernoAtivo()" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid rgba(255,255,255,0.15); color: #ffffff; background: transparent; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #ffffff;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                                Refazer Lista
+                            </button>
+                            
+                            <button type="button" class="btn btn-primary" onclick="window.voltarParaConfiguracao()" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: none; color: #ffffff; background-color: var(--accent); display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; color: #ffffff;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                                Nova Sessão
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Container de Questões -->
+                    <div class="questoes-list" id="questoesContainer">
+                        <!-- Injetado por JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 7: LABORATÓRIO DE VALIDAÇÃO -->
+            <section id="section-validacao" class="content-section">
+                <div class="section-header"
+                    style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h1>🧪 Laboratório de Validação</h1>
+                        <p class="section-subtitle">Examine as afirmativas de Certo/Errado antes de integrá-las. <strong
+                                id="curacao-status" style="margin-left: 10px;">0 aprovadas para envio</strong>.</p>
+                        <div id="lab-custom-list-banner"
+                            style="display: none; margin-top: 10px; padding: 8px 12px; background-color: var(--accent-light); color: var(--accent); border-radius: 8px; font-size: 0.82rem; font-weight: 700; align-items: center; justify-content: space-between; gap: 15px; border: 1.5px solid var(--border);">
+                            <span>🧪 Modo Curadoria: Tratando a lista <span id="lab-custom-list-name">"Lista
+                                    1"</span></span>
+                            <button class="btn btn-sm btn-outline-danger" onclick="window.sairModoCuradoriaLab()"
+                                style="padding: 2px 8px; font-size: 0.72rem; font-weight: 800; border-radius: 6px; border-width: 1.5px;">✕
+                                Sair do Modo Curadoria</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-success font-weight-bold" onclick="integrarQuestoesCespeValidadas()"
+                        style="padding: 12px 24px; border-radius:12px; font-size:1rem; border:none; box-shadow: var(--shadow); font-weight:700;">
+                        ✅ Solicitar Integração no Chat
+                    </button>
+                </div>
+
+                <!-- Filtros e Busca da Validação -->
+                <div class="filters-panel">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filterListaVal">Lista de Origem</label>
+                            <select id="filterListaVal" onchange="aplicarFiltrosVal()">
+                                <option value="todas">Todas as Listas</option>
+                                <!-- Preenchido dinamicamente por JS -->
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterStatusVal">Status / Filtro</label>
+                            <select id="filterStatusVal" onchange="aplicarFiltrosVal()">
+                                <option value="todas">Todas as Questões</option>
+                                <option value="aprovadas">Aprovadas (Consistentes)</option>
+                                <option value="pendentes">Pendentes de Curadoria</option>
+                                <option value="com_gabarito">Com Gabarito identificado</option>
+                                <option value="sem_gabarito">Sem Gabarito (Para preencher)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Importador Lote (CEO / Admin) -->
+                <div id="dropzone-val" onclick="document.getElementById('fileImportVal').click()"
+                    style="border: 2px dashed var(--accent); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px; background-color: var(--bg-card); cursor: pointer; transition: background-color 0.2s ease;">
+                    <span style="font-size: 1.8rem; display: block; margin-bottom: 5px;">📥</span>
+                    <strong style="font-size: 0.9rem; color: var(--text-primary); display: block;">Importar Questões em
+                        Lote (JSON)</strong>
+                    <span style="font-size: 0.78rem; color: var(--text-secondary);">Arraste o JSON estruturado ou clique
+                        para carregar questões direto na fila do Laboratório</span>
+                    <input type="file" id="fileImportVal" accept=".json" style="display: none;"
+                        onchange="window.importarQuestoesValLote(event)">
+                </div>
+
+                <!-- Container de Questões de Validação -->
+                <div class="questoes-list" id="validacaoContainer">
+                    <!-- Injetado por JS -->
+                </div>
+            </section>
+
+            <!-- SEÇÃO 3: CADERNO DE ERROS -->
+            <section id="section-caderno-erros" class="content-section">
+                <div class="section-header">
+                    <h1>📕 Caderno de Erros</h1>
+                    <p class="section-subtitle">Aqui estão reunidas as questões que você errou. Refaça-as para
+                        fortalecer sua retenção.</p>
+                </div>
+
+                <!-- Container do Caderno de Erros -->
+                <div class="questoes-list" id="cadernoErrosContainer">
+                    <!-- Injetado por JS -->
+                </div>
+            </section>
+
+            <!-- SEÇÃO 4: FAVORITAS -->
+            <section id="section-favoritas" class="content-section">
+                <div class="section-header">
+                    <h1>⭐ Questões Favoritas</h1>
+                    <p class="section-subtitle">Revise e resolva rapidamente as questões que você favoritou para revisão
+                        futura.</p>
+                </div>
+
+                <!-- Container de Favoritas -->
+                <div class="questoes-list" id="favoritasContainer">
+                    <!-- Injetado por JS -->
+                </div>
+            </section>
+
+            <!-- SEÇÃO 5: MINHAS NOTAS -->
+            <section id="section-minhas-notas" class="content-section">
+                <div class="section-header">
+                    <h1>✏️ Minhas Notas & Explicações</h1>
+                    <p class="section-subtitle">Revise todas as suas anotações pessoais e explicações salvas dos balões
+                        pedagógicos.</p>
+                </div>
+
+                <!-- Container de Notas -->
+                <div class="row g-4" id="minhasNotasContainer">
+                    <!-- Injetado por JS -->
+                </div>
+            </section>
+
+            <!-- SEÇÃO 6: CONFIGURAÇÕES / AJUSTES -->
+            <section id="section-configuracoes" class="content-section">
+                <div class="section-header">
+                    <h1>⚙️ Ajustes e Configurações</h1>
+                    <p class="section-subtitle">Gerencie suas preferências e dados locais da plataforma.</p>
+                </div>
+
+                <div class="config-card">
+                    <h3>💡 Intensidade dos Marcadores de Texto</h3>
+                    <p>Ajuste o nível de transparência das cores dos grifos no enunciado (entre 15% e 75%).</p>
+                    <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+                        <input type="range" id="opacitySlider" min="15" max="75" value="45"
+                            oninput="alterarOpacidadeGrifos(this.value)" style="flex:1; cursor:pointer;">
+                        <span id="opacityDisplay" style="font-weight:700; width:45px; text-align:right;">45%</span>
+                    </div>
+                </div>
+
+                <div class="config-card" style="margin-top:20px;">
+                    <h3>👁️ Estudo Ativo: Revelar Incorreção</h3>
+                    <p>Ao ativar, você pode passar o mouse sobre os termos incorretos tachados para ver a correção
+                        detalhada.</p>
+                    <div class="form-check form-switch"
+                        style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+                        <input class="form-check-input" type="checkbox" id="toggleHoverCorretivo"
+                            onchange="alternarHoverCorretivo(this.checked)" checked style="cursor:pointer;">
+                        <label class="form-check-label" for="toggleHoverCorretivo"
+                            style="font-weight:600; cursor:pointer; margin-bottom:0;">Revelar termos corretos no
+                            hover</label>
+                    </div>
+                </div>
+
+                <div class="config-card" style="margin-top:20px;">
+                    <h3>🗑️ Limpar Progresso e Histórico</h3>
+                    <p>Isso apagará todo o seu progresso de acertos/erros, anotações de fóruns e favoritos salvos
+                        localmente neste navegador.</p>
+                    <button class="btn-danger" onclick="resetarDadosGerais()">
+                        Limpar Todos os Dados
+                    </button>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: MINHA ASSINATURA -->
+            <section id="section-assinatura" class="content-section">
+                <div class="section-header">
+                    <h1>💳 Minha Assinatura</h1>
+                    <p class="section-subtitle">Gerencie seu plano, cobranças e status da assinatura.</p>
+                </div>
+                <div class="config-card">
+                    <h3>Plano Atual: Premium Pro</h3>
+                    <p>Acesso ilimitado a todas as ferramentas pedagógicas, marcações e banco de questões.</p>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid var(--border); flex-wrap:wrap; gap:15px;">
+                        <div>
+                            <span style="font-size:0.85rem; color:var(--text-secondary); display:block;">Valor</span>
+                            <span style="font-size:1.2rem; font-weight:800; color:var(--text-primary);">R$ 49,90 / mês</span>
+                        </div>
+                        <div>
+                            <span style="font-size:0.85rem; color:var(--text-secondary); display:block;">Status</span>
+                            <span class="badge" style="background-color:#10b981; color:white; font-weight:700; padding:4px 8px; border-radius:12px;">Ativa</span>
+                        </div>
+                        <div>
+                            <span style="font-size:0.85rem; color:var(--text-secondary); display:block;">Próximo Vencimento</span>
+                            <span style="font-weight:700; color:var(--text-primary);">10/09/2026</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: NOTIFICAÇÕES -->
+            <section id="section-notificacoes" class="content-section">
+                <div class="section-header">
+                    <h1>🔔 Notificações</h1>
+                    <p class="section-subtitle">Avisos administrativos e preferências do sistema.</p>
+                </div>
+                <div id="notificacoesContainer"></div>
+            </section>
+
+            <!-- SEÇÃO: INTEGRAÇÕES -->
+            <section id="section-integracoes" class="content-section">
+                <div class="section-header">
+                    <h1>🔌 Integrações Externas</h1>
+                    <p class="section-subtitle">Conecte seus aplicativos favoritos para automatizar seus estudos.</p>
+                </div>
+                <div class="config-card">
+                    <h3>Google Calendar</h3>
+                    <p>Sincronize seu planejamento de estudos diretamente na sua agenda do Google.</p>
+                    <button class="btn-primary" style="margin-top:10px; font-weight:700; padding:8px 16px; border-radius:8px; border:none; background-color:var(--accent); color:white; cursor:pointer;">Conectar Calendário</button>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: BACKUP / EXPORTAR -->
+            <section id="section-backup" class="content-section">
+                <div class="section-header">
+                    <h1>📥 Backup e Exportação</h1>
+                    <p class="section-subtitle">Exporte suas notas, estatísticas e listas de questões em formatos abertos.</p>
+                </div>
+                <div class="config-card">
+                    <h3>Exportar Dados Locais</h3>
+                    <p>Baixe todas as suas notas e estatísticas de resolução em formato JSON.</p>
+                    <button class="btn-primary" style="margin-top:10px; font-weight:700; padding:8px 16px; border-radius:8px; border:none; background-color:var(--accent); color:white; cursor:pointer;">Exportar para JSON</button>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: SUPORTE E AJUDA -->
+            <section id="section-suporte" class="content-section">
+                <div class="section-header">
+                    <h1>⚓ Suporte e Ajuda</h1>
+                    <p class="section-subtitle">FAQ, tutoriais de uso e canal de atendimento direto.</p>
+                </div>
+                <div class="config-card">
+                    <h3>Precisa de ajuda?</h3>
+                    <p>Entre em contato com o nosso suporte técnico pelo e-mail ou WhatsApp.</p>
+                    <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn-primary" style="font-weight:700; padding:8px 16px; border-radius:8px; border:none; background-color:var(--accent); color:white; cursor:pointer;">Enviar E-mail</button>
+                        <button class="btn-success" style="font-weight:700; padding:8px 16px; border-radius:8px; border:none; background-color:#25d366; color:white; cursor:pointer;">Suporte via WhatsApp</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO: TERMOS E PRIVACIDADE -->
+            <section id="section-termos" class="content-section">
+                <div class="section-header">
+                    <h1>🛡️ Termos e Privacidade</h1>
+                    <p class="section-subtitle">Nossas diretrizes de conformidade com a LGPD e termos de uso.</p>
+                </div>
+                <div class="config-card">
+                    <h3>Políticas de Privacidade e LGPD</h3>
+                    <p>Seus dados pessoais e históricos de estudo estão 100% protegidos em nossa base de dados conforme as diretrizes da LGPD.</p>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 8: BIBLIOTECA DE PROVAS -->
+            <section id="section-provas" class="content-section">
+                <!-- Banner Premium -->
+                <div class="prova-banner">
+                    <h1 class="prova-banner-title">📄 Biblioteca de Provas</h1>
+                    <p class="prova-banner-desc">Explore o repositório de cadernos de provas aplicados desde 2016 pelas
+                        principais bancas e impulsione seus estudos por Engenharia Reversa.</p>
+                </div>
+
+                <!-- Painel de Estatísticas / Resumo das Provas -->
+                <div class="prova-stats-row">
+                    <div class="prova-stat-card" onclick="selecionarBancaTab('todas')" title="Ver todas as provas">
+                        <span style="font-size:1.6rem;">📚</span>
+                        <div>
+                            <div class="prova-stat-number" id="stats-total-provas">37</div>
+                            <div class="prova-stat-label">Total Provas</div>
+                        </div>
+                    </div>
+                    <div class="prova-stat-card" onclick="selecionarBancaTab('Cebraspe')"
+                        title="Ver provas do Cebraspe">
+                        <span style="font-size:1.6rem; color:#3b82f6;">🔵</span>
+                        <div>
+                            <div class="prova-stat-number">11</div>
+                            <div class="prova-stat-label">Cebraspe</div>
+                        </div>
+                    </div>
+                    <div class="prova-stat-card" onclick="selecionarBancaTab('FGV')" title="Ver provas da FGV">
+                        <span style="font-size:1.6rem; color:#f59e0b;">🟡</span>
+                        <div>
+                            <div class="prova-stat-number">11</div>
+                            <div class="prova-stat-label">FGV</div>
+                        </div>
+                    </div>
+                    <div class="prova-stat-card" onclick="selecionarBancaTab('Cesgranrio')"
+                        title="Ver provas da Cesgranrio">
+                        <span style="font-size:1.6rem; color:#10b981;">🟢</span>
+                        <div>
+                            <div class="prova-stat-number">9</div>
+                            <div class="prova-stat-label">Cesgranrio</div>
+                        </div>
+                    </div>
+                    <div class="prova-stat-card" onclick="selecionarBancaTab('FCC')" title="Ver provas da FCC">
+                        <span style="font-size:1.6rem; color:#ec4899;">💗</span>
+                        <div>
+                            <div class="prova-stat-number">8</div>
+                            <div class="prova-stat-label">FCC</div>
+                        </div>
+                    </div>
+                    <div class="prova-stat-card" onclick="selecionarBancaTab('Vunesp')" title="Ver provas da Vunesp">
+                        <span style="font-size:1.6rem; color:#a855f7;">🟣</span>
+                        <div>
+                            <div class="prova-stat-number" id="stats-vunesp-number">9</div>
+                            <div class="prova-stat-label">Vunesp</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Abas Rápidas de Bancas (Tabs) -->
+                <div class="banca-tabs" id="bancaTabsWrapper">
+                    <button class="banca-tab active" data-banca="todas" onclick="selecionarBancaTab('todas')">Todas as
+                        Bancas</button>
+                    <button class="banca-tab" data-banca="Cebraspe" onclick="selecionarBancaTab('Cebraspe')">Cebraspe
+                        (CESPE)</button>
+                    <button class="banca-tab" data-banca="FGV" onclick="selecionarBancaTab('FGV')">FGV</button>
+                    <button class="banca-tab" data-banca="Cesgranrio"
+                        onclick="selecionarBancaTab('Cesgranrio')">Cesgranrio</button>
+                    <button class="banca-tab" data-banca="FCC" onclick="selecionarBancaTab('FCC')">FCC</button>
+                    <button class="banca-tab" data-banca="Vunesp" onclick="selecionarBancaTab('Vunesp')">Vunesp</button>
+                </div>
+
+                <!-- Linha secundária de Filtros (Ano e Busca) -->
+                <div class="filtros-container card-base"
+                    style="margin-bottom: 25px; padding: 15px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border: 1.5px solid var(--border); border-radius: 12px; background-color: var(--bg-card);">
+                    <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 4px;">
+                        <label for="filterAnoProvas"
+                            style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">Ano de
+                            Aplicação</label>
+                        <select id="filterAnoProvas" onchange="aplicarFiltrosProvas()"
+                            style="width: 100%; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); cursor: pointer; font-size: 0.88rem;">
+                            <option value="todos">Todos os Anos</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="2018">2018</option>
+                            <option value="2017">2017</option>
+                            <option value="2016">2016</option>
+                        </select>
+                    </div>
+                    <div id="adminStatusArquivosProvasFilter" style="flex: 1; min-width: 190px; display: none; flex-direction: column; gap: 4px;">
+                        <label for="filterStatusArquivosProvas"
+                            style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">Status dos
+                            Arquivos</label>
+                        <select id="filterStatusArquivosProvas" onchange="aplicarFiltrosProvas()"
+                            style="width: 100%; padding: 8px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); cursor: pointer; font-size: 0.88rem;">
+                            <option value="todos">Todos</option>
+                            <option value="processadas">Questões processadas</option>
+                            <option value="baixados">Arquivos baixados</option>
+                            <option value="vinculados">Documentos vinculados</option>
+                            <option value="parciais">Origem/documento parcial</option>
+                            <option value="pendentes">Arquivos pendentes</option>
+                        </select>
+                    </div>
+                    <div style="flex: 3; min-width: 250px; display: flex; flex-direction: column; gap: 4px;">
+                        <label for="searchProva"
+                            style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">Busca
+                            Textual</label>
+                        <input type="text" id="searchProva" oninput="aplicarFiltrosProvas()"
+                            placeholder="Pesquise por órgão, cargo, ano..."
+                            style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); font-size: 0.88rem;">
+                    </div>
+                </div>
+
+                <!-- Grid de Provas -->
+                <div class="row g-4" id="provasGridContainer" style="display: flex; flex-wrap: wrap; gap: 20px;">
+                    <!-- Inserido dinamicamente via JS -->
+                </div>
+            </section>
+
+            <!-- SEÇÃO: LISTAS DE QUESTÕES -->
+            <section id="section-listas" class="content-section">
+                <!-- Banner Premium -->
+                <div class="prova-banner"
+                    style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 30px rgba(16, 185, 129, 0.15); border: none; margin-bottom: 25px;">
+                    <h1 class="prova-banner-title">📋 Minhas Listas de Questões</h1>
+                    <p class="prova-banner-desc">Importe arquivos privados (.docx, .pdf, .txt), organize por tags e escolha
+                        quais listas entram na sua sessão de resolução.</p>
+                </div>
+
+                <div class="listas-layout">
+                    <!-- Dropzone de Upload e Criação de Lista -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <!-- Criar Nova Lista Manual -->
+                        <div class="card-base"
+                            style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card); display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h3
+                                    style="font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    ➕ Criar Lista Manual</h3>
+                                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 15px;">Use apenas quando quiser montar uma lista selecionando questões durante os estudos. Para listas prontas, prefira importar um arquivo.</p>
+
+                                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                                    <label for="inputListName"
+                                        style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">Nome
+                                        da Lista</label>
+                                    <input type="text" id="inputListName"
+                                        placeholder="Ex: Revisão LRF, Pegadinhas Direito..."
+                                        style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); font-size: 0.88rem;">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="window.criarListaManual()"
+                                style="width: 100%; padding: 10px; font-weight: 700; border-radius: 8px; background-color: var(--accent); border-color: var(--accent); color: #fff;">
+                                Criar Lista Vazia
+                            </button>
+                        </div>
+
+                        <!-- Upload de arquivo -->
+                        <div class="upload-dropzone" id="dropzoneListas"
+                            onclick="document.getElementById('fileInputListas').click()"
+                            ondragover="event.preventDefault(); this.classList.add('dragover');"
+                            ondragleave="this.classList.remove('dragover');"
+                            ondrop="event.preventDefault(); this.classList.remove('dragover'); window.lidarComDropArquivo(event)">
+                            <span class="upload-icon">📥</span>
+                            <div class="upload-title">Importar Arquivo de Questões</div>
+                            <div class="upload-desc">Arraste ou clique para enviar arquivos <strong>.txt, .docx ou
+                                    .pdf</strong>. Nosso leitor converterá em questões privadas exclusivas para você.
+                            </div>
+                            <input type="file" id="fileInputListas" accept=".txt,.pdf,.docx" style="display: none;"
+                                onchange="window.lidarComUploadArquivo(this.files)">
+                        </div>
+                    </div>
+
+                    <div class="listas-helper-panel">
+                        <div>
+                            <strong>Como preparar o arquivo</strong>
+                            <p>Numere as questões, mantenha alternativas em linhas separadas e informe o gabarito como
+                                "Gabarito: A", "Gabarito: Certo" ou em arquivo separado. Tags podem ser escritas como
+                                "Tags: constitucional, revisão".</p>
+                        </div>
+                        <label class="listas-gabarito-upload">
+                            <span>Importar gabarito de uma lista</span>
+                            <input type="file" id="fileInputGabaritoLista" accept=".txt,.csv"
+                                onchange="window.lidarComUploadGabaritoLista(this.files)">
+                        </label>
+                    </div>
+                    <!-- Grid de Listas (Folhas Grampeadas) -->
+                    <div>
+                        <div class="listas-toolbar">
+                            <div>
+                                <h3 style="font-size: 1.2rem; font-weight: 850; margin: 0;">📚 Suas Listas Ativas</h3>
+                                <p id="listasResumoBusca">Busque por nome ou por uma ou mais tags.</p>
+                            </div>
+                            <div class="listas-toolbar-actions">
+                                <input type="search" id="inputBuscaListas"
+                                    placeholder="Buscar por nome ou tags..."
+                                    oninput="window.renderizarListas()">
+                                <button class="btn btn-primary btn-sm" onclick="window.abrirListasSelecionadasNaSala()">
+                                    Abrir selecionadas
+                                </button>
+                            </div>
+                        </div>
+                        <div class="listas-grid" id="listasGridContainer">
+                            <!-- Injetado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 9: ESTATÍSTICAS DETALHADAS -->
+            <section id="section-estatisticas" class="content-section">
+                <!-- Banner Premium -->
+                <div class="prova-banner"
+                    style="background: linear-gradient(135deg, #8b5cf6 0%, var(--accent) 100%); box-shadow: 0 8px 30px rgba(139, 92, 246, 0.15); border: none;">
+                    <h1 class="prova-banner-title">📊 Painel de Performance</h1>
+                    <p class="prova-banner-desc">Analise suas métricas de resolução, tempos gastos e o mapeamento
+                        detalhado por disciplinas, assuntos e bancas.</p>
+                </div>
+
+                <!-- Grid de Métricas Gerais -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <!-- Tempo na sessão -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; background-color: var(--bg-card);">
+                        <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">⏱️</span>
+                        <div
+                            style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                            Tempo de Estudo</div>
+                        <div style="font-size: 1.7rem; font-weight: 850; color: var(--text-primary);"
+                            id="stats-tempo-estudo">00:00:00</div>
+                    </div>
+                    <!-- Tempo Médio -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; background-color: var(--bg-card);">
+                        <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">⏳</span>
+                        <div
+                            style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                            Tempo Médio por Questão</div>
+                        <div style="font-size: 1.7rem; font-weight: 850; color: var(--text-primary);"
+                            id="stats-tempo-medio">0s</div>
+                    </div>
+                    <!-- Maior / Menor Tempo -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; background-color: var(--bg-card);">
+                        <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">🚀</span>
+                        <div
+                            style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                            Maior / Menor Tempo</div>
+                        <div style="font-size: 1.25rem; font-weight: 850; color: var(--text-primary); display: flex; justify-content: center; gap: 10px; margin-top: 4px;"
+                            id="stats-min-max-tempo">
+                            <span style="color: var(--errada);" title="Maior Tempo" id="stats-max-tempo">0s</span>
+                            <span style="color: var(--text-secondary);">/</span>
+                            <span style="color: var(--correta);" title="Menor Tempo" id="stats-min-tempo">0s</span>
+                        </div>
+                    </div>
+                    <!-- Resolvidas / Acertos / Erros -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; background-color: var(--bg-card);">
+                        <span style="font-size: 2.2rem; display: block; margin-bottom: 8px;">🎯</span>
+                        <div
+                            style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                            Aproveitamento</div>
+                        <div style="font-size: 1.6rem; font-weight: 850; color: var(--text-primary);"
+                            id="stats-taxa-acerto">0%</div>
+                        <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">
+                            <span style="color: var(--correta); font-weight: 700;" id="stats-num-acertos">0
+                                acertos</span> |
+                            <span style="color: var(--errada); font-weight: 700;" id="stats-num-erros">0 erros</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Container de Gráficos Analíticos -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <!-- Aproveitamento Geral -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card); min-height: 320px; display: flex; flex-direction: column;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">🎯 Aproveitamento Geral
+                        </h3>
+                        <div style="flex: 1; position: relative;">
+                            <canvas id="chartAproveitamentoGeral"></canvas>
+                        </div>
+                    </div>
+                    <!-- Desempenho Semanal -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card); min-height: 320px; display: flex; flex-direction: column;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">📈 Evolução Semanal</h3>
+                        <div style="flex: 1; position: relative;">
+                            <canvas id="chartEvolucaoSemanal"></canvas>
+                        </div>
+                    </div>
+                    <!-- Desempenho por Disciplina -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card); min-height: 320px; display: flex; flex-direction: column;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">📊 Aproveitamento por
+                            Disciplina</h3>
+                        <div style="flex: 1; position: relative;">
+                            <canvas id="chartRadarDisciplinas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhes por Categorias -->
+                <div class="stats-details-grid">
+                    <!-- Bancas -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card);">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">🏛️ Performance por Banca
+                        </h3>
+                        <div id="stats-bancas-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    </div>
+
+                    <!-- Cargos -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card);">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">💼 Performance por Cargo
+                        </h3>
+                        <div id="stats-cargos-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    </div>
+
+                    <!-- Disciplinas -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card);">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">📚 Performance por
+                            Disciplina</h3>
+                        <div id="stats-disciplinas-list" style="display: flex; flex-direction: column; gap: 12px;">
+                        </div>
+                    </div>
+
+                    <!-- Assuntos -->
+                    <div class="card-base"
+                        style="border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; background-color: var(--bg-card);">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px;">🏷️ Performance por
+                            Assunto</h3>
+                        <div id="stats-assuntos-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 9: PLANNER & CICLOS DE ESTUDO -->
+            <section id="section-planner" class="content-section"
+                style="padding: 0; overflow: hidden; background: transparent; border: none;">
+                <iframe id="planner-iframe" src="planner/index.html?v=1786893744205"
+                    style="width: 100%; height: calc(100vh - 40px); border: none; border-radius: 12px; background: transparent;"></iframe>
+            </section>
+
+            <!-- SEÇÃO 10: PAINEL ADMINISTRATIVO (REMB) -->
+            <section id="section-admin" class="content-section">
+                <div class="section-header">
+                    <h1>⚙️ Painel Administrativo REMB</h1>
+                    <p class="section-subtitle">Gestão de infraestrutura, acessos de usuários e faturamento.</p>
+                </div>
+                <div id="admin-panel-content"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODO FOCO (MODAL FULLSCREEN DE ISOLAMENTO) -->
+    <div class="foco-overlay" id="focoOverlay" onclick="fecharModoFoco()"></div>
+    <div class="foco-modal" id="focoModal">
+        <div class="foco-wrapper">
+            <div class="foco-header">
+                <h3>🔍 Modo Foco - Resolução Ativa</h3>
+                <button class="modal-close-btn" onclick="fecharModoFoco()" title="Fechar modo foco">&times;</button>
+            </div>
+
+            <div class="foco-body" id="focoModalConteudo">
+                <!-- A questão ativa do foco será injetada aqui -->
+            </div>
+
+            <div class="foco-footer">
+                <button class="btn-secundario" id="btnFocoAnterior" onclick="anteriorQuestaoFoco()">
+                    ◀ Questão Anterior
+                </button>
+                <span class="foco-tip-label">
+                    Dica: Use as setas ◀ ▶ do teclado para navegar | Teclas A-E para marcar | Enter para responder
+                </span>
+                <button class="btn-secundario" id="btnFocoProximo" onclick="proximaQuestaoFoco()">
+                    Próxima Questão ▶
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADICIONAR QUESTÃO À LISTA -->
+    <div class="lists-modal-backdrop" id="modalAddToList" style="display: none;">
+        <div class="lists-modal-card">
+            <div class="lists-modal-header">
+                <h3 class="lists-modal-title">📋 Adicionar à Lista</h3>
+                <button class="lists-modal-close" onclick="window.fecharModalAddToList()">&times;</button>
+            </div>
+            <div class="lists-modal-body">
+                <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">Selecione abaixo em qual lista
+                    deseja inserir esta questão:</p>
+                <div id="modalAddToListOptions"
+                    style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 5px; margin-top: 10px;">
+                    <!-- Injetado por JS -->
+                </div>
+
+                <div
+                    style="border-top: 1.5px solid var(--border); padding-top: 15px; margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">Ou crie uma nova
+                        lista e adicione:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="inputNewListNameModal" placeholder="Nome da nova lista..."
+                            style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-app); color: var(--text-primary); font-size: 0.88rem;">
+                        <button class="btn btn-primary btn-sm" onclick="window.criarAdicionarNovaListaModal()"
+                            style="font-weight: 700; background-color: var(--accent); border-color: var(--accent); color: #fff; border-radius: 8px; padding: 0 15px;">Criar
+                            & Add</button>
+                    </div>
+                </div>
+            </div>
+            <div class="lists-modal-footer">
+                <button class="btn-pag" onclick="window.fecharModalAddToList()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VISUALIZAR QUESTÕES DA LISTA -->
+    <div class="lists-modal-backdrop" id="modalViewListQuestions" style="display: none;">
+        <div class="lists-modal-card" style="max-width: 800px; height: 80vh;">
+            <div class="lists-modal-header" style="background-color: var(--bg-primary);">
+                <div>
+                    <h3 class="lists-modal-title" id="lblViewListTitle">📋 Nome da Lista</h3>
+                    <span
+                        style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; display: block; margin-top: 2px;"
+                        id="lblViewListInfo">0 questões</span>
+                </div>
+                <button class="lists-modal-close" onclick="window.fecharModalViewList()">&times;</button>
+            </div>
+            <div class="lists-modal-body" style="background-color: var(--bg-app); padding: 15px;">
+                <div class="questoes-list" id="modalViewListQuestionsContainer"
+                    style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Injetado por JS -->
+                </div>
+            </div>
+            <div class="lists-modal-footer">
+                <button class="btn-pag" onclick="window.fecharModalViewList()">Fechar</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL CADASTRO / EDIÇÃO DE USUÁRIO (ADMIN) -->
+    <div class="lists-modal-backdrop" id="modalAdminUser" style="display: none;">
+        <div class="lists-modal-card"
+            style="max-width: 480px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="lists-modal-header" style="background-color: var(--bg-primary);">
+                <h3 class="lists-modal-title" id="modalAdminUserTitle">➕ Cadastrar Novo Usuário</h3>
+                <button class="lists-modal-close" onclick="window.fecharModalAdminUser()">&times;</button>
+            </div>
+            <div class="lists-modal-body"
+                style="background-color: var(--bg-app); padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;">
+                <input type="hidden" id="txtAdminUserId">
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left;">Nome
+                        do Usuário</label>
+                    <input type="text" id="txtAdminUserNome" placeholder="Ex: Rubem Eduardo..."
+                        style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left;">Email</label>
+                    <input type="email" id="txtAdminUserEmail" placeholder="Ex: rubem@concursos.com..."
+                        style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left;">Telefone</label>
+                    <input type="text" id="txtAdminUserTelefone" placeholder="Ex: (11) 98888-8888..."
+                        style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left;">Nível
+                        de Acesso</label>
+                    <select id="selAdminUserNivel"
+                        style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem;">
+                        <option value="ALUNO FREE">Aluno Free</option>
+                        <option value="ALUNO PREMIUM">Aluno Premium</option>
+                        <option value="ADMIN / GESTOR">Admin / Gestor</option>
+                        <option value="CEO / PROPRIETÁRIO">CEO / Proprietário</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left;">Expiração
+                        da Assinatura</label>
+                    <input type="date" id="txtAdminUserValidade"
+                        style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left;">Status
+                        da Conta</label>
+                    <select id="selAdminUserStatus"
+                        style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem;">
+                        <option value="ATIVO">Ativo</option>
+                        <option value="INATIVO">Inativo</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-align:left;">Notas
+                        / Observações</label>
+                    <textarea id="txtAdminUserNotas" rows="2" placeholder="Observações internas sobre o usuário..."
+                        style="padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border); background-color: var(--bg-card); color: var(--text-primary); font-size: 0.9rem; resize:vertical;"></textarea>
+                </div>
+            </div>
+            <div class="lists-modal-footer">
+                <button class="btn-pag" onclick="window.fecharModalAdminUser()">Cancelar</button>
+                <button class="btn btn-primary" onclick="window.salvarUsuarioAdmin()"
+                    style="border: none; box-shadow: var(--shadow); font-weight: 700; border-radius: 8px; color: #fff; background-color: var(--accent); padding: 6px 16px;">Salvar
+                    Usuário</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BALÃO EXPLICATIVO PEDAGÓGICO (CLASSIFICAÇÃO CARD) -->
+    <div id="balao-pedagogico" class="balao-explicativo-popup classification-card" style="display: none;">
+        <div class="balao-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="balao-header-dot">●</span>
+                <p class="card-title" id="balao-titulo">Classificação</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="page-count-badge" id="balao-passo-label">1/3</span>
+                <button class="balao-btn-close" onclick="fecharModoCorrecao()" title="Fechar" style="background: none; border: none; font-size: 1.15rem; font-weight: 800; cursor: pointer; color: inherit; opacity: 0.7; padding: 0; line-height: 1; margin-left: 4px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">×</button>
+            </div>
+        </div>
+        
+        <div class="px-4 pt-3 pb-3">
+            <p class="card-message" id="balao-conteudo"></p>
+        </div>
+
+        <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 16px 16px !important; border-top: none; background: transparent;">
+            <button class="save-note" type="button" onclick="salvarBalaoEmMinhasNotas()">
+                <svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                </svg>
+                <span>Salvar Nota</span>
+            </button>
+
+            <div class="pagination">
+                <button class="nav-button nav-prev" id="btn-balao-voltar" onclick="voltarPassoBalao()" type="button"
+                    aria-label="Anterior">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-4 h-4">
+                        <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                </button>
+                <button class="nav-button nav-next" id="btn-balao-avancar" onclick="avancarPassoBalao()" type="button"
+                    aria-label="Próximo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-4 h-4">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA MÓVEL DE MARCAÇÃO FLUTUANTE ARRASTÁVEL (STICKY HIGHLIGHTER) -->
+    <div class="sticky-highlighter-bar" id="stickyHighlighterBar">
+        <!-- Minimized Capsule View -->
+        <div class="highlighter-minimized-view"
+            style="display: none; flex-direction: column; align-items: center; gap: 10px; width: 100%;">
+            <div class="highlighter-drag-handle" id="highlighterDragHandleMin"
+                style="font-size: 1rem; color: var(--text-secondary); cursor: grab; user-select: none; margin-bottom: 4px;">
+                ⋮⋮</div>
+            <div
+                style="font-size: 0.55rem; font-weight: 850; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; writing-mode: vertical-lr; margin-bottom: 6px; user-select: none;">
+                CANETA</div>
+            <div id="minimized-active-tool-icon"
+                style="background-color: var(--accent-light); color: var(--accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; user-select: none; transition: all 0.2s;">
+                🖍️
+            </div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;"
+                onclick="window.toggleMinimizarCaneta()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                    <line x1="15" y1="3" x2="15" y2="21"></line>
+                </svg>
+            </div>
+            <button onclick="window.toggleMinimizarCaneta()"
+                style="background-color: var(--accent); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; box-shadow: var(--shadow-sm); font-weight: bold;"
+                title="Maximizar">
+                +
+            </button>
+        </div>
+
+        <!-- Expanded Panel View -->
+        <div class="highlighter-expanded-view" style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+            <!-- Card 1: Tonalidade -->
+            <div class="sidebar-card" style="padding: 16px 20px; gap: 12px;">
+                <!-- Header Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <h3 class="sidebar-card-title" style="margin: 0;">Tonalidade</h3>
+                    <div style="display: none;">
+                        <div id="highlighterDragHandle"></div>
+                        <button onclick="window.toggleMinimizarCaneta()">✕</button>
+                    </div>
+                </div>
+
+                <!-- Tonalidade Slider -->
+                <div style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                        <span>Tonalidade</span>
+                        <span id="lblOpacityValue">50%</span>
+                    </div>
+                    <input type="range" id="highlighterOpacityRange" min="10" max="100" value="50" oninput="window.alterarOpacidadeSlider(this.value)" style="width: 100%; height: 6px; border-radius: 3px; background: var(--border); outline: none; -webkit-appearance: none; cursor: pointer;">
+                </div>
+
+                <!-- Colors Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px; border-top: 1px dashed var(--border); padding-top: 10px;">
+                    <button class="color-dot btn-amarelo active" onclick="window.setCanetaCor('yellow', this)" style="background-color: #eab308; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;">✓</button>
+                    <button class="color-dot btn-verde" onclick="window.setCanetaCor('green', this)" style="background-color: #10b981; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;"></button>
+                    <button class="color-dot btn-azul" onclick="window.setCanetaCor('blue', this)" style="background-color: #3b82f6; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;"></button>
+                    <button class="color-dot btn-rosa" onclick="window.setCanetaCor('pink', this)" style="background-color: #ec4899; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;"></button>
+                    <button class="color-dot btn-laranja" onclick="window.setCanetaCor('orange', this)" style="background-color: #f97316; width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem;"></button>
+                </div>
+            </div>
+
+            <!-- Card 2: Tools List -->
+            <div class="sidebar-card" style="padding: 15px; gap: 8px;">
+                <button class="tool-btn active" id="btn-tool-marca-texto" onclick="window.setCanetaTool('marca-texto')" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
+                    Marca-texto
+                </button>
+                <button class="tool-btn" id="btn-tool-sublinhar" onclick="window.setCanetaTool('sublinhar')" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s;">
+                    <span style="font-weight: 800; font-size: 1.05rem; text-decoration: underline; text-underline-offset: 3px; line-height: 1;">U</span>
+                    Sublinhar
+                </button>
+                <button class="tool-btn" id="btn-tool-anotacao" onclick="window.setCanetaTool('anotacao')" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s;">
+                    <span style="font-weight: 800; font-size: 1.05rem; line-height: 1;">T</span>
+                    Anotação
+                </button>
+                <button class="tool-btn" id="btn-tool-mapear" onclick="window.setCanetaTool('mapear')" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+                    Mapear
+                </button>
+                <button class="tool-btn" id="btn-tool-apagar" onclick="window.setCanetaTool('apagar')" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-.5-.5-.5-1.3 0-1.8L13 4c.5-.5 1.3-.5 1.8 0l5.2 5.2c.5.5.5 1.3 0 1.8L12 19"></path></svg>
+                    Apagar
+                </button>
+            </div>
+
+            <!-- Card 3: Caneta Footer Dark Label -->
+            <div style="width: 100%; border: none; border-radius: 12px; padding: 14px; background-color: #1e293b; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; box-shadow: var(--shadow-sm); user-select: none;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #ffffff;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                CANETA
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY DE ESCURECIMENTO PARA O MODO CORREÇÃO -->
+    <div id="correcao-overlay" class="correcao-overlay-backdrop" style="display: none;"></div>
+
+    <!-- BOTÃO FLUTUANTE PARA SAIR DO MODO CORREÇÃO -->
+    <div id="btn-sair-correcao" class="btn-sair-correcao-flutuante" onclick="fecharModoCorrecao()"
+        style="display: none;">
+        <span>✕</span> Sair do Modo Correção
+    </div>
+
+    <!-- GSAP (GreenSock Animation Platform) -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+    <!-- Swiper 11 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Bootstrap 5.3.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bundle.min.js"></script>
+
+    <!-- MathJax for LaTeX equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- JS SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js?v=1787423300000"></script>
+    <script src="js/session.js?v=1787423300000"></script>
+</body>
+
+</html>
+
+
+
+

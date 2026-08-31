@@ -5386,3 +5386,158 @@ body.modo-correcao-ativo .active-caderno-bar {
 [data-theme="dark"] .balao-explicativo-popup.generic-card .card-message {
     color: #cbd5e1 !important;
 }
+.listas-helper-panel {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+
+.listas-helper-panel strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.listas-helper-panel p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.listas-gabarito-upload {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.listas-gabarito-upload input {
+    display: none;
+}
+
+.listas-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.listas-toolbar p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.listas-toolbar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.listas-toolbar-actions input {
+    width: min(360px, 70vw);
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+}
+
+.lista-card-topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.lista-card-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.lista-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.lista-tag-chip {
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lista-pendencia-badge {
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    font-weight: 850;
+}
+
+.lista-card-btn {
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.lista-card-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+@media (max-width: 760px) {
+    .listas-helper-panel,
+    .listas-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .listas-toolbar-actions,
+    .listas-toolbar-actions input,
+    .listas-gabarito-upload {
+        width: 100%;
+    }
+}

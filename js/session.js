@@ -4,10 +4,195 @@
 window.activeSessionQuestionIdx = 0;
 window.sessionBancasFiltro = []; // Bancas ativas para filtrar na sessão
 window.sessionAnosFiltro = [];    // Anos ativos para filtrar na sessão
+window.sessionSourceContext = window.sessionSourceContext || null;
 
 // Preferência de quantidade de questões por página
 window.sessionPageSize = parseInt(localStorage.getItem("remb_session_page_size")) || 20;
 window.sessionCurrentPage = 0;
+
+function escapeSessionHTML(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function formatSessionValue(value, fallback = "Não informado") {
+    if (value === undefined || value === null || value === "" || value === "todas" || value === "todos") {
+        return fallback;
+    }
+    return String(value);
+}
+
+function getSessionSummaryText() {
+    const ctx = window.sessionSourceContext || {};
+    const total = window.cadernoQuestoes?.length || 0;
+
+    if (ctx.type === "prova") {
+        const prova = ctx.prova || {};
+        return `Prova selecionada: ${formatSessionValue(prova.banca || ctx.banca)} ${formatSessionValue(prova.orgao, "")} ${formatSessionValue(prova.ano, "")} (${total} questões)`;
+    }
+
+    if (ctx.type === "lista") {
+        return `Lista selecionada: ${formatSessionValue(ctx.nome, "Lista sem nome")} (${total} questões)`;
+    }
+
+    if (ctx.type === "filtro") {
+        const qtdFiltros = ctx.filters?.length || 0;
+        return `Filtro aplicado: ${qtdFiltros} regra(s), ${total} questões`;
+    }
+
+    const disctips = new Set((window.cadernoQuestoes || []).map(q => q.disciplina || "Sem Disciplina"));
+    const discStr = Array.from(disctips).join(", ");
+    return `Matérias incluídas: ${discStr}`;
+}
+window.getSessionSummaryText = getSessionSummaryText;
+
+function buildSessionOriginContextHTML(total) {
+    const ctx = window.sessionSourceContext || {};
+
+    if (ctx.type === "prova") {
+        const prova = ctx.prova || {};
+        const rows = [
+            ["Banca", prova.banca || ctx.banca],
+            ["Órgão", prova.orgao],
+            ["Cargo", prova.cargo],
+            ["Ano", prova.ano],
+            ["Nível", prova.nivel],
+            ["Arquivo", prova.file || ctx.file]
+        ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+
+        return `
+            <div class="session-origin-box">
+                <span class="session-origin-kicker">Sessão aberta por prova</span>
+                <strong>${escapeSessionHTML(prova.nome || prova.titulo || prova.id || "Prova selecionada")}</strong>
+                <div class="session-origin-details">
+                    ${rows.map(([label, value]) => `
+                        <div class="session-origin-row">
+                            <span>${escapeSessionHTML(label)}</span>
+                            <b>${escapeSessionHTML(value)}</b>
+                        </div>
+                    `).join("")}
+                </div>
+                <p>${total} questões carregadas para resolução.</p>
+            </div>
+        `;
+    }
+
+    if (ctx.type === "lista") {
+        return `
+            <div class="session-origin-box">
+                <span class="session-origin-kicker">Sessão aberta por lista</span>
+                <strong>${escapeSessionHTML(ctx.nome || "Lista selecionada")}</strong>
+                <div class="session-origin-details">
+                    <div class="session-origin-row">
+                        <span>Questões</span>
+                        <b>${escapeSessionHTML(ctx.quantidade || total)}</b>
+                    </div>
+                    <div class="session-origin-row">
+                        <span>Tipo</span>
+                        <b>${escapeSessionHTML(ctx.tipo || "Lista pessoal")}</b>
+                    </div>
+                </div>
+                ${ctx.descricao ? `<p>${escapeSessionHTML(ctx.descricao)}</p>` : `<p>Lista pessoal selecionada para resolução.</p>`}
+            </div>
+        `;
+    }
+
+    if (ctx.type === "filtro") {
+        const filters = Array.isArray(ctx.filters) ? ctx.filters : [];
+        return `
+            <div class="session-origin-box">
+                <span class="session-origin-kicker">Sessão gerada por filtros</span>
+                <strong>${filters.length} filtro(s) utilizado(s)</strong>
+                <div class="session-origin-filter-list">
+                    ${filters.map((f, idx) => {
+                        const bancaLabel = f.banca === "todas" ? "Todas as bancas" : f.banca;
+                        return `
+                            <div class="session-origin-filter">
+                                <span>Filtro ${idx + 1}</span>
+                                <b>${escapeSessionHTML(f.disciplinaText || f.disciplina || "Todas as disciplinas")}</b>
+                                <small>${escapeSessionHTML(f.assuntoText || f.assunto || "Todos os assuntos")} • ${escapeSessionHTML(bancaLabel || "Todas as bancas")} • ${escapeSessionHTML(f.quantidade || 0)} q.</small>
+                            </div>
+                        `;
+                    }).join("") || `<p>Nenhum detalhe do filtro foi registrado.</p>`}
+                </div>
+                <p>Status: ${escapeSessionHTML(ctx.statusLabel || ctx.status || "Todos")} ${ctx.cobrados ? "• somente assuntos mais cobrados" : ""}</p>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="session-origin-box">
+            <span class="session-origin-kicker">Origem da sessão</span>
+            <strong>Sessão atual</strong>
+            <p>${total} questões carregadas. Os detalhes de origem não foram registrados nesta abertura.</p>
+        </div>
+    `;
+}
+
+function guardarTemplateCanetaSessao() {
+    const bar = document.getElementById("stickyHighlighterBar");
+    if (bar && !window.highlighterBarTemplate) {
+        window.highlighterBarTemplate = bar.cloneNode(true);
+    }
+}
+
+function obterOuCriarCanetaSessao() {
+    let bar = document.getElementById("stickyHighlighterBar");
+    if (bar) {
+        guardarTemplateCanetaSessao();
+        return bar;
+    }
+
+    if (!window.highlighterBarTemplate) return null;
+
+    bar = window.highlighterBarTemplate.cloneNode(true);
+    document.body.appendChild(bar);
+
+    if (typeof window.inicializarArrastoHighlighter === "function") {
+        window.inicializarArrastoHighlighter();
+    }
+
+    return bar;
+}
+
+guardarTemplateCanetaSessao();
+document.addEventListener("DOMContentLoaded", guardarTemplateCanetaSessao);
+
+window.garantirCanetaSessaoVisivel = function() {
+    const bar = obterOuCriarCanetaSessao();
+    const splitContainer = document.getElementById("active-session-split-container");
+    if (!bar || !splitContainer || !document.body.classList.contains("session-active") || !window.cadernoGerado) return;
+
+    if (bar.parentNode !== splitContainer) {
+        splitContainer.appendChild(bar);
+    }
+
+    const expandedView = bar.querySelector(".highlighter-expanded-view");
+    const minimizedView = bar.querySelector(".highlighter-minimized-view");
+
+    localStorage.setItem("remb_caneta_minimizada", "false");
+    bar.hidden = false;
+    bar.removeAttribute("aria-hidden");
+    bar.style.display = "flex";
+    bar.style.visibility = "visible";
+    bar.style.opacity = "1";
+    bar.style.pointerEvents = "auto";
+    bar.classList.remove("minimized");
+    bar.classList.add("session-highlighter-mounted");
+    bar.style.width = "280px";
+    bar.style.left = "auto";
+    bar.style.right = "auto";
+    bar.style.top = "95px";
+    bar.style.bottom = "auto";
+    bar.style.transform = "none";
+
+    if (expandedView) expandedView.style.display = "flex";
+    if (minimizedView) minimizedView.style.display = "none";
+};
 
 // Inicializar ou re-renderizar a sessão ativa
 window.renderizarSessaoAtiva = function() {
@@ -78,6 +263,7 @@ window.renderizarSessaoAtiva = function() {
         bar.style.right = "auto";
         bar.style.top = "auto";
     }
+    window.garantirCanetaSessaoVisivel();
 
     const questoesContainer = document.createElement("div");
     questoesContainer.id = "questoesContainer";
@@ -259,13 +445,12 @@ window.renderizarSessaoAtiva = function() {
     if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
         window.MathJax.typesetPromise();
     }
+    window.garantirCanetaSessaoVisivel();
+    setTimeout(window.garantirCanetaSessaoVisivel, 80);
 };
 
 // Reconstrução do HTML da barra superior
 function rebuildDarkBarHTML(darkBar) {
-    const disctips = new Set(window.cadernoQuestoes.map(q => q.disciplina || "Sem Disciplina"));
-    const discStr = Array.from(disctips).join(", ");
-
     const total = window.cadernoQuestoes.length;
     let resolvidas = 0;
     window.cadernoQuestoes.forEach(q => {
@@ -289,7 +474,7 @@ function rebuildDarkBarHTML(darkBar) {
                         <span style="color: #10b981; font-size: 0.75rem;">●</span>
                         Sessão em Resolução
                     </span>
-                    <span id="active-caderno-summary" style="font-size: 0.72rem; color: rgba(255,255,255,0.65); font-weight: 600;">Matérias incluídas: ${discStr}</span>
+                    <span id="active-caderno-summary" style="font-size: 0.72rem; color: rgba(255,255,255,0.65); font-weight: 600;">${escapeSessionHTML(getSessionSummaryText())}</span>
                 </div>
             </div>
         </div>
@@ -431,6 +616,7 @@ function renderSidebarHTML(container, bancas, anos, bancaCounts, anoCounts, inde
         <!-- Card 2: Filtros de Origem -->
         <div class="sidebar-card">
             <h4 class="sidebar-card-heading">Filtros de Origem</h4>
+            ${buildSessionOriginContextHTML(total)}
             <div class="session-filter-list">
                 ${bancasHTML || '<p style="font-size:0.8rem; color:var(--text-secondary);">Sem bancas na sessão</p>'}
             </div>
@@ -608,6 +794,8 @@ window.voltarParaConfiguracao = function() {
     window.activeSessionQuestionIdx = 0;
     window.sessionBancasFiltro = [];
     window.sessionAnosFiltro = [];
+    window.sessionSourceContext = null;
+    localStorage.removeItem("remb_session_source_context");
 
     // Ocultar barra de canetas
     const penBar = document.getElementById("stickyHighlighterBar");
@@ -624,8 +812,8 @@ setTimeout(() => {
     // Hook na função gerarCadernoQuestoes para direcionar para nossa renderizarSessaoAtiva
     const originalGerar = window.gerarCadernoQuestoes;
     if (originalGerar) {
-        window.gerarCadernoQuestoes = function() {
-            originalGerar();
+        window.gerarCadernoQuestoes = async function() {
+            await originalGerar();
             if (window.cadernoGerado) {
                 window.activeSessionQuestionIdx = 0;
                 window.sessionBancasFiltro = [];
@@ -650,8 +838,8 @@ setTimeout(() => {
     // Hook na função abrirQuestoesNaSala para suportar Provas e Listas
     const originalAbrirNaSala = window.abrirQuestoesNaSala;
     if (originalAbrirNaSala) {
-        window.abrirQuestoesNaSala = function(questoes, limitMinutes = 0) {
-            originalAbrirNaSala(questoes, limitMinutes);
+        window.abrirQuestoesNaSala = function(questoes, limitMinutes = 0, sourceContext = null) {
+            originalAbrirNaSala(questoes, limitMinutes, sourceContext);
             if (window.cadernoGerado) {
                 window.activeSessionQuestionIdx = 0;
                 window.sessionBancasFiltro = [];

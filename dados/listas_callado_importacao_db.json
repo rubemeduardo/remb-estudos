@@ -1,0 +1,539 @@
+{
+  "dryRun": false,
+  "replaceFromReport": true,
+  "replacedPrevious": {
+    "idsFromReport": 29,
+    "removed": 29,
+    "backupPath": "dados\\backup_listas_callado_1788120563826.json"
+  },
+  "generatedAt": "2026-08-30T20:10:17.268Z",
+  "usuario": {
+    "id": "u_51e50319-0a49-47df-8363-d36bf827803a",
+    "nome": "Rubem",
+    "email": "ceo@rembconcursos.com.br"
+  },
+  "sourceRoot": "C:/Users/Usuário/OneDrive/Documentos/ChatGPT/ORGANIZADOR DE ARQUIVOS/Materiais_Callado",
+  "candidates": 101,
+  "importedLists": [
+    {
+      "id": "callado_06e8f7acb53e6256",
+      "nome": "MCASP Despesa Publica Classificacao",
+      "questoes": 91,
+      "pendentes": 91,
+      "origem": "Administracao_Financeira_Orcamentaria/Listas_de_Exercicios/Geral/2025-03-24__MCASP_Despesa_Publica_Classificacao.pdf"
+    },
+    {
+      "id": "callado_4e2723a101fb36bc",
+      "nome": "MCASP Receita Publica",
+      "questoes": 60,
+      "pendentes": 60,
+      "origem": "Administracao_Financeira_Orcamentaria/Listas_de_Exercicios/Geral/2025-05-05__MCASP_Receita_Publica.pdf"
+    },
+    {
+      "id": "callado_cdfba7a08544ff5e",
+      "nome": "CPC 03 DFC questoes",
+      "questoes": 32,
+      "pendentes": 32,
+      "origem": "Contabilidade_Geral/Listas_de_Exercicios/CPC_03_DFC/2025-02-24__CPC_03_DFC_questoes.pdf"
+    },
+    {
+      "id": "callado_26d8fd845ce577ef",
+      "nome": "LISTA DE EXERCICIOS - EM BRANCO - Copia",
+      "questoes": 22,
+      "pendentes": 22,
+      "origem": "Contabilidade_Geral/Listas_de_Exercicios/Geral/2023-11-26__LISTA_DE_EXERCICIOS_-_EM_BRANCO_-_Copia.pdf"
+    },
+    {
+      "id": "callado_84ad08c97790f691",
+      "nome": "CPC 39 40 48 Instrumentos Financeiros questoes",
+      "questoes": 32,
+      "pendentes": 32,
+      "origem": "Contabilidade_Geral/Listas_de_Exercicios/Geral/2025-02-24__CPC_39_40_48_Instrumentos_Financeiros_questoes.pdf"
+    },
+    {
+      "id": "callado_bd1b15ad81ddfb7a",
+      "nome": "CPC 39 40 48 Instrumentos Financeiros questoes",
+      "questoes": 32,
+      "pendentes": 32,
+      "origem": "Contabilidade_Geral/Listas_de_Exercicios/Geral/2025-03-13__CPC_39_40_48_Instrumentos_Financeiros_questoes.pdf"
+    },
+    {
+      "id": "callado_a4b87c53ac8d372e",
+      "nome": "MCASP NBC TSP 08 Ativo Intangivel questoes",
+      "questoes": 22,
+      "pendentes": 22,
+      "origem": "Contabilidade_Publica/Listas_de_Exercicios/Ativo_Intangivel/2024-07-30__MCASP_NBC_TSP_08_Ativo_Intangivel_questoes.pdf"
+    },
+    {
+      "id": "callado_1a19627170cfcb8c",
+      "nome": "MCASP PCASP questoes",
+      "questoes": 32,
+      "pendentes": 32,
+      "origem": "Contabilidade_Publica/Listas_de_Exercicios/Geral/2025-03-17__MCASP_PCASP_questoes.pdf"
+    },
+    {
+      "id": "callado_97e2dc271130c468",
+      "nome": "100 questoes FGV n01",
+      "questoes": 101,
+      "pendentes": 101,
+      "origem": "Contabilidade_Publica/Listas_de_Exercicios/Geral/2026-05-15__100_questoes_FGV_n01.pdf"
+    },
+    {
+      "id": "callado_1489b348ffc2985c",
+      "nome": "100 questoes FGV n02",
+      "questoes": 103,
+      "pendentes": 103,
+      "origem": "Contabilidade_Publica/Listas_de_Exercicios/Geral/2026-06-02__100_questoes_FGV_n02.pdf"
+    },
+    {
+      "id": "callado_8adb19abf4834d0a",
+      "nome": "100 questoes FGV n03",
+      "questoes": 107,
+      "pendentes": 107,
+      "origem": "Contabilidade_Publica/Listas_de_Exercicios/Geral/2026-07-09__100_questoes_FGV_n03.pdf"
+    },
+    {
+      "id": "callado_e6877e676f693f60",
+      "nome": "100 questoes FGV n04",
+      "questoes": 44,
+      "pendentes": 44,
+      "origem": "Contabilidade_Publica/Listas_de_Exercicios/Geral/2026-08-10__100_questoes_FGV_n04.pdf"
+    },
+    {
+      "id": "callado_ca9e1731badeddb8",
+      "nome": "100 questoes FGV n05",
+      "questoes": 100,
+      "pendentes": 100,
+      "origem": "Contabilidade_Publica/Listas_de_Exercicios/Geral/2026-08-20__100_questoes_FGV_n05.pdf"
+    },
+    {
+      "id": "callado_ecd620908c2e19f7",
+      "nome": "LISTA - CONTROLE DA ADMINISTRAÇÃO CONTROLE LEGISLATIVO",
+      "questoes": 27,
+      "pendentes": 27,
+      "origem": "Controle_Administrativo/Listas_de_Exercicios/Aspectos_Gerais/LISTA - CONTROLE DA ADMINISTRAÇÃO_CONTROLE LEGISLATIVO.pdf"
+    },
+    {
+      "id": "callado_88ecf50a2a9d273e",
+      "nome": "exercicio - anulacao revogacao convalidacao2",
+      "questoes": 153,
+      "pendentes": 153,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Anulacao_Revogacao_Convalidacao/2023-09-21__exercicio_-_anulacao_revogacao_convalidacao2.pdf"
+    },
+    {
+      "id": "callado_29314cd8691f56c6",
+      "nome": "exercicios - classificacao",
+      "questoes": 70,
+      "pendentes": 70,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Classificacao/2023-09-19__exercicios_-_classificacao.pdf"
+    },
+    {
+      "id": "callado_4edbdf97d92110dd",
+      "nome": "EXERCICIOS - CLASSIFICACAO 2",
+      "questoes": 70,
+      "pendentes": 70,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Classificacao/2023-09-21__EXERCICIOS_-_CLASSIFICACAO_2.pdf"
+    },
+    {
+      "id": "callado_c112529779c9ad4b",
+      "nome": "LISTA DE EXERCICIOS - CLASSIFICACAO",
+      "questoes": 70,
+      "pendentes": 70,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Classificacao/2023-11-26__LISTA_DE_EXERCICIOS_-_CLASSIFICACAO.pdf"
+    },
+    {
+      "id": "callado_31003a4b0c27d223",
+      "nome": "LISTA - ATOS ADMINISTRATIVOS CLASSIFICACAO",
+      "questoes": 70,
+      "pendentes": 70,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Classificacao/2025-01-07__LISTA_-_ATOS_ADMINISTRATIVOS_CLASSIFICACAO.docx"
+    },
+    {
+      "id": "callado_f1fbac8575bffaec",
+      "nome": "EXERCICIOS - ELEMENTOS OU PRESSUPOSTOS",
+      "questoes": 95,
+      "pendentes": 95,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Elementos/2023-10-03__EXERCICIOS_-_ELEMENTOS_OU_PRESSUPOSTOS.pdf"
+    },
+    {
+      "id": "callado_7e84030c390460f7",
+      "nome": "Exercicios - Atos Adm - Especies",
+      "questoes": 65,
+      "pendentes": 65,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Especies/2023-09-26__Exercicios_-_Atos_Adm_-_Especies.pdf"
+    },
+    {
+      "id": "callado_eb6569f59188e9e2",
+      "nome": "EXERCICIOS - ESPECIES",
+      "questoes": 65,
+      "pendentes": 65,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Especies/2023-09-27__EXERCICIOS_-_ESPECIES.pdf"
+    },
+    {
+      "id": "callado_6e6b7d922f4d739c",
+      "nome": "LISTA DE EXERCICIOS - ESPECIE",
+      "questoes": 65,
+      "pendentes": 65,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Atos_Admin_Especies/2023-11-26__LISTA_DE_EXERCICIOS_-_ESPECIE.pdf"
+    },
+    {
+      "id": "callado_56a5d0ae4bb0ef60",
+      "nome": "jscf",
+      "questoes": 5,
+      "pendentes": 5,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Geral/2023-09-19__jscf.pdf"
+    },
+    {
+      "id": "callado_0794c6d4797dd63c",
+      "nome": "hlm - Especies 2",
+      "questoes": 37,
+      "pendentes": 37,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Geral/2023-09-27__hlm_-_Especies_2.pdf"
+    },
+    {
+      "id": "callado_2472051ea9ae8600",
+      "nome": "mszp - Especies 2",
+      "questoes": 3,
+      "pendentes": 3,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Geral/2023-09-27__mszp_-_Especies_2.pdf"
+    },
+    {
+      "id": "callado_d8dd755bc20ed8d6",
+      "nome": "jscf - Especies",
+      "questoes": 4,
+      "pendentes": 4,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Geral/2023-10-03__jscf_-_Especies.pdf"
+    },
+    {
+      "id": "callado_4430b2bcc6fafb7c",
+      "nome": "Lei 14133 2021 1parte comentada",
+      "questoes": 58,
+      "pendentes": 58,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Teoria_e_Questoes/2026-03-30__Lei_14133_2021_1parte_comentada.pdf"
+    },
+    {
+      "id": "callado_59c35ad693cad912",
+      "nome": "Lei 12813 2013 Conflito de Interesses",
+      "questoes": 33,
+      "pendentes": 33,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Teoria_e_Questoes/2026-08-20__Lei_12813_2013_Conflito_de_Interesses.pdf"
+    },
+    {
+      "id": "callado_e49dafb3b4bf7b6f",
+      "nome": "Lei 12846 2013 Anticorrupcao versao anterior",
+      "questoes": 10,
+      "pendentes": 10,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Teoria_e_Questoes/2026-08-24__Lei_12846_2013_Anticorrupcao_versao_anterior.pdf"
+    },
+    {
+      "id": "callado_7b893fe145d23b69",
+      "nome": "Lei 12846 2013 Anticorrupcao",
+      "questoes": 10,
+      "pendentes": 10,
+      "origem": "Direito_Administrativo/Listas_de_Exercicios/Teoria_e_Questoes/2026-08-28__Lei_12846_2013_Anticorrupcao.pdf"
+    },
+    {
+      "id": "callado_6d1a378c5c429d2c",
+      "nome": "TESTE COMPLETO DIVERSOS ASSUNTOS 1 27dezembro2024 ALUNO",
+      "questoes": 30,
+      "pendentes": 30,
+      "origem": "Listas_Diversas/Listas_de_Exercicios/Diversos_Assuntos/2025-01-04__TESTE_COMPLETO_DIVERSOS_ASSUNTOS_1_27dezembro2024_ALUNO.pdf"
+    },
+    {
+      "id": "callado_3b939410dbbcd71a",
+      "nome": "TESTES RAPIDOS renumerado formatado",
+      "questoes": 1,
+      "pendentes": 1,
+      "origem": "Listas_Diversas/Listas_de_Exercicios/Testes_Rapidos/TESTES_RAPIDOS_renumerado_formatado.docx"
+    }
+  ],
+  "totalQuestions": 1719,
+  "newQuestions": 0,
+  "reusedQuestions": 1719,
+  "divergentAnswers": 0,
+  "skippedCount": 68,
+  "skipped": [
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Auditoria\\Listas_de_Exercicios\\Geral\\2024-08-25__LISTA_-_RELATORIO_DE_AUDITORIA.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 24
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Auditoria\\Listas_de_Exercicios\\Relatorio_de_Auditoria\\2024-08-25__LISTA_-_RELATORIO_DE_AUDITORIA.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Contabilidade_Geral\\Listas_de_Exercicios\\CPC_03_DFC\\2025-02-24__CPC_03_DFC_questoes_CDFBA7A0.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Contabilidade_Geral\\Listas_de_Exercicios\\CPC_03_DFC\\2025-02-24__CPC_03_DFC_questoes__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Contabilidade_Geral\\Listas_de_Exercicios\\Geral\\2025-02-24__CPC_03_DFC_questoes.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Contabilidade_Publica\\Listas_de_Exercicios\\Estrutura_Conceitual\\2023-10-11__EXERCICIOS_-_ESTRUTURA_CONCEITUAL_SETOR_PUBLICO.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 34
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Contabilidade_Publica\\Listas_de_Exercicios\\Geral\\2023-10-11__EXERCICIOS_-_ESTRUTURA_CONCEITUAL_SETOR_PUBLICO.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Contabilidade_Publica\\Listas_de_Exercicios\\Geral\\2024-07-30__MCASP_NBC_TSP_08_Ativo_Intangivel_questoes.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Contabilidade_Publica\\Listas_de_Exercicios\\PCASP\\2025-03-17__MCASP_PCASP_questoes.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Aspectos_Gerais\\LISTA - CONTROLE DA ADMINISTRAÇÃO_CONTROLE LEGISLATIVO_ECD62090.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Aspectos_Gerais\\LISTA - CONTROLE DA ADMINISTRAÇÃO_CONTROLE LEGISLATIVO__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Controle_da_Administracao\\2023-11-29__LISTA_-_CONTROLE_DA_ADMINISTRACAO_CONTROLE_LEGISLATIVO.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Controle_da_Administracao\\2023-11-29__LISTA_-_CONTROLE_DA_ADMINISTRACAO_CONTROLE_LEGISLATIVO_ECD62090.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Controle_da_Administracao\\2023-11-29__LISTA_-_CONTROLE_DA_ADMINISTRACAO_CONTROLE_LEGISLATIVO__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Controle_Legislativo\\2023-11-29__LISTA_-_CONTROLE_DA_ADMINISTRACAO_CONTROLE_LEGISLATIVO.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Controle_Legislativo\\2023-11-29__LISTA_-_CONTROLE_DA_ADMINISTRACAO_CONTROLE_LEGISLATIVO_ECD62090.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Controle_Administrativo\\Listas_de_Exercicios\\Controle_Legislativo\\2023-11-29__LISTA_-_CONTROLE_DA_ADMINISTRACAO_CONTROLE_LEGISLATIVO__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Anulacao_Revogacao_Convalidacao\\2023-09-14__Exercicios_-_Atos_Adm_-_Anulacao-Revogacao-Convalidacao.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 32
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Anulacao_Revogacao_Convalidacao\\2023-09-14__Exercicios_-_Atos_Adm_-_Anulacao-Revogacao-Convalidacao__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Anulacao_Revogacao_Convalidacao\\2023-09-21__exercicio_-_anulacao_revogacao_convalidacao2__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-09-19__exercicios_-_classificacao_29314CD8.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-09-19__exercicios_-_classificacao__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-09-21__Exercicios_-_Atos_Adm_-_Classificacao.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 26
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-09-21__Exercicios_-_Atos_Adm_-_Classificacao_1E187364.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-09-21__Exercicios_-_Atos_Adm_-_Classificacao__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-09-21__EXERCICIOS_-_CLASSIFICACAO_2_4EDBDF97.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-09-21__EXERCICIOS_-_CLASSIFICACAO_2__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-11-26__LISTA_DE_EXERCICIOS_-_CLASSIFICACAO_C1125297.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2023-11-26__LISTA_DE_EXERCICIOS_-_CLASSIFICACAO__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2025-01-07__LISTA_-_ATOS_ADMINISTRATIVOS_CLASSIFICACAO_31003A4B.docx",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Classificacao\\2025-01-07__LISTA_-_ATOS_ADMINISTRATIVOS_CLASSIFICACAO__2.docx",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-09-27__exercicios_-_elementos_ou_requisitos.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 24
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-09-27__exercicios_-_elementos_ou_requisitos_29C9013D.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-09-27__exercicios_-_elementos_ou_requisitos__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-10-03__EXERCICIOS_-_ELEMENTOS_OU_PRESSUPOSTOS_F1FBAC85.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-10-03__EXERCICIOS_-_ELEMENTOS_OU_PRESSUPOSTOS__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-10-03__exercicios_-_elementos_ou_requisitos_-_Copia.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 24
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-10-03__exercicios_-_elementos_ou_requisitos_-_Copia_B9210107.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Elementos\\2023-10-03__exercicios_-_elementos_ou_requisitos_-_Copia__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-09-26__Exercicios_-_Atos_Adm_-_Especies_7E84030C.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-09-26__Exercicios_-_Atos_Adm_-_Especies__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-09-27__EXERCICIOS_-_ESPECIES_EB6569F5.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-09-27__EXERCICIOS_-_ESPECIES__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-09-28__Exercicios_-_Atos_Adm_-_Especies.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 22
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-09-28__Exercicios_-_Atos_Adm_-_Especies_4EBF3B45.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-09-28__Exercicios_-_Atos_Adm_-_Especies__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-11-26__LISTA_DE_EXERCICIOS_-_ESPECIE_6E6B7D92.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Atos_Admin_Especies\\2023-11-26__LISTA_DE_EXERCICIOS_-_ESPECIE__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-14__Exercicios_-_Atos_Adm_-_Anulacao-Revogacao-Convalidacao.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-19__exercicios_-_classificacao.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-21__Exercicios_-_Atos_Adm_-_Classificacao.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-21__EXERCICIOS_-_CLASSIFICACAO_2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-21__exercicio_-_anulacao_revogacao_convalidacao2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-26__Exercicios_-_Atos_Adm_-_Especies.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-27__exercicios_-_elementos_ou_requisitos.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-27__EXERCICIOS_-_ESPECIES.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-09-28__Exercicios_-_Atos_Adm_-_Especies.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-10-03__EXERCICIOS_-_ELEMENTOS_OU_PRESSUPOSTOS.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-10-03__exercicios_-_elementos_ou_requisitos_-_Copia.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-11-26__LISTA_DE_EXERCICIOS_-_CLASSIFICACAO.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-11-26__LISTA_DE_EXERCICIOS_-_ESPECIE.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2023-11-29__LISTA_-_CONTROLE_DA_ADMINISTRACAO_CONTROLE_LEGISLATIVO.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Geral\\2025-01-07__LISTA_-_ATOS_ADMINISTRATIVOS_CLASSIFICACAO.docx",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Teoria_e_Questoes\\2026-04-02__Lei_14133_2021_3parte.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 52685
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Direito_Administrativo\\Listas_de_Exercicios\\Teoria_e_Questoes\\2026-04-13__Lei_14133_2021_4parte.pdf",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 64796
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Listas_Diversas\\Listas_de_Exercicios\\Diversos_Assuntos\\2025-01-04__TESTE_COMPLETO_DIVERSOS_ASSUNTOS_1_27dezembro2024_ALUNO__2.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Listas_Diversas\\Listas_de_Exercicios\\Diversos_Assuntos\\2025-01-04__TESTE_COMPLETO_DIVERSOS_ASSUNTOS_1_27dezembro2024_ALUNO__3.pdf",
+      "reason": "duplicado_por_hash"
+    },
+    {
+      "file": "C:\\Users\\Usuário\\OneDrive\\Documentos\\ChatGPT\\ORGANIZADOR DE ARQUIVOS\\Materiais_Callado\\Listas_Diversas\\Listas_de_Exercicios\\Diversos_Assuntos\\2025-02-11__DUVIDAS_-_LISTAS.txt",
+      "reason": "sem_questoes_identificadas",
+      "textLength": 33
+    }
+  ]
+}

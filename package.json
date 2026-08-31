@@ -5,11 +5,19 @@
   "main": "server.js",
   "dependencies": {
     "express": "^4.19.2",
+    "pdf-parse": "^1.1.1",
     "pg": "^8.12.0"
   },
   "scripts": {
     "start": "node server.js",
     "dev": "node dev_server.js",
-    "migrate:data": "node js/migrate_data.js"
+    "migrate:data": "node js/migrate_data.js",
+    "db:migrate": "node scripts/migrate_database.js",
+    "db:check": "node scripts/check_database.js",
+    "db:backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup_database.ps1",
+    "db:backfill:sources": "node scripts/backfill_question_sources.js",
+    "provas:vincular": "node scripts/link_exam_documents.js",
+    "provas:pendentes": "node scripts/check_pending_exams.js",
+    "import:questions": "node scripts/import_questions.js"
   }
 }

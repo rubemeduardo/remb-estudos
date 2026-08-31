@@ -1,5 +1,8 @@
 // REMB ESTUDOS - MOTOR CENTRAL SPA, SELEÇÃO DE TEXTO, TAGS CUSTOMIZADAS E AGENTE PEDAGÓGICO DE CORREÇÃO COM GSAP
 
+var BANCO_QUESTOES = window.BANCO_QUESTOES || [];
+var QUESTOES_CESPE_TRATADAS = window.QUESTOES_CESPE_TRATADAS || [];
+
 // ==========================================================================
 // API DE PRODUÇÃO (AUTENTICAÇÃO, PERFIL E PROGRESSO)
 // ==========================================================================
@@ -93,6 +96,265 @@ const REMB_API = {
 
 window.REMB_API = REMB_API;
 
+const QUESTOES_API = {
+    meta: null,
+    ultimaConsulta: null,
+
+    async carregarMeta(params = {}) {
+        const query = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value && value !== "todas" && value !== "todos") query.set(key, value);
+        });
+        const endpoint = `/api/questions-meta${query.toString() ? `?${query}` : ""}`;
+        const meta = await REMB_API.request(endpoint);
+        if (!params.disciplina) this.meta = meta;
+        return meta;
+    },
+
+    async listar(params = {}) {
+        const query = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "" && value !== "todas" && value !== "todos") {
+                query.set(key, value);
+            }
+        });
+        const payload = await REMB_API.request(`/api/questions?${query}`);
+        this.ultimaConsulta = payload;
+        return payload;
+    },
+
+    async salvarCuracao(questionId, payload) {
+        return REMB_API.request(`/api/admin/questions/${encodeURIComponent(questionId)}/curation`, {
+            method: "PUT",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async listarMapaGabarito(tipoOrigem, origemId) {
+        const query = new URLSearchParams({ tipoOrigem, origemId });
+        return REMB_API.request(`/api/admin/answer-keys?${query}`);
+    },
+
+    async salvarMapaGabarito(payload) {
+        return REMB_API.request("/api/admin/answer-keys", {
+            method: "PUT",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async importarMapaGabarito(payload) {
+        return REMB_API.request("/api/admin/answer-keys/import", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async aplicarMapaGabarito(payload) {
+        return REMB_API.request("/api/admin/answer-keys/apply", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async processarProva(payload) {
+        return REMB_API.request("/api/admin/provas/process-questions", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async vincularDocumentosProva(payload) {
+        return REMB_API.request("/api/admin/provas/link-documents", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async continuarPipelineProva(payload) {
+        return REMB_API.request("/api/admin/provas/continue-pipeline", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async estruturarQuestoesProva(payload) {
+        return REMB_API.request("/api/admin/provas/structure-questions", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async liberarQuestoesEstruturadas(payload) {
+        return REMB_API.request("/api/admin/provas/release-structured", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async aplicarGabaritoOficialProva(payload) {
+        return REMB_API.request("/api/admin/provas/apply-answer-key", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async salvarCardProva(payload) {
+        return REMB_API.request("/api/admin/provas/cards", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async buscarParaSessao(filtro, statusVal, cobradosVal) {
+        const quantidade = Math.min(100, Math.max(1, Number(filtro.quantidade || 10)));
+        const params = {
+            page: 1,
+            limit: quantidade,
+            includeAnswer: true,
+            disciplina: filtro.disciplina,
+            assunto: filtro.assunto,
+            banca: filtro.banca
+        };
+        const payload = await this.listar(params);
+        let data = payload.data || [];
+
+        data = data.filter(q => {
+            const resp = progressoUsuario.respondidas[q.id];
+            if (statusVal === "nao_respondidas" && resp) return false;
+            if (statusVal === "erradas" && (!resp || resp.correta)) return false;
+            if (statusVal === "favoritas" && (!progressoUsuario.favoritas || !progressoUsuario.favoritas.includes(q.id))) return false;
+            if (cobradosVal && obterRelevanciaQuestao(q) < 80) return false;
+            return true;
+        });
+
+        return data.slice(0, quantidade);
+    }
+};
+
+window.QUESTOES_API = QUESTOES_API;
+
+function aplicarQuestaoAtualizadaLocal(question) {
+    if (!question || !question.id) return;
+    const updateInList = (list) => {
+        if (!Array.isArray(list)) return false;
+        const index = list.findIndex(item => item.id === question.id);
+        if (index === -1) return false;
+        list[index] = { ...list[index], ...question };
+        return true;
+    };
+
+    updateInList(BANCO_QUESTOES);
+    if (typeof QUESTOES_CESPE_TRATADAS !== 'undefined') updateInList(QUESTOES_CESPE_TRATADAS);
+    if (Array.isArray(window.cespeFiltradasVal)) updateInList(window.cespeFiltradasVal);
+    if (Array.isArray(cespeFiltradasVal)) updateInList(cespeFiltradasVal);
+    if (progressoUsuario.listas) {
+        Object.values(progressoUsuario.listas).forEach(list => updateInList(list.questoes));
+    }
+}
+
+const LEGACY_QUESTION_ASSETS = {
+    banco: {
+        files: [
+            "dados/1___100_questoes_ALUNO.json",
+            "dados/2___100_questoes_ALUNO.json",
+            "dados/3___100_questoes_ALUNO.json"
+        ],
+        loaded: false,
+        loading: null
+    },
+    laboratorio: { files: ["dados/questoes_cespe_tratadas.json"], loaded: false, loading: null }
+};
+
+async function carregarQuestoesLegadas(tipo = "banco") {
+    const asset = LEGACY_QUESTION_ASSETS[tipo];
+    if (!asset || asset.loaded) return;
+    if (!asset.loading) {
+        asset.loading = Promise.all(asset.files.map(file => fetch(file).then(res => res.json()))).then((chunks) => {
+            const data = chunks.flat();
+            if (tipo === "banco") BANCO_QUESTOES = data;
+            if (tipo === "laboratorio") QUESTOES_CESPE_TRATADAS = data;
+            asset.loaded = true;
+        });
+    }
+    await asset.loading;
+}
+
+window.carregarQuestoesLegadas = carregarQuestoesLegadas;
+
+function normalizarBancaSessao(value) {
+    const banca = String(value || "").trim().toLowerCase();
+    if (banca === "cespe" || banca === "cebraspe") return "cebraspe";
+    return banca;
+}
+
+function obterBancaQuestao(q) {
+    const origemBanca = q.origem_questao?.banca;
+    if (origemBanca) return normalizarBancaSessao(origemBanca);
+    const tags = Array.isArray(q.tags) ? q.tags.map(tag => String(tag).toLowerCase()) : [];
+    if (tags.includes("cespe") || tags.includes("cebraspe") || q.labId) return "cebraspe";
+    return "";
+}
+
+async function obterQuestoesLocaisParaSessao({ incluirLaboratorio = false } = {}) {
+    await carregarQuestoesLegadas("banco");
+    if (incluirLaboratorio) {
+        await carregarQuestoesLegadas("laboratorio");
+    }
+
+    const questoes = [...(BANCO_QUESTOES || [])];
+    if (incluirLaboratorio) {
+        (QUESTOES_CESPE_TRATADAS || []).forEach(q => {
+            if (!q.origem_questao) {
+                q.origem_questao = { banca: "Cebraspe" };
+            }
+            questoes.push(q);
+        });
+    }
+    return questoes;
+}
+
+function filtrarQuestoesLocaisParaSessao(questoes, filtro, statusVal, cobradosVal) {
+    return questoes.filter(q => {
+        if (filtro.disciplina !== "todas" && q.disciplina !== filtro.disciplina) return false;
+        if (filtro.assunto !== "todos" && q.assunto !== filtro.assunto) return false;
+        if (filtro.banca !== "todas") {
+            const qBanca = obterBancaQuestao(q);
+            const selBanca = normalizarBancaSessao(filtro.banca);
+            if (qBanca !== selBanca) return false;
+        }
+
+        const resp = progressoUsuario.respondidas[q.id];
+        if (statusVal === "nao_respondidas" && resp) return false;
+        if (statusVal === "erradas" && (!resp || resp.correta)) return false;
+        if (statusVal === "favoritas" && (!progressoUsuario.favoritas || !progressoUsuario.favoritas.includes(q.id))) return false;
+        if (cobradosVal && obterRelevanciaQuestao(q) < 80) return false;
+        return true;
+    });
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function formatarMoedaBRL(value) {
+    return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    }).format(Number(value || 0));
+}
+
+function formatarDataBR(value) {
+    if (!value) return "-";
+    const date = new Date(`${String(value).split("T")[0]}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("pt-BR");
+}
+
 // ==========================================================================
 // ESTADO GLOBAL E ESTRUTURA DO LOCALSTORAGE
 // ==========================================================================
@@ -121,8 +383,28 @@ let progressoUsuario = {
     comentariosForum: {},// { questionId: [ {usuario, data, texto} ] }
     baloesSalvos: {},    // { questionId: [ "texto do balao 1", ... ] }
     tagsCustomizadas: {},// { questionId: [ "minha tag", ... ] }
+    notificacoesAdmin: [],
     planner: { cicloAtivo: false, config: {}, progresso: { totalRealizado: 0, historicoDias: {}, questoesCiclo: [] } },
     activeUserLevel: "CEO / PROPRIETÁRIO"
+};
+
+const adminFinanceState = {
+    costs: [],
+    revenues: [],
+    subscriptions: [],
+    billings: [],
+    cashMovements: [],
+    revenueCompetences: [],
+    summary: {},
+    categories: [],
+    suppliers: [],
+    revenueCategories: [],
+    revenueSources: [],
+    view: "assinaturas",
+    filtroStatus: "todos",
+    filtroCategoria: "todas",
+    filtroReceitaStatus: "todos",
+    filtroReceitaCategoria: "todas"
 };
 
 // Dados para o Modo Correção
@@ -242,6 +524,96 @@ const BANCO_PROVAS = [
     { id: "vunesp-pcsp-delegado-2022", banca: "Vunesp", ano: "2022", orgao: "Polícia Civil de SP (PC-SP)", cargo: "Delegado de Polícia", nivel: "Superior", file: "pcsp_delegado_2022.json" },
     { id: "vunesp-pcsp-delegado-2018", banca: "Vunesp", ano: "2018", orgao: "Polícia Civil de SP (PC-SP)", cargo: "Delegado de Polícia", nivel: "Superior", file: "pcsp_delegado_2018.json" }
 ];
+
+let documentosProvasCarregados = false;
+let escopoAcessoUsuario = { restrito: true, provas: [], listas: [] };
+let escopoAcessoCarregado = false;
+const pipelineAdminState = {
+    emExecucao: {},
+    resultados: {}
+};
+
+async function carregarEscopoAcessoUsuario() {
+    if (escopoAcessoCarregado) return escopoAcessoUsuario;
+    escopoAcessoCarregado = true;
+    try {
+        const payload = await REMB_API.request("/api/access/scope");
+        escopoAcessoUsuario = {
+            restrito: Boolean(payload.restricted),
+            provas: Array.isArray(payload.provas) ? payload.provas : [],
+            listas: Array.isArray(payload.listas) ? payload.listas : []
+        };
+    } catch (error) {
+        escopoAcessoUsuario = usuarioAtualPodeAdministrar()
+            ? { restrito: false, provas: [], listas: [] }
+            : { restrito: true, provas: [], listas: [] };
+    }
+    return escopoAcessoUsuario;
+}
+
+function provaPermitidaParaUsuario(prova) {
+    if (usuarioAtualPodeAdministrar()) return true;
+    if (escopoAcessoUsuario.restrito === false) return true;
+    return escopoAcessoUsuario.provas.includes(prova.id);
+}
+
+function listaPermitidaParaUsuario(listaId) {
+    if (usuarioAtualPodeAdministrar()) return true;
+    if (escopoAcessoUsuario.restrito === false) return true;
+    return escopoAcessoUsuario.listas.includes(listaId);
+}
+
+async function carregarDocumentosProvas() {
+    await carregarEscopoAcessoUsuario();
+    if (documentosProvasCarregados) return;
+    documentosProvasCarregados = true;
+    try {
+        const response = await fetch("dados/provas_manifest.json", { cache: "no-store" });
+        if (!response.ok) return;
+        const manifest = await response.json();
+        const docsById = manifest.provas || {};
+        const cardsById = manifest.cards || manifest.provasExtras || {};
+        Object.entries(cardsById).forEach(([id, card]) => {
+            if (!id || BANCO_PROVAS.some(prova => prova.id === id)) return;
+            BANCO_PROVAS.push({
+                id,
+                banca: card.banca || "Banca não informada",
+                ano: String(card.ano || new Date().getFullYear()),
+                orgao: card.orgao || "Órgão não informado",
+                cargo: card.cargo || "Cargo não informado",
+                nivel: card.nivel || "Superior",
+                file: card.file || `${id}.json`,
+                statusPipeline: card.statusPipeline || "",
+                suspensa: Boolean(card.suspensa)
+            });
+        });
+        BANCO_PROVAS.forEach(prova => {
+            const card = cardsById[prova.id];
+            if (card) {
+                prova.banca = card.banca || prova.banca;
+                prova.ano = String(card.ano || prova.ano);
+                prova.orgao = card.orgao || prova.orgao;
+                prova.cargo = card.cargo || prova.cargo;
+                prova.nivel = card.nivel || prova.nivel;
+                prova.file = card.file || prova.file;
+                prova.statusPipeline = card.statusPipeline || prova.statusPipeline || "";
+                prova.suspensa = Boolean(card.suspensa);
+            }
+            const docs = docsById[prova.id];
+            if (!docs) return;
+            prova.documentos = { ...(prova.documentos || {}), ...docs };
+            if (docs.prova) prova.provaUrl = docs.prova;
+            if (docs.gabarito) prova.gabaritoUrl = docs.gabarito;
+            if (docs.edital) prova.editalUrl = docs.edital;
+            if (docs.recurso) prova.recursoUrl = docs.recurso;
+            if (docs.origem || docs.origemUrl || docs.fonte || docs.source) {
+                prova.origemUrl = docs.origem || docs.origemUrl || docs.fonte || docs.source;
+            }
+        });
+    } catch (error) {
+        console.warn("Não foi possível carregar vínculos de documentos das provas.", error);
+    }
+}
 
 let emModoSimulado = false;
 let simuladoFinalizado = false;
@@ -457,6 +829,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             timerSegundos = parseInt(savedTime, 10) || 0;
             const savedLimit = localStorage.getItem("remb_caderno_limit_time") || "0";
             window.limitTimeMinutes = parseInt(savedLimit, 10) || 0;
+            const savedSessionContext = localStorage.getItem("remb_session_source_context");
+            if (savedSessionContext) {
+                window.sessionSourceContext = JSON.parse(savedSessionContext);
+            }
             timerPausado = true; // Pausado por padrão ao recarregar a página
             const playPauseBtn = document.getElementById("playPauseBtn");
             if (playPauseBtn) playPauseBtn.innerHTML = "▶️";
@@ -920,7 +1296,7 @@ window.renderizarDashboardCicloPlanner = function(container) {
             </p>
             
             <div style="display:flex; flex-wrap:wrap; gap:12px;">
-                <button class="btn btn-primary" onclick="window.resolverMetaHoje('${diaHoje.materia}')" style="font-weight: 750;">🚀 Resolver na Sala</button>
+                <button class="btn btn-primary" onclick="window.resolverMetaHoje('${diaHoje.materia}')" style="font-weight: 750;">🚀 Abrir Sessão</button>
                 <button class="btn btn-outline-secondary" onclick="window.abrirModalManualPlanner()" style="font-weight: 700;">⏱️ Registrar Estudo Manual</button>
                 <button class="btn btn-outline-success" onclick="window.concluirMetaDoDia()" style="font-weight: 700;">✔️ Meta Concluída</button>
             </div>
@@ -1257,6 +1633,7 @@ async function carregarConfiguracoesLocais() {
                 comentariosForum: parsed.comentariosForum || {},
                 baloesSalvos: parsed.baloesSalvos || {},
                 tagsCustomizadas: parsed.tagsCustomizadas || {},
+                notificacoesAdmin: parsed.notificacoesAdmin || [],
                 curacaoVal: parsed.curacaoVal || {},
                 questoesLaboratorioAdicionais: parsed.questoesLaboratorioAdicionais || [],
                 planner: parsed.planner || { cicloAtivo: false, config: {}, progresso: { totalRealizado: 0, historicoDias: {}, questoesCiclo: [] } },
@@ -1288,6 +1665,7 @@ async function carregarConfiguracoesLocais() {
             comentariosForum: {},
             baloesSalvos: {},
             tagsCustomizadas: {},
+            notificacoesAdmin: [],
             planner: { cicloAtivo: false, config: {}, progresso: { totalRealizado: 0, historicoDias: {}, questoesCiclo: [] } },
             activeUserLevel: currentUser.nivel,
             usuariosAdmin: usersList,
@@ -1360,7 +1738,7 @@ function aplicarGlowButtons() {
 // ==========================================================================
 // ROTEAMENTO SPA (Single Page Application)
 // ==========================================================================
-function navegarPara(sectionId) {
+async function navegarPara(sectionId) {
     fecharModoCorrecao();
 
     // Fechar menu mobile se estiver aberto
@@ -1406,27 +1784,33 @@ function navegarPara(sectionId) {
         } else {
             document.getElementById("sala-setup-panel").style.display = "block";
             document.getElementById("sala-active-panel").style.display = "none";
-            inicializarFiltros();
-            window.atualizarAssuntosDropdown();
+            await inicializarFiltros();
+            await window.atualizarAssuntosDropdown();
             window.renderizarFiltrosSalvos();
         }
     } else if (sectionId === 'provas') {
+        await carregarQuestoesLegadas("banco").catch(e => console.warn("Falha ao carregar base local para biblioteca.", e));
         window.renderizarBibliotecaProvas();
     } else if (sectionId === 'estatisticas') {
         window.renderizarEstatisticasDetalhadas();
     } else if (sectionId === 'planner') {
         window.renderizarPlanner();
     } else if (sectionId === 'validacao') {
+        await carregarQuestoesLegadas("laboratorio").catch(e => console.warn("Falha ao carregar base local do laboratório.", e));
         inicializarFiltrosVal();
         aplicarFiltrosVal();
     } else if (sectionId === 'caderno-erros') {
+        await carregarQuestoesLegadas("banco").catch(e => console.warn("Falha ao carregar base local para caderno de erros.", e));
         renderizarCadernoErros();
     } else if (sectionId === 'favoritas') {
+        await carregarQuestoesLegadas("banco").catch(e => console.warn("Falha ao carregar base local para favoritas.", e));
         renderizarFavoritas();
     } else if (sectionId === 'minhas-notas') {
         renderizarMinhasNotas();
     } else if (sectionId === 'listas') {
         window.renderizarListas();
+    } else if (sectionId === 'notificacoes') {
+        renderizarNotificacoes();
     }
     
     atualizarBadgesMenu();
@@ -1459,7 +1843,47 @@ function atualizarBadgesMenu() {
         badgeFavoritas.innerText = totalFavoritas;
         badgeFavoritas.style.display = totalFavoritas > 0 ? "block" : "none";
     }
+
+    const adminNotificacoes = Array.isArray(progressoUsuario.notificacoesAdmin)
+        ? progressoUsuario.notificacoesAdmin.filter(item => !item.lida).length
+        : 0;
+    const badgeNotificacoes = document.getElementById("badge-notificacoes-admin-menu");
+    if (badgeNotificacoes) {
+        badgeNotificacoes.innerText = adminNotificacoes;
+        badgeNotificacoes.style.display = adminNotificacoes > 0 ? "inline-flex" : "none";
+    }
 }
+
+function renderizarNotificacoes() {
+    const container = document.getElementById("notificacoesContainer");
+    if (!container) return;
+    container.innerHTML = `
+        <div class="config-card">
+            <h3>Notificações do Sistema</h3>
+            <p>Avisos sobre atualizações de gabaritos e novas questões.</p>
+            <div class="form-check form-switch" style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+                <input class="form-check-input" type="checkbox" id="checkNotifGabarito" checked style="cursor:pointer;">
+                <label class="form-check-label" for="checkNotifGabarito" style="font-weight:600; cursor:pointer;">Atualizações de gabaritos oficiais</label>
+            </div>
+            <div class="form-check form-switch" style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+                <input class="form-check-input" type="checkbox" id="checkNotifNovidades" checked style="cursor:pointer;">
+                <label class="form-check-label" for="checkNotifNovidades" style="font-weight:600; cursor:pointer;">Novas questões da sua banca de interesse</label>
+            </div>
+        </div>
+    `;
+}
+
+window.marcarNotificacaoAdminLida = function(id) {
+    if (!Array.isArray(progressoUsuario.notificacoesAdmin)) return;
+    const item = progressoUsuario.notificacoesAdmin.find(notificacao => notificacao.id === id);
+    if (item) item.lida = true;
+    salvarProgressoLocal();
+    if (document.getElementById("section-admin")?.classList.contains("active")) {
+        renderizarAdminNotificacoes();
+    } else {
+        renderizarNotificacoes();
+    }
+};
 
 // ==========================================================================
 // CRONÔMETRO
@@ -1526,10 +1950,53 @@ function resetTimer() {
 // ==========================================================================
 // FILTROS DINÂMICOS
 // ==========================================================================
-function inicializarFiltros() {
+async function inicializarFiltros() {
     const disciplinas = new Set();
     const assuntos = new Set();
     const listas = new Set();
+
+    try {
+        const meta = await QUESTOES_API.carregarMeta();
+
+        const selectDisc = document.getElementById("filterDisciplina");
+        if (selectDisc) {
+            selectDisc.innerHTML = '<option value="todas">Todas as Disciplinas</option>';
+            (meta.disciplinas || []).forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.innerText = d;
+                selectDisc.appendChild(opt);
+            });
+        }
+
+        const selectAssunto = document.getElementById("filterAssunto");
+        if (selectAssunto) {
+            selectAssunto.innerHTML = '<option value="todos">Todos os Assuntos</option>';
+            (meta.assuntos || []).forEach(a => {
+                const opt = document.createElement("option");
+                opt.value = a;
+                opt.innerText = a;
+                selectAssunto.appendChild(opt);
+            });
+        }
+
+        const selectBanca = document.getElementById("filterBanca");
+        if (selectBanca) {
+            selectBanca.innerHTML = '<option value="todas">Todas as Bancas</option>';
+            (meta.bancas || []).forEach(b => {
+                const opt = document.createElement("option");
+                opt.value = b;
+                opt.innerText = b;
+                selectBanca.appendChild(opt);
+            });
+        }
+
+        const totalLabel = document.getElementById("queue-total-count");
+        if (totalLabel && window.filterQueue.length === 0) totalLabel.innerText = `${meta.total || 0} questões no banco`;
+        return;
+    } catch (e) {
+        console.warn("Falha ao carregar metadados de questões pelo backend; usando fallback local.", e);
+    }
 
     BANCO_QUESTOES.forEach(q => {
         if (q.disciplina) disciplinas.add(q.disciplina);
@@ -1572,7 +2039,7 @@ function inicializarFiltros() {
 }
 
 // Filtra questões por disciplina, assunto, banca, lista de origem, status e tags do Tags-Input
-function aplicarFiltros() {
+async function aplicarFiltros() {
     const disc = document.getElementById("filterDisciplina").value;
     const assunto = document.getElementById("filterAssunto").value;
     const banca = document.getElementById("filterBanca").value;
@@ -1584,6 +2051,34 @@ function aplicarFiltros() {
         if (listaOrigem !== "todas" || (banca !== "todas" && banca.toLowerCase() !== globalProvaAtiva.banca.toLowerCase())) {
             globalProvaAtiva = null;
         }
+    }
+
+    const container = document.getElementById("questoesContainer");
+    const config = paginacaoEstadual.sala || { paginaAtual: 1, itensPorPagina: 20 };
+
+    try {
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:30px; color:var(--text-secondary);">
+                    Carregando questões...
+                </div>
+            `;
+        }
+
+        const payload = await QUESTOES_API.listar({
+            page: config.paginaAtual,
+            limit: config.itensPorPagina,
+            includeAnswer: true,
+            disciplina: disc,
+            assunto,
+            banca
+        });
+        const filtradasRemotas = payload.data || [];
+        filtradasRemotas.__remotePagination = payload.pagination;
+        renderizarListaQuestoes(filtradasRemotas, container, false, "sala");
+        return;
+    } catch (e) {
+        console.warn("Falha ao consultar questões pelo backend; usando fallback local.", e);
     }
 
     const filtradas = BANCO_QUESTOES.filter(q => {
@@ -1639,8 +2134,6 @@ function aplicarFiltros() {
 
         return true;
     });
-
-    const container = document.getElementById("questoesContainer");
     renderizarListaQuestoes(filtradas, container, false, "sala");
 }
 
@@ -1663,8 +2156,13 @@ function renderizarListaQuestoes(lista, container, isFoco = false, key = "sala")
         paginacaoEstadual[key] = { paginaAtual: 1, itensPorPagina: 20 };
     }
     const config = paginacaoEstadual[key];
-    const totalItens = lista.length;
-    const totalPaginas = Math.ceil(totalItens / config.itensPorPagina) || 1;
+    const remotePagination = lista.__remotePagination;
+    const totalItens = remotePagination?.total || lista.length;
+    const totalPaginas = remotePagination?.totalPages || Math.ceil(totalItens / config.itensPorPagina) || 1;
+    if (remotePagination) {
+        config.paginaAtual = remotePagination.page || config.paginaAtual;
+        config.itensPorPagina = remotePagination.limit || config.itensPorPagina;
+    }
 
     // Resetar para página 1 caso mude o filtro e a página atual fique órfã
     if (config.paginaAtual > totalPaginas) {
@@ -1674,7 +2172,7 @@ function renderizarListaQuestoes(lista, container, isFoco = false, key = "sala")
     // Fatiar a lista para renderizar apenas a página ativa
     const inicio = (config.paginaAtual - 1) * config.itensPorPagina;
     const fim = inicio + config.itensPorPagina;
-    const itensPagina = lista.slice(inicio, fim);
+    const itensPagina = remotePagination ? lista : lista.slice(inicio, fim);
 
     // Renderizar os itens fatiados
     const newCards = [];
@@ -1724,7 +2222,23 @@ function renderizarListaQuestoes(lista, container, isFoco = false, key = "sala")
 
 function obterAbstractStepsDefault(q) {
     const isCebraspe = q.origem_questao?.banca?.toLowerCase() === 'cebraspe' || q.origem_questao?.banca?.toLowerCase() === 'cespe';
-    const gabarito = q.gabarito || (isCebraspe ? "C" : "A");
+    const gabarito = normalizarValorGabaritoAdmin(q.gabarito);
+    if (!gabarito) {
+        return [
+            {
+                titulo: "Foco da Questão",
+                texto: `Esta questão aborda ${q.disciplina || "a matéria"} no tema ${q.assunto || "Geral"}.`,
+                target: "header",
+                cor_destaque: "none"
+            },
+            {
+                titulo: "Gabarito pendente",
+                texto: "Nenhum gabarito oficial foi aplicado a esta questão.",
+                target: "enunciado",
+                cor_destaque: "none"
+            }
+        ];
+    }
     
     if (isCebraspe) {
         return [
@@ -2278,6 +2792,11 @@ function criarQuestaoCard(q, isModoFoco = false) {
     if (respondida && !emSimuladoOculto) {
         posResolucaoHTML = criarBlocoPosResolucao(q);
     }
+    const origemGabaritoAdminHTML = respondida && usuarioAtualPodeAdministrar()
+        ? `<div style="margin-top:10px; padding:10px 14px; border:1px solid var(--border); border-radius:8px; background-color:var(--bg-card); color:var(--text-secondary); font-size:0.8rem; font-weight:600;">
+            Origem do gabarito aplicado: ${escapeHtml(formatarOrigemGabarito(obterOrigemGabaritoQuestao(q, { tipo: "questao", origemId: q.id })))}
+        </div>`
+        : "";
 
     let curacaoFooterHTML = "";
     curacaoFooterHTML = `
@@ -2333,6 +2852,7 @@ function criarQuestaoCard(q, isModoFoco = false) {
         </div>
         ${footerCardHTML}
         ${posResolucaoHTML}
+        ${origemGabaritoAdminHTML}
         ${curacaoFooterHTML}
         ${historyHTML}
     `;
@@ -2570,6 +3090,10 @@ function responderQuestao(questionId) {
 
     const letraSelecionada = selecionadaEl.getAttribute("data-letra");
     const qObj = obterQuestaoPorId(questionId);
+    if (!qObj || !qObj.gabarito) {
+        alert("Esta questão ainda não tem gabarito curado. Inclua o gabarito no Laboratório antes de corrigir a resposta.");
+        return;
+    }
     const correta = (letraSelecionada === qObj.gabarito);
 
     // Efeito de pulso GSAP no botão de responder
@@ -3020,7 +3544,7 @@ function atualizarEstatisticasDashboard() {
             const pct = Math.round((resolvidasQ / totalQ) * 100);
             estudoAtivo = {
                 tipo: "Caderno ativo",
-                titulo: "Caderno de Estudos — Sala",
+                titulo: "Caderno de Estudos — Sessão",
                 subtitulo: window.cadernoQuestoes[0].disciplina || "Disciplinas Variadas",
                 questaoAtual: Math.min(totalQ, resolvidasQ + 1),
                 totalQuestoes: totalQ,
@@ -3080,7 +3604,7 @@ function atualizarEstatisticasDashboard() {
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                     </div>
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;">
-                        <h4 style="font-size: 0.92rem; font-weight: 800; font-family: 'Outfit', sans-serif; margin: 0; color: var(--text-primary);">Caderno de Estudos — Sala</h4>
+                        <h4 style="font-size: 0.92rem; font-weight: 800; font-family: 'Outfit', sans-serif; margin: 0; color: var(--text-primary);">Caderno de Estudos — Sessão</h4>
                         <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">Questão 1 de 10</p>
                         <div style="width: 100%; background-color: var(--border); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 5px;">
                             <div style="width: 10%; background-color: var(--accent); height: 100%;"></div>
@@ -3232,6 +3756,7 @@ function resetarDadosGerais() {
             comentariosForum: {},
             baloesSalvos: {},
             tagsCustomizadas: {},
+            notificacoesAdmin: [],
             tentativas: {}
         };
         localStorage.removeItem("remb_estudos_progresso");
@@ -3653,6 +4178,15 @@ function atualizarSelecaoCSS(cor) {
 window.atualizarVisibilidadeHighlighterBar = function() {
     const bar = document.getElementById("stickyHighlighterBar");
     if (!bar) return;
+
+    if (document.body.classList.contains("session-active") && window.cadernoGerado && !emModoCorrecao) {
+        if (typeof window.garantirCanetaSessaoVisivel === "function") {
+            window.garantirCanetaSessaoVisivel();
+        } else {
+            bar.style.display = "flex";
+        }
+        return;
+    }
     
     const activeSection = document.querySelector(".content-section.active");
     const sectionId = activeSection ? activeSection.id : "";
@@ -4411,7 +4945,9 @@ function obterPassosPedagogicosGerais(q) {
             } else if (step.target === 'comando') {
                 targetSelector = `#card-${q.id} .comando-container, #foco-card-${q.id} .comando-container`;
             } else if (step.target === 'gabarito') {
-                targetSelector = `#card-${q.id} [data-letra="${q.gabarito || 'A'}"], #foco-card-${q.id} [data-letra="${q.gabarito || 'A'}"]`;
+                targetSelector = q.gabarito
+                    ? `#card-${q.id} [data-letra="${q.gabarito}"], #foco-card-${q.id} [data-letra="${q.gabarito}"]`
+                    : `#card-${q.id} .enunciado-texto, #foco-card-${q.id} .enunciado-texto`;
             } else if (['A', 'B', 'C', 'D', 'E'].includes(step.target)) {
                 targetSelector = `#card-${q.id} [data-letra="${step.target}"], #foco-card-${q.id} [data-letra="${step.target}"]`;
             }
@@ -4426,7 +4962,7 @@ function obterPassosPedagogicosGerais(q) {
                     if (step.cor_destaque && step.cor_destaque !== 'none' && step.termo_destaque) {
                         destacarTermoEnunciado(q.id, step.termo_destaque, step.cor_destaque);
                     } else if (step.target === 'gabarito') {
-                        destacarGabaritoCorreto(q.id, q.gabarito || 'A');
+                        if (q.gabarito) destacarGabaritoCorreto(q.id, q.gabarito);
                     } else if (['A', 'B', 'C', 'D', 'E'].includes(step.target) && step.cor_destaque === 'tachar') {
                         forcarRiscadoAlternativa(q.id, step.target);
                     }
@@ -4561,7 +5097,25 @@ function obterPassosPedagogicosGerais(q) {
         ];
     }
 
-    const gabarito = q.gabarito || "A";
+    const gabarito = normalizarValorGabaritoAdmin(q.gabarito);
+    if (!gabarito) {
+        return [
+            {
+                titulo: "Classificação",
+                texto: `Esta questão aborda **${q.disciplina}** no tema **${q.assunto || "Estudos"}**.`,
+                targetSelector: `#card-${q.id} .questao-header, #foco-card-${q.id} .questao-header`,
+                pos: "seta-baixo",
+                action: () => {}
+            },
+            {
+                titulo: "Gabarito pendente",
+                texto: "Nenhum gabarito oficial foi aplicado a esta questão.",
+                targetSelector: `#card-${q.id} .enunciado-texto, #foco-card-${q.id} .enunciado-texto`,
+                pos: "seta-baixo",
+                action: () => {}
+            }
+        ];
+    }
     const incorretas = ["A", "B", "C", "D", "E"].filter(l => l !== gabarito).slice(0, 2);
 
     return [
@@ -5184,7 +5738,7 @@ window.cancelarEdicaoQuestao = function(qId) {
     }
 };
 
-window.salvarEdicaoQuestao = function(qId) {
+window.salvarEdicaoQuestao = async function(qId) {
     const cardEl = document.querySelector("#validacaoContainer #card-" + qId) || document.getElementById(`card-${qId}`);
     if (!cardEl) return;
 
@@ -5228,7 +5782,23 @@ window.salvarEdicaoQuestao = function(qId) {
         progressoUsuario.curacaoVal[qId].alternativas = alternativasVal;
     }
 
-    salvarProgressoLocal();
+    try {
+        const saved = await QUESTOES_API.salvarCuracao(qId, {
+            enunciado: enunciadoVal,
+            gabarito: gabaritoVal,
+            banca: bancaVal,
+            disciplina: disciplinaVal,
+            assunto: assuntoVal,
+            passos_correcao: passosVal,
+            alternativas: alternativasVal
+        });
+        if (saved && saved.question) aplicarQuestaoAtualizadaLocal(saved.question);
+        salvarProgressoLocal();
+    } catch (error) {
+        console.error("Erro ao salvar curadoria no banco:", error);
+        alert(error.message || "Não foi possível salvar a curadoria no banco de dados.");
+        return;
+    }
     questaoEmEdicaoId = null;
     
     // Restaurar visibilidade de todas as questoes
@@ -5890,6 +6460,7 @@ window.enviarParaLaboratorio = function(qId) {
 };
 
 let bancaSelecionadaTab = 'todas';
+let provaProcessamentoPendente = null;
 
 window.selecionarBancaTab = function(banca) {
     bancaSelecionadaTab = banca;
@@ -5908,15 +6479,33 @@ window.selecionarBancaTab = function(banca) {
     window.renderizarBibliotecaProvas();
 };
 
-window.renderizarBibliotecaProvas = function() {
+window.renderizarBibliotecaProvas = async function() {
+    await carregarDocumentosProvas();
     const container = document.getElementById("provasGridContainer");
     if (!container) return;
 
     const filterAno = document.getElementById("filterAnoProvas").value;
     const searchVal = document.getElementById("searchProva").value.trim().toLowerCase();
+    const isAdmin = usuarioAtualPodeAdministrar();
+    const filterStatusArquivos = document.getElementById("filterStatusArquivosProvas")?.value || "todos";
+    const adminStatusFilter = document.getElementById("adminStatusArquivosProvasFilter");
+    if (adminStatusFilter) {
+        adminStatusFilter.style.display = isAdmin ? "flex" : "none";
+    }
 
     // Filtrar provas
     const filtradas = BANCO_PROVAS.filter(p => {
+        if (provaPermitidaParaUsuario(p) === false) return false;
+        if (!isAdmin && p.suspensa) return false;
+        if (!isAdmin && !provaTemDocumentosObrigatorios(p)) return false;
+        if (isAdmin && filterStatusArquivos !== "todos") {
+            if (filterStatusArquivos === "processadas") {
+                if (!provaTemQuestoesProcessadas(p)) return false;
+            } else {
+                const statusArquivos = obterStatusArquivosProva(p);
+                if (filterStatusArquivos !== statusArquivos) return false;
+            }
+        }
         if (bancaSelecionadaTab !== "todas" && p.banca !== bancaSelecionadaTab) return false;
         if (filterAno !== "todos" && p.ano !== filterAno) return false;
         if (searchVal) {
@@ -5961,25 +6550,35 @@ window.renderizarBibliotecaProvas = function() {
         else if (p.banca === "Cesgranrio") { badgeColor = "#10b981"; badgeBg = "rgba(16,185,129,0.1)"; cardBancaClass = "banca-cesgranrio"; }
         else if (p.banca === "FCC") { badgeColor = "#ec4899"; badgeBg = "rgba(236,72,153,0.1)"; cardBancaClass = "banca-fcc"; }
         else if (p.banca === "Vunesp") { badgeColor = "#a855f7"; badgeBg = "rgba(168,85,247,0.1)"; cardBancaClass = "banca-vunesp"; }
+        const origemUrl = obterOrigemDocumentoProva(p);
+        const bancaLabel = escapeHtml(String(p.banca || "").toUpperCase());
+        const bancaBadge = origemUrl
+            ? `<a href="${escapeHtml(origemUrl)}" target="_blank" rel="noopener noreferrer" class="meta-badge" style="background-color: ${badgeBg}; color: ${badgeColor}; font-weight: 800; border: none; font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; text-decoration:none;" title="Abrir origem oficial dos arquivos">${bancaLabel}</a>`
+            : `<span class="meta-badge" style="background-color: ${badgeBg}; color: ${badgeColor}; font-weight: 800; border: none; font-size: 0.72rem; padding: 4px 10px; border-radius: 6px;" title="Origem dos arquivos ainda não vinculada">${bancaLabel}</span>`;
+        const statusArquivos = obterStatusArquivosProva(p);
+        const statusArquivosHtml = statusArquivos === "baixados"
+            ? `<span style="font-size:0.7rem; background-color:var(--correta-light); border:1px solid var(--correta); border-radius:6px; padding:2px 8px; color:var(--correta); font-weight:700;" title="Prova e gabarito estão em arquivos locais do sistema.">✅ Arquivos baixados</span>`
+            : statusArquivos === "vinculados"
+                ? `<span style="font-size:0.7rem; background-color:rgba(59,130,246,0.10); border:1px solid #3b82f6; border-radius:6px; padding:2px 8px; color:#2563eb; font-weight:700;" title="Prova e gabarito estão vinculados por documento ou página oficial.">🔗 Documentos vinculados</span>`
+                : statusArquivos === "parciais"
+                    ? `<span style="font-size:0.7rem; background-color:rgba(99,102,241,0.10); border:1px solid #6366f1; border-radius:6px; padding:2px 8px; color:#4f46e5; font-weight:700;" title="Existe origem ou documento parcial, mas ainda falta prova e/ou gabarito.">🔎 Origem parcial</span>`
+                    : `<span style="font-size:0.7rem; background-color:rgba(245,158,11,0.12); border:1px solid #f59e0b; border-radius:6px; padding:2px 8px; color:#b45309; font-weight:700;" title="Ainda falta vincular prova e/ou gabarito.">⚠️ Arquivos pendentes</span>`;
 
-        // Verificar se temos questões associadas a este arquivo localmente
-        let hasQuestions = false;
-        if (typeof BANCO_QUESTOES !== 'undefined') {
-            hasQuestions = BANCO_QUESTOES.some(q => q.origem_importacao?.arquivo === p.file);
-        }
-        let hasLabQuestions = false;
-        if (typeof QUESTOES_CESPE_TRATADAS !== 'undefined') {
-            hasLabQuestions = QUESTOES_CESPE_TRATADAS.some(q => q.origem_importacao?.arquivo === p.file);
-        }
+        const hasQuestions = Array.isArray(BANCO_QUESTOES) && BANCO_QUESTOES.some(q => obterArquivoOrigemQuestao(q) === p.file);
+        const hasLabQuestions = Array.isArray(QUESTOES_CESPE_TRATADAS) && QUESTOES_CESPE_TRATADAS.some(q => obterArquivoOrigemQuestao(q) === p.file);
+        const hasProcessedQuestions = hasQuestions || hasLabQuestions;
+        const curationButtonHtml = isAdmin ? `
+                    <button class="btn btn-outline-secondary btn-sm" onclick="window.abrirProvaNoLaboratorio('${p.id}', '${p.file}')" style="flex:1; border-radius:8px; font-size:0.75rem; font-weight:700; padding:6px 8px; border-width:1.5px; ${hasLabQuestions ? '' : 'opacity:0.6;'}">
+                        🧪 Curação Lab
+                    </button>
+        ` : "";
 
         col.innerHTML = `
             <div class="premium-prova-card ${cardBancaClass}" style="transition: all 0.25s ease;">
                 <div>
                     <!-- Header do Card -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <span class="meta-badge" style="background-color: ${badgeBg}; color: ${badgeColor}; font-weight: 800; border: none; font-size: 0.72rem; padding: 4px 10px; border-radius: 6px;">
-                            ${p.banca.toUpperCase()}
-                        </span>
+                        ${bancaBadge}
                         <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);">
                             📅 ${p.ano}
                         </span>
@@ -5997,9 +6596,15 @@ window.renderizarBibliotecaProvas = function() {
                         <span style="font-size:0.7rem; background-color:var(--bg-app); border:1px solid var(--border); border-radius:6px; padding:2px 8px; color:var(--text-secondary); font-weight:600;">
                             🎓 ${p.nivel}
                         </span>
-                        ${hasQuestions ? `
+                        ${hasProcessedQuestions ? `
                             <span style="font-size:0.7rem; background-color:var(--correta-light); border:1px solid var(--correta); border-radius:6px; padding:2px 8px; color:var(--correta); font-weight:700;">
-                                📝 Simulável (Pilot)
+                                📝 Questões processadas
+                            </span>
+                        ` : ""}
+                        ${statusArquivosHtml}
+                        ${isAdmin && p.suspensa ? `
+                            <span style="font-size:0.7rem; background-color:rgba(100,116,139,0.12); border:1px solid #64748b; border-radius:6px; padding:2px 8px; color:#475569; font-weight:700;" title="Prova oculta para usuários comuns.">
+                                ⏸️ Suspensa
                             </span>
                         ` : ""}
                     </div>
@@ -6008,20 +6613,32 @@ window.renderizarBibliotecaProvas = function() {
                 <!-- Ações do Card -->
                 <div style="display:flex; gap:10px; border-top: 1px dashed var(--border); padding-top:12px; margin-top:10px;">
                     <button class="btn btn-outline-primary btn-sm" onclick="window.abrirProvaNaSala('${p.id}', '${p.file}', '${p.banca}')" style="flex:1; border-radius:8px; font-size:0.75rem; font-weight:700; padding:6px 8px; border-width:1.5px;">
-                        📥 Resolver Sala
+                        📥 Sessão de Resolução
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="window.abrirProvaNoLaboratorio('${p.id}', '${p.file}')" style="flex:1; border-radius:8px; font-size:0.75rem; font-weight:700; padding:6px 8px; border-width:1.5px; dots ${hasLabQuestions ? '' : 'opacity:0.6;'}">
-                        🧪 Curação Lab
+                    ${curationButtonHtml}
+                </div>
+                ${isAdmin ? `
+                <div style="display:flex; margin-top:8px;">
+                    <button class="btn btn-outline-success btn-sm" onclick="window.enviarProvaParaPipeline('${p.id}')" style="width:100%; border-radius:8px; font-size:0.75rem; font-weight:700; padding:6px 8px; border-width:1.5px;">
+                        🔄 Enviar ao Pipeline
                     </button>
                 </div>
+                ` : ""}
+                ${isAdmin && hasProcessedQuestions ? `
+                <div style="display:flex; margin-top:8px;">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="window.abrirPainelGabaritos('${p.id}')" style="width:100%; border-radius:8px; font-size:0.75rem; font-weight:700; padding:6px 8px; border-width:1.5px;">
+                        ✅ Painel de Gabaritos
+                    </button>
+                </div>
+                ` : ""}
 
                 <!-- Arquivos para Download -->
                 <div style="display:flex; justify-content:space-between; gap:4px; margin-top:12px; padding-top:8px; border-top: 1px solid var(--border); font-size:0.68rem; font-weight:600; flex-wrap:wrap; user-select:none;">
                     <span style="color:var(--text-secondary); margin-right:4px;">Downloads:</span>
-                    <a href="#" onclick="window.baixarArquivoProva(event, '${p.id}', '${p.banca}', '${p.orgao}', '${p.ano}', '${p.cargo}', 'prova')" style="color:var(--accent); text-decoration:none; margin-right:6px;" title="Baixar Caderno de Prova">📄 Prova</a>
-                    <a href="#" onclick="window.baixarArquivoProva(event, '${p.id}', '${p.banca}', '${p.orgao}', '${p.ano}', '${p.cargo}', 'gabarito')" style="color:var(--accent); text-decoration:none; margin-right:6px;" title="Baixar Gabarito Oficial">✅ Gabarito</a>
-                    <a href="#" onclick="window.baixarArquivoProva(event, '${p.id}', '${p.banca}', '${p.orgao}', '${p.ano}', '${p.cargo}', 'edital')" style="color:var(--accent); text-decoration:none; margin-right:6px;" title="Baixar Edital do Concurso">📘 Edital</a>
-                    <a href="#" onclick="window.baixarArquivoProva(event, '${p.id}', '${p.banca}', '${p.orgao}', '${p.ano}', '${p.cargo}', 'recurso')" style="color:var(--accent); text-decoration:none;" title="Baixar Recursos / Pareceres">⚖️ Recurso</a>
+                    ${renderDocumentoProvaLink(p, "prova", "📄", "Prova", "Abrir caderno de prova vinculado")}
+                    ${renderDocumentoProvaLink(p, "gabarito", "✅", "Gabarito", "Abrir documento de gabarito vinculado à prova")}
+                    ${renderDocumentoProvaLink(p, "edital", "📘", "Edital", "Abrir edital vinculado ao concurso")}
+                    ${renderDocumentoProvaLink(p, "recurso", "⚖️", "Recurso", "Abrir recursos ou pareceres vinculados")}
                 </div>
             </div>
         `;
@@ -6043,10 +6660,14 @@ window.aplicarFiltrosProvas = function() {
     window.renderizarBibliotecaProvas();
 };
 
-window.abrirQuestoesNaSala = function(questoes, limitMinutes = 0) {
+window.abrirQuestoesNaSala = function(questoes, limitMinutes = 0, sourceContext = null) {
     window.cadernoQuestoes = questoes;
     window.cadernoGerado = true;
     localStorage.setItem("remb_caderno_ativo", JSON.stringify(window.cadernoQuestoes));
+
+    const effectiveSourceContext = sourceContext || { type: "direto" };
+    window.sessionSourceContext = effectiveSourceContext;
+    localStorage.setItem("remb_session_source_context", JSON.stringify(effectiveSourceContext));
 
     window.limitTimeMinutes = limitMinutes;
     localStorage.setItem("remb_caderno_limit_time", limitMinutes);
@@ -6078,52 +6699,62 @@ window.abrirQuestoesNaSala = function(questoes, limitMinutes = 0) {
     navegarPara('questoes');
 };
 
-window.abrirProvaNaSala = function(provaId, file, banca) {
+window.abrirProvaNaSala = async function(provaId, file, banca) {
     const provaObj = BANCO_PROVAS.find(p => p.id === provaId);
+    const provaLabel = provaObj
+        ? `${provaObj.banca || banca || "Prova"} ${provaObj.orgao || ""} ${provaObj.ano || ""}`.trim()
+        : (banca || provaId || "Prova selecionada");
+    const provaContext = {
+        type: "prova",
+        prova: provaObj ? { ...provaObj, nome: provaLabel } : { id: provaId, file, banca, nome: provaLabel },
+        file,
+        banca
+    };
+
+    const bancaNormalizada = normalizarBancaSessao(provaObj?.banca || banca);
+    const incluirLaboratorio = bancaNormalizada === "cebraspe";
+    const questoesDisponiveis = await obterQuestoesLocaisParaSessao({ incluirLaboratorio }).catch(e => {
+        console.warn("Falha ao carregar questões locais para prova.", e);
+        return BANCO_QUESTOES || [];
+    });
     
     // 1. Achar se há questões desta lista no BANCO_QUESTOES
     let hasQuestions = false;
     let provaQuestoes = [];
-    if (typeof BANCO_QUESTOES !== 'undefined') {
-        provaQuestoes = BANCO_QUESTOES.filter(q => q.origem_importacao?.arquivo === file);
+    if (questoesDisponiveis.length > 0) {
+        provaQuestoes = questoesDisponiveis.filter(q => obterArquivoOrigemQuestao(q) === file);
         hasQuestions = provaQuestoes.length > 0;
     }
 
     if (hasQuestions) {
         globalProvaAtiva = provaObj;
-        window.abrirQuestoesNaSala(provaQuestoes, 0);
-        alert(`Prova "${provaObj.nome}" aberta na aba de Questões.`);
+        window.abrirQuestoesNaSala(provaQuestoes, 0, provaContext);
+        alert(`Prova "${provaLabel}" aberta na aba de Questões.`);
     } else {
-        // Fallback / Mock se não tiver as questões prontas no banco
-        const targetBanca = (banca || "").toLowerCase();
-        const filterQuestoes = BANCO_QUESTOES.filter(q => {
-            const qBanca = (q.origem_questao?.banca || "").toLowerCase();
-            return qBanca === targetBanca || (targetBanca === "cespe" && qBanca === "cebraspe") || (targetBanca === "cebraspe" && qBanca === "cespe");
-        }).slice(0, 10); // fall back to 10 questions of the banca
-        
-        if (filterQuestoes.length > 0) {
-            window.abrirQuestoesNaSala(filterQuestoes, 0);
-            alert(`Mocking: Prova cadastrada no acervo. Como os arquivos de texto/PDF originais estão na fila de processamento da API, carregamos uma seleção de 10 questões da banca ${banca || 'CEBRASPE'} na aba de Questões.`);
-        } else {
-            alert(`A prova selecionada está cadastrada no levantamento histórico da Biblioteca, mas o arquivo de questões (${file}) ainda não foi processado pelo pipeline da API da Biblioteca de Concursos (Sister Project).`);
+        const provaDoc = obterDocumentoProva(provaObj, "prova");
+        if (provaDoc) {
+            alert(`A prova "${provaLabel}" tem documento vinculado, mas as questões ainda não foram processadas. Envie este documento ao fluxo de processamento do Laboratório antes de abrir uma Sessão de Resolução.`);
+            window.open(provaDoc, "_blank");
+            return;
         }
+        alert(`A prova "${provaLabel}" está cadastrada, mas ainda não tem arquivo de questões nem documento de prova vinculado para processamento.`);
     }
 };
 
-window.abrirProvaNoLaboratorio = function(provaId, file) {
+window.abrirProvaNoLaboratorio = async function(provaId, file) {
     let hasLabQuestions = false;
     if (typeof QUESTOES_CESPE_TRATADAS !== 'undefined') {
-        hasLabQuestions = QUESTOES_CESPE_TRATADAS.some(q => q.origem_importacao?.arquivo === file);
+        hasLabQuestions = QUESTOES_CESPE_TRATADAS.some(q => obterArquivoOrigemQuestao(q) === file);
     }
 
     if (hasLabQuestions) {
+        await navegarPara('validacao');
         const filterVal = document.getElementById("filterListaVal");
         if (filterVal) {
             filterVal.value = file;
         }
         
         aplicarFiltrosVal();
-        navegarPara('validacao');
         
         alert(`Fila do Laboratório filtrada pelo arquivo da Prova selecionada.`);
     } else {
@@ -6131,28 +6762,776 @@ window.abrirProvaNoLaboratorio = function(provaId, file) {
     }
 };
 
+function removerBannerProcessamentoProva() {
+    const banner = document.getElementById("prova-processamento-banner");
+    if (banner) banner.remove();
+}
+
+function renderizarBannerProcessamentoProva() {
+    removerBannerProcessamentoProva();
+    if (!provaProcessamentoPendente) return;
+    const dropzone = document.getElementById("dropzone-val");
+    if (!dropzone) return;
+    const prova = provaProcessamentoPendente;
+    const rotuloProva = rotuloDocumentoProva("prova", prova.documentoProva);
+    const rotuloGabarito = rotuloDocumentoProva("gabarito", prova.documentoGabarito);
+    dropzone.insertAdjacentHTML("beforebegin", `
+        <div id="prova-processamento-banner" class="card-base" style="border:1px solid var(--accent); box-shadow:var(--shadow); padding:16px; border-radius:10px; background-color:var(--bg-card); margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                <div style="min-width:260px; flex:1;">
+                    <h3 style="margin:0 0 6px; font-size:1rem; font-weight:800; color:var(--text-primary);">Processamento da prova</h3>
+                    <p style="margin:0; color:var(--text-secondary); font-size:0.86rem;">
+                        ${escapeHtml(prova.banca)} · ${escapeHtml(prova.orgao)} · ${escapeHtml(prova.ano)}
+                    </p>
+                    <p style="margin:6px 0 0; color:var(--text-secondary); font-size:0.82rem;">
+                        Use a origem oficial ou os documentos vinculados como referência e envie o JSON estruturado das questões. O gabarito não será presumido.
+                    </p>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    ${prova.documentoProva ? `<button class="btn btn-outline-secondary btn-sm" onclick="window.abrirDocumentoProcessamentoProva('prova')" style="border-radius:8px; font-weight:700;">📄 ${escapeHtml(rotuloProva)}</button>` : ""}
+                    ${prova.documentoGabarito ? `<button class="btn btn-outline-secondary btn-sm" onclick="window.abrirDocumentoProcessamentoProva('gabarito')" style="border-radius:8px; font-weight:700;">✅ ${escapeHtml(rotuloGabarito)}</button>` : ""}
+                    <button class="btn btn-primary btn-sm" onclick="window.selecionarJsonProcessamentoProva()" style="border:none; border-radius:8px; font-weight:700; color:#fff; background-color:var(--accent);">📥 Selecionar JSON</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="window.cancelarProcessamentoProva()" style="border-radius:8px; font-weight:700;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+window.abrirDocumentoProcessamentoProva = function(tipo) {
+    const prova = provaProcessamentoPendente;
+    if (!prova) return;
+    const url = tipo === "gabarito" ? prova.documentoGabarito : prova.documentoProva;
+    if (url) window.open(url, "_blank");
+};
+
+window.selecionarJsonProcessamentoProva = function() {
+    const input = document.getElementById("fileImportVal");
+    if (!input) return;
+    input.value = "";
+    input.click();
+};
+
+window.cancelarProcessamentoProva = function() {
+    provaProcessamentoPendente = null;
+    removerBannerProcessamentoProva();
+};
+
+window.enviarProvaParaPipeline = async function(provaId) {
+    await window.navegarAdminTab("pipeline", provaId);
+};
+
+window.processarProvaVinculada = async function(provaId, fallbackLaboratorio = false, options = {}) {
+    const silencioso = Boolean(options.silencioso);
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        if (!silencioso) alert("Prova não localizada.");
+        return;
+    }
+    if (!provaTemDocumentosObrigatorios(prova)) {
+        if (fallbackLaboratorio) {
+            await window.abrirVinculoDocumentosPipeline(provaId);
+            return;
+        }
+        if (!silencioso) alert("Vincule o documento da prova e do gabarito no Pipeline antes de iniciar o processamento.");
+        return;
+    }
+    if (!provaTemFonteProcessavelQuestoes(prova)) {
+        const pipeline = obterEstadoPipelineProva(prova);
+        registrarNotificacaoPipelineAdmin(prova, pipeline);
+        if (fallbackLaboratorio) {
+            const documentos = prova.documentos || prova.links || {};
+            provaProcessamentoPendente = {
+                provaId: prova.id,
+                file: prova.file,
+                banca: prova.banca,
+                ano: prova.ano,
+                orgao: prova.orgao,
+                cargo: prova.cargo,
+                origem: obterOrigemDocumentoProva(prova),
+                documentoProva: obterDocumentoProva(prova, "prova"),
+                documentoGabarito: obterDocumentoProva(prova, "gabarito"),
+                questoes: documentos.questoes || prova.questoes || ""
+            };
+            await navegarPara("validacao");
+            renderizarBannerProcessamentoProva();
+            return;
+        }
+        if (!silencioso) alert("Esta prova ainda não tem fonte estruturada para processamento automático. O aviso foi enviado para tratamento administrativo no Pipeline.");
+        return;
+    }
+    const documentos = prova.documentos || prova.links || {};
+    const contexto = {
+        provaId: prova.id,
+        file: prova.file,
+        banca: prova.banca,
+        ano: prova.ano,
+        orgao: prova.orgao,
+        cargo: prova.cargo,
+        origem: obterOrigemDocumentoProva(prova),
+        documentoProva: obterDocumentoProva(prova, "prova"),
+        documentoGabarito: obterDocumentoProva(prova, "gabarito")
+    };
+
+    try {
+        const result = await QUESTOES_API.processarProva({
+            provaId: prova.id,
+            sourceFile: prova.file,
+            revisaoLiberada: prova.documentos?.estruturacao?.status === "liberado_para_processamento",
+            questionFileCandidates: [
+                documentos.questoes,
+                documentos.questoesUrl,
+                documentos.arquivoQuestoes,
+                prova.questoes,
+                prova.questoesUrl,
+                prova.file
+            ],
+            meta: {
+                banca: prova.banca,
+                ano: prova.ano,
+                orgao: prova.orgao,
+                cargo: prova.cargo,
+                prova: prova.orgao,
+                origem: contexto.origem,
+                documentoProva: contexto.documentoProva,
+                documentoGabarito: contexto.documentoGabarito,
+                questoes: documentos.questoes || prova.questoes || "",
+                questoesUrl: documentos.questoesUrl || prova.questoesUrl || ""
+            }
+        });
+        if (!silencioso) alert(`Processamento concluído: ${result.imported || 0} questão(ões) importada(s) e ${result.skipped || 0} ignorada(s) por inconsistência ou duplicidade.`);
+        await carregarQuestoesLegadas("banco").catch(e => console.warn("Falha ao recarregar questões locais.", e));
+        if (document.getElementById("section-admin")?.classList.contains("active")) {
+            await renderizarAdminPipeline(prova.id);
+        } else {
+            window.renderizarBibliotecaProvas();
+        }
+    } catch (error) {
+        if (silencioso) throw error;
+        provaProcessamentoPendente = contexto;
+        await navegarPara("validacao");
+        renderizarBannerProcessamentoProva();
+        alert(error.message || "Não foi possível processar automaticamente. Envie o JSON estruturado pelo Laboratório.");
+    }
+};
+
 /* =====================================
    FUNÇÃO DE DOWNLOAD DE ARQUIVOS DE PROVAS
 ===================================== */
-window.baixarArquivoProva = function(event, provaId, banca, orgao, ano, cargo, tipo) {
-    if (event) event.preventDefault();
-    
-    // Se for a prova do TCU 2026, servimos do backend
-    if (provaId === 'cebraspe-tcu-2026') {
-        if (tipo === 'prova') {
-            window.open('http://localhost:3001/arquivos-provas/cespe-cebraspe-2026-tcu-auditor-federal-de-controle-externo-area-de-controle-externo-orientacao-auditoria-de-tecnologia-da-informacao-prova.pdf', '_blank');
-            return;
-        }
-        if (tipo === 'gabarito') {
-            window.open('http://localhost:3001/arquivos-gabaritos/cespe-cebraspe-2026-tcu-auditor-federal-de-controle-externo-area-de-controle-externo-orientacao-auditoria-de-tecnologia-da-informacao-gabarito.pdf', '_blank');
-            return;
-        }
+function obterDocumentoProva(prova, tipo) {
+    if (!prova) return "";
+    const documentos = prova.documentos || prova.links || {};
+    const aliases = {
+        prova: ["prova", "caderno", "arquivo", "arquivoProva", "provaUrl", "url"],
+        gabarito: ["gabarito", "gabaritoUrl", "arquivoGabarito", "documentoGabarito", "linkGabarito"],
+        edital: ["edital", "editalUrl", "arquivoEdital", "linkEdital"],
+        recurso: ["recurso", "recursos", "recursoUrl", "arquivoRecurso", "linkRecurso"]
+    };
+    for (const key of aliases[tipo] || [tipo]) {
+        const value = prova[key] || documentos[key];
+        if (value) return value;
     }
-    
-    // Fallback: faz busca no Google pelo PDF do arquivo de origem
-    const query = `${banca} ${orgao} ${ano} ${cargo} ${tipo} pdf`;
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-    window.open(searchUrl, '_blank');
+    return "";
+}
+
+function obterOrigemDocumentoProva(prova) {
+    if (!prova) return "";
+    const documentos = prova.documentos || prova.links || {};
+    return prova.origemUrl
+        || prova.origem
+        || documentos.origem
+        || documentos.origemUrl
+        || documentos.fonte
+        || documentos.source
+        || obterDocumentoProva(prova, "prova")
+        || "";
+}
+
+function documentoEstaBaixadoNoSistema(url) {
+    if (!url) return false;
+    return !/^https?:\/\//i.test(String(url)) && String(url).startsWith("dados/provas/");
+}
+
+function provaTemDocumentosObrigatorios(prova) {
+    return Boolean(obterDocumentoProva(prova, "prova") && obterDocumentoProva(prova, "gabarito"));
+}
+
+function provaTemArquivosObrigatoriosBaixados(prova) {
+    return documentoEstaBaixadoNoSistema(obterDocumentoProva(prova, "prova"))
+        && documentoEstaBaixadoNoSistema(obterDocumentoProva(prova, "gabarito"));
+}
+
+function obterStatusArquivosProva(prova) {
+    if (provaTemArquivosObrigatoriosBaixados(prova)) return "baixados";
+    if (provaTemDocumentosObrigatorios(prova)) return "vinculados";
+    if (obterOrigemDocumentoProva(prova) || obterDocumentoProva(prova, "prova") || obterDocumentoProva(prova, "gabarito")) return "parciais";
+    return "pendentes";
+}
+
+function obterArquivoOrigemQuestao(questao) {
+    return questao?.origem_importacao?.arquivo
+        || questao?.origem_importacao?.arquivo_json
+        || questao?.rawData?.origem_importacao?.arquivo
+        || questao?.rawData?.origem_importacao?.arquivo_json
+        || questao?.raw_data?.origem_importacao?.arquivo
+        || questao?.raw_data?.origem_importacao?.arquivo_json
+        || "";
+}
+
+function provaTemQuestoesProcessadas(prova) {
+    if (!prova?.file) return false;
+    const existeNoBanco = Array.isArray(BANCO_QUESTOES)
+        && BANCO_QUESTOES.some(q => obterArquivoOrigemQuestao(q) === prova.file);
+    const existeNoLaboratorio = Array.isArray(QUESTOES_CESPE_TRATADAS)
+        && QUESTOES_CESPE_TRATADAS.some(q => obterArquivoOrigemQuestao(q) === prova.file);
+    return existeNoBanco || existeNoLaboratorio;
+}
+
+function obterArquivoQuestoesVinculado(prova) {
+    if (!prova) return "";
+    const documentos = prova.documentos || prova.links || {};
+    return documentos.questoes
+        || documentos.questoesUrl
+        || documentos.arquivoQuestoes
+        || prova.questoes
+        || prova.questoesUrl
+        || "";
+}
+
+function provaTemFonteProcessavelQuestoes(prova) {
+    const arquivoQuestoes = obterArquivoQuestoesVinculado(prova);
+    if (!arquivoQuestoes) return false;
+    return documentoProvaEhArquivoDireto(arquivoQuestoes) && String(arquivoQuestoes).toLowerCase().split("?")[0].endsWith(".json");
+}
+
+function questoesDaProvaNoCliente(prova) {
+    if (!prova?.file) return [];
+    const todas = [
+        ...(Array.isArray(BANCO_QUESTOES) ? BANCO_QUESTOES : []),
+        ...(Array.isArray(QUESTOES_CESPE_TRATADAS) ? QUESTOES_CESPE_TRATADAS : [])
+    ];
+    return todas.filter(q => obterArquivoOrigemQuestao(q) === prova.file);
+}
+
+function questoesDaProvaTemGabaritoPendente(prova) {
+    const questoes = questoesDaProvaNoCliente(prova);
+    return questoes.length > 0 && questoes.some(q => !normalizarValorGabaritoAdmin(q.gabarito));
+}
+
+function obterEstadoPipelineProva(prova) {
+    const questoes = questoesDaProvaNoCliente(prova);
+    const temQuestoes = questoes.length > 0;
+    const temGabaritoPendente = temQuestoes && questoes.some(q => !normalizarValorGabaritoAdmin(q.gabarito));
+    const temFonteProcessavel = provaTemFonteProcessavelQuestoes(prova);
+    const aguardandoRevisao = prova?.documentos?.estruturacao?.status === "gerado_para_revisao";
+    const temDocumentos = provaTemDocumentosObrigatorios(prova);
+    const temArquivosBaixados = provaTemArquivosObrigatoriosBaixados(prova);
+    const temParcial = Boolean(obterOrigemDocumentoProva(prova) || obterDocumentoProva(prova, "prova") || obterDocumentoProva(prova, "gabarito"));
+
+    if (temQuestoes && !temGabaritoPendente) {
+        return { code: "completo", label: "Pipeline completo", blocked: false, action: "none" };
+    }
+    if (aguardandoRevisao) {
+        return { code: "revisao_laboratorio", label: "Revisão no Lab", blocked: false, action: "laboratorio", reason: "Questões estruturadas aguardam revisão no Laboratório antes da integração." };
+    }
+    if (temQuestoes && temGabaritoPendente) {
+        return { code: "gabaritos_pendentes", label: "Gabaritos pendentes", blocked: false, action: "gabarito" };
+    }
+    if (temFonteProcessavel) {
+        return { code: "pronto_processamento", label: "Pronto para processar", blocked: false, action: "processar" };
+    }
+    if (temArquivosBaixados) {
+        return { code: "arquivos_baixados", label: "Arquivos baixados", blocked: true, action: "notify", reason: "Arquivos baixados, mas ainda sem JSON estruturado de questões." };
+    }
+    if (temDocumentos) {
+        return { code: "documentos_vinculados", label: "Documentos vinculados", blocked: true, action: "notify", reason: "Documentos vinculados, mas ainda sem arquivo estruturado de questões." };
+    }
+    if (temParcial) {
+        return { code: "documentos_parciais", label: "Documentos parciais", blocked: true, action: "notify", reason: "Origem parcial: ainda falta prova e/ou gabarito." };
+    }
+    if (prova?.statusPipeline === "card_criado") {
+        return { code: "card_criado", label: "Card cadastrado", blocked: false, action: "vincular", reason: "Card criado; próxima etapa é vincular origem, prova e gabarito." };
+    }
+    return { code: "arquivos_pendentes", label: "Arquivos pendentes", blocked: true, action: "notify", reason: "Ainda faltam origem, prova e gabarito vinculados." };
+}
+
+function registrarNotificacaoPipelineAdmin(prova, pipeline) {
+    if (!usuarioAtualPodeAdministrar() || !pipeline?.blocked || !prova?.id) return;
+    if (!Array.isArray(progressoUsuario.notificacoesAdmin)) progressoUsuario.notificacoesAdmin = [];
+    const id = `pipeline_${prova.id}_${pipeline.code}`;
+    if (progressoUsuario.notificacoesAdmin.some(item => item.id === id)) return;
+    progressoUsuario.notificacoesAdmin.unshift({
+        id,
+        tipo: "pipeline_prova",
+        status: pipeline.code,
+        titulo: `Pipeline bloqueado: ${prova.banca} ${prova.orgao} ${prova.ano}`,
+        mensagem: pipeline.reason || "A prova precisa de tratamento administrativo para prosseguir.",
+        provaId: prova.id,
+        criadoEm: new Date().toISOString(),
+        lida: false
+    });
+    salvarProgressoLocal();
+}
+
+function documentoProvaEhArquivoDireto(url) {
+    if (!url) return false;
+    const value = String(url).split("?")[0].toLowerCase();
+    return value.startsWith("dados/provas/") || /\.(pdf|json|txt|docx?)$/i.test(value);
+}
+
+function rotuloDocumentoProva(tipo, url) {
+    const isArquivoDireto = documentoProvaEhArquivoDireto(url);
+    if (tipo === "prova") return isArquivoDireto ? "Abrir prova" : "Abrir origem da prova";
+    if (tipo === "gabarito") return isArquivoDireto ? "Abrir gabarito" : "Abrir origem do gabarito";
+    if (tipo === "edital") return isArquivoDireto ? "Abrir edital" : "Abrir origem do edital";
+    if (tipo === "recurso") return isArquivoDireto ? "Abrir recurso" : "Abrir origem do recurso";
+    return isArquivoDireto ? "Abrir documento" : "Abrir origem";
+}
+
+function renderDocumentoProvaLink(prova, tipo, icon, label, title) {
+    const documentUrl = obterDocumentoProva(prova, tipo);
+    if (!documentUrl) {
+        return `<span style="color:var(--text-secondary); opacity:0.55; margin-right:6px;" title="${escapeHtml(label)} ainda não vinculado">${icon} ${escapeHtml(label)}</span>`;
+    }
+    return `<a href="#" onclick="window.baixarArquivoProva(event, '${escapeHtml(prova.id)}', '${escapeHtml(tipo)}')" style="color:var(--accent); text-decoration:none; margin-right:6px;" title="${escapeHtml(rotuloDocumentoProva(tipo, documentUrl))}">${icon} ${escapeHtml(label)}</a>`;
+}
+
+function usuarioAtualPodeAdministrar() {
+    const nivel = progressoUsuario?.activeUserLevel || "";
+    return nivel === "CEO / PROPRIETÁRIO" || nivel === "ADMIN / GESTOR";
+}
+
+window.baixarArquivoProva = function(event, provaId, tipo) {
+    if (event) event.preventDefault();
+
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    const documentUrl = obterDocumentoProva(prova, tipo);
+    if (documentUrl) {
+        window.open(documentUrl, "_blank");
+        return;
+    }
+
+    alert(`Nenhum documento de ${tipo} foi vinculado a este card de prova.`);
+};
+
+const adminGabaritosState = {
+    tipo: "prova",
+    origemId: "",
+    itens: [],
+    mapas: [],
+    questoesProcessadas: []
+};
+
+function normalizarValorGabaritoAdmin(value) {
+    const normalized = String(value || "").trim().toUpperCase();
+    if (normalized === "CERTO") return "C";
+    if (normalized === "ERRADO") return "E";
+    if (normalized === "ANULADO" || normalized === "ANULADA" || normalized === "*" || normalized === "+") return "X";
+    return /^[A-EX]$/.test(normalized) ? normalized : "";
+}
+
+function rotuloGabarito(value) {
+    const normalized = normalizarValorGabaritoAdmin(value);
+    if (normalized === "C") return "C / CERTO";
+    if (normalized === "E") return "E / ERRADO";
+    if (normalized === "X") return "X / ANULADA";
+    return normalized || "Sem gabarito";
+}
+
+function chaveMapaGabaritoLocal(tipoOrigem, origemId) {
+    return `${tipoOrigem}:${origemId}`;
+}
+
+function obterNumeroQuestao(q, index) {
+    return q?.numero || q?.numero_original || q?.origem_importacao?.numero_original || index + 1;
+}
+
+function obterOrigemGabaritoQuestao(q, contexto) {
+    const origem = q?.gabarito_origem || q?.rawData?.gabarito_origem || q?.raw_data?.gabarito_origem;
+    if (origem?.tipo) return origem;
+    if (q?.gabarito && contexto?.tipo === "prova") {
+        const prova = BANCO_PROVAS.find(p => p.id === contexto.origemId);
+        const fonte = obterDocumentoProva(prova, "gabarito");
+        if (fonte) return { tipo: "banca_oficial", fonte };
+    }
+    if (q?.gabarito && contexto?.tipo === "lista") {
+        return { tipo: "lista_importada", fonte: contexto.origemId };
+    }
+    return { tipo: "sem_gabarito", fonte: "" };
+}
+
+function formatarOrigemGabarito(origem) {
+    const labels = {
+        banca_oficial: "Arquivo vinculado no card",
+        arquivo_admin: "Arquivo importado pelo administrador",
+        lista_importada: "Lista importada",
+        ajuste_manual: "Ajuste manual",
+        laboratorio: "Laboratório",
+        sem_gabarito: "Sem gabarito aplicado"
+    };
+    const label = labels[origem?.tipo] || origem?.tipo || "Origem não registrada";
+    const fonte = origem?.fonte ? ` · ${origem.fonte}` : "";
+    return `${label}${fonte}`;
+}
+
+async function carregarItensGabaritoAdmin() {
+    await carregarDocumentosProvas();
+    const tipo = adminGabaritosState.tipo;
+    const origemId = adminGabaritosState.origemId;
+    if (!origemId) {
+        adminGabaritosState.itens = [];
+        adminGabaritosState.mapas = [];
+        adminGabaritosState.questoesProcessadas = [];
+        return;
+    }
+
+    let mapas = [];
+    try {
+        const payload = await QUESTOES_API.listarMapaGabarito(tipo, origemId);
+        mapas = payload.items || [];
+    } catch (error) {
+        console.warn("Não foi possível carregar mapa de gabarito do banco.", error);
+        const key = chaveMapaGabaritoLocal(tipo, origemId);
+        mapas = progressoUsuario.gabaritoMapas?.[key] || [];
+    }
+
+    let questoes = [];
+    if (tipo === "lista") {
+        const lista = progressoUsuario.listas?.[origemId];
+        questoes = Array.isArray(lista?.questoes) ? lista.questoes : [];
+    } else {
+        const prova = BANCO_PROVAS.find(p => p.id === origemId);
+        const questoesDisponiveis = await obterQuestoesLocaisParaSessao({ incluirLaboratorio: true }).catch(() => BANCO_QUESTOES || []);
+        questoes = questoesDisponiveis.filter(q => {
+            return obterArquivoOrigemQuestao(q) === prova?.file;
+        });
+    }
+
+    const byNumero = new Map();
+    questoes.forEach((q, index) => {
+        const numero = Number(obterNumeroQuestao(q, index));
+        if (!numero) return;
+        byNumero.set(numero, {
+            numero,
+            question: q,
+            questionId: q.id,
+            gabarito: normalizarValorGabaritoAdmin(q.gabarito),
+            origem: obterOrigemGabaritoQuestao(q, { tipo, origemId }),
+            status: "questao_processada"
+        });
+    });
+
+    mapas.forEach((mapa) => {
+        const numero = Number(mapa.numero);
+        if (!numero) return;
+        const existing = byNumero.get(numero);
+        byNumero.set(numero, {
+            ...existing,
+            numero,
+            mapId: mapa.id,
+            question: existing?.question || null,
+            questionId: existing?.questionId || mapa.aplicadoQuestaoId || "",
+            gabarito: normalizarValorGabaritoAdmin(existing?.gabarito || mapa.gabarito),
+            origem: {
+                tipo: mapa.origemTipo || "arquivo_admin",
+                fonte: mapa.fonte || "",
+                mapa_id: mapa.id
+            },
+            status: existing?.question ? "aplicado_ou_aplicavel" : "aguardando_questao"
+        });
+    });
+
+    adminGabaritosState.mapas = mapas;
+    adminGabaritosState.questoesProcessadas = questoes;
+    adminGabaritosState.itens = Array.from(byNumero.values()).sort((a, b) => Number(a.numero) - Number(b.numero));
+}
+
+function opcoesOrigemGabaritoAdmin() {
+    const provas = BANCO_PROVAS.map(p => `<option value="prova:${escapeHtml(p.id)}">${escapeHtml(p.banca)} · ${escapeHtml(p.orgao)} · ${escapeHtml(p.ano)}</option>`).join("");
+    const listas = Object.entries(progressoUsuario.listas || {})
+        .map(([id, list]) => `<option value="lista:${escapeHtml(id)}">${escapeHtml(list.nome || id)}</option>`)
+        .join("");
+    return `
+        <optgroup label="Provas">${provas}</optgroup>
+        <optgroup label="Listas">${listas || `<option value="" disabled>Nenhuma lista disponível</option>`}</optgroup>
+    `;
+}
+
+async function renderizarAdminGabaritos() {
+    const panelContent = document.getElementById("admin-panel-content");
+    if (!panelContent) return;
+    if (!adminGabaritosState.origemId && BANCO_PROVAS.length) {
+        adminGabaritosState.tipo = "prova";
+        adminGabaritosState.origemId = BANCO_PROVAS[0].id;
+    }
+    await carregarItensGabaritoAdmin();
+
+    const selectedValue = `${adminGabaritosState.tipo}:${adminGabaritosState.origemId}`;
+    const provaSelecionada = adminGabaritosState.tipo === "prova"
+        ? BANCO_PROVAS.find(p => p.id === adminGabaritosState.origemId)
+        : null;
+    const sourceFile = obterArquivoOrigemGabaritoAdmin();
+    const gabaritoVinculado = provaSelecionada ? obterDocumentoProva(provaSelecionada, "gabarito") : "";
+    const origemVinculada = provaSelecionada ? obterOrigemDocumentoProva(provaSelecionada) : "";
+    const totalMapas = adminGabaritosState.mapas.length;
+    const totalQuestoes = adminGabaritosState.questoesProcessadas.length;
+    const totalAplicaveis = adminGabaritosState.itens.filter(item => item.question).length;
+    const totalAguardando = adminGabaritosState.itens.filter(item => !item.question).length;
+    const painelPodeTratarGabarito = totalQuestoes > 0;
+    const rows = adminGabaritosState.itens.length
+        ? adminGabaritosState.itens.map((item) => `
+            <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:10px; font-weight:800;">${escapeHtml(item.numero)}</td>
+                <td style="padding:10px;">
+                    <select data-numero="${escapeHtml(item.numero)}" data-question-id="${escapeHtml(item.questionId || "")}" class="admin-gabarito-select" style="padding:7px 9px; border-radius:8px; border:1.5px solid var(--border); background-color:var(--bg-app); color:var(--text-primary); font-weight:700;">
+                        <option value="" ${!item.gabarito ? "selected" : ""}>-</option>
+                        ${["A", "B", "C", "D", "E", "X"].map(letra => `<option value="${letra}" ${item.gabarito === letra ? "selected" : ""}>${letra}${letra === "C" ? " / CERTO" : letra === "E" ? " / ERRADO" : letra === "X" ? " / ANULADA" : ""}</option>`).join("")}
+                    </select>
+                </td>
+                <td style="padding:10px; color:var(--text-secondary); font-size:0.82rem;">${escapeHtml(formatarOrigemGabarito(item.origem))}</td>
+                <td style="padding:10px; text-align:right;">
+                    <span style="font-size:0.75rem; color:${item.question ? 'var(--correta)' : 'var(--text-secondary)'}; font-weight:700; margin-right:10px;">${item.question ? `Questão importada${item.questionId ? ` · ${escapeHtml(item.questionId)}` : ""}` : "Aguardando questão"}</span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="window.salvarGabaritoAdmin('${escapeHtml(item.numero)}')" style="border-radius:8px; font-size:0.75rem; font-weight:700;">Salvar</button>
+                </td>
+            </tr>
+        `).join("")
+        : `<tr><td colspan="4" style="padding:18px; color:var(--text-secondary); text-align:center;">Nenhuma questão processada para esta origem. Importe as questões da prova ou lista antes de tratar o gabarito.</td></tr>`;
+
+    panelContent.innerHTML = `
+        <div class="admin-gabaritos" style="display:flex; flex-direction:column; gap:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap;">
+                <div>
+                    <h2 style="font-size:1.8rem; font-weight:800; margin:0;">✅ Painel de Gabaritos</h2>
+                    <p style="color:var(--text-secondary); margin:6px 0 0;">Consulta e correção administrativa dos gabaritos aplicados.</p>
+                </div>
+                <button class="btn btn-primary" onclick="document.getElementById('inputArquivoGabaritoAdmin').click()" ${painelPodeTratarGabarito ? "" : "disabled"} title="${painelPodeTratarGabarito ? "Importar gabarito para as questões processadas" : "Importe as questões antes de importar gabarito"}" style="border:none; border-radius:8px; font-weight:700; color:#fff; background-color:var(--accent); ${painelPodeTratarGabarito ? "" : "opacity:0.55; cursor:not-allowed;"}">📤 Importar gabarito</button>
+                <input type="file" id="inputArquivoGabaritoAdmin" accept=".txt,.csv,.json" style="display:none;" onchange="window.importarArquivoGabaritoAdmin(this.files)">
+            </div>
+
+            <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:18px; border-radius:12px; background-color:var(--bg-card); display:flex; flex-direction:column; gap:14px;">
+                <div style="display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end;">
+                    <div style="flex:1; min-width:260px;">
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">Origem de consulta</label>
+                        <select id="selectOrigemGabaritoAdmin" onchange="window.selecionarOrigemGabaritoAdmin(this.value)" style="width:100%; padding:9px; border-radius:8px; border:1.5px solid var(--border); background-color:var(--bg-app); color:var(--text-primary);">
+                            ${opcoesOrigemGabaritoAdmin()}
+                        </select>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-secondary); min-width:260px;">
+                        <div><strong>Gabarito vinculado:</strong> ${gabaritoVinculado ? escapeHtml(gabaritoVinculado) : "não"}</div>
+                        <div><strong>Origem do arquivo:</strong> ${origemVinculada ? escapeHtml(origemVinculada) : "não vinculada"}</div>
+                        <div><strong>Arquivo de questões:</strong> ${sourceFile ? escapeHtml(sourceFile) : "não informado"}</div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px;">
+                    <div style="padding:10px; border:1px solid var(--border); border-radius:8px; background-color:var(--bg-app);"><strong>${totalMapas}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">itens no mapa</span></div>
+                    <div style="padding:10px; border:1px solid var(--border); border-radius:8px; background-color:var(--bg-app);"><strong>${totalQuestoes}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">questões processadas</span></div>
+                    <div style="padding:10px; border:1px solid var(--border); border-radius:8px; background-color:var(--bg-app);"><strong>${totalAplicaveis}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">aplicáveis agora</span></div>
+                    <div style="padding:10px; border:1px solid var(--border); border-radius:8px; background-color:var(--bg-app);"><strong>${totalAguardando}</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">aguardando questões</span></div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-outline-success btn-sm" onclick="window.aplicarMapaGabaritoAdmin()" ${painelPodeTratarGabarito ? "" : "disabled"} title="${painelPodeTratarGabarito ? "Aplicar o mapa às questões importadas" : "Importe as questões antes de aplicar gabarito"}" style="border-radius:8px; font-weight:700; ${painelPodeTratarGabarito ? "" : "opacity:0.55; cursor:not-allowed;"}">✅ Aplicar mapa às questões</button>
+                    ${painelPodeTratarGabarito ? "" : `<span style="align-self:center; color:var(--text-secondary); font-size:0.82rem;">Tratamento liberado somente após importar questões.</span>`}
+                </div>
+            </div>
+
+            <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:18px; border-radius:12px; background-color:var(--bg-card); overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border);">
+                            <th style="padding:10px;">Nº</th>
+                            <th style="padding:10px;">Gabarito aplicado</th>
+                            <th style="padding:10px;">Origem administrativa</th>
+                            <th style="padding:10px; text-align:right;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    const select = document.getElementById("selectOrigemGabaritoAdmin");
+    if (select) select.value = selectedValue;
+}
+
+window.abrirPainelGabaritos = function(provaId) {
+    adminGabaritosState.tipo = "prova";
+    adminGabaritosState.origemId = provaId;
+    window.navegarAdminTab("gabaritos");
+};
+
+window.selecionarOrigemGabaritoAdmin = function(value) {
+    const [tipo, ...rest] = String(value || "").split(":");
+    adminGabaritosState.tipo = tipo === "lista" ? "lista" : "prova";
+    adminGabaritosState.origemId = rest.join(":");
+    renderizarAdminGabaritos();
+};
+
+function encontrarItemGabaritoAdminPorNumero(numero) {
+    return adminGabaritosState.itens.find(item => String(item.numero) === String(numero));
+}
+
+function obterArquivoOrigemGabaritoAdmin() {
+    if (adminGabaritosState.tipo === "prova") {
+        return BANCO_PROVAS.find(p => p.id === adminGabaritosState.origemId)?.file || "";
+    }
+    return adminGabaritosState.origemId;
+}
+
+async function salvarMapaGabaritoComFallback(payload) {
+    try {
+        return await QUESTOES_API.salvarMapaGabarito(payload);
+    } catch (error) {
+        console.warn("Mapa de gabarito salvo apenas localmente.", error);
+        if (!progressoUsuario.gabaritoMapas) progressoUsuario.gabaritoMapas = {};
+        const key = chaveMapaGabaritoLocal(payload.tipoOrigem, payload.origemId);
+        const current = progressoUsuario.gabaritoMapas[key] || [];
+        const numero = Number(payload.numero);
+        const existingIndex = current.findIndex(item => Number(item.numero) === numero);
+        const localItem = {
+            id: `local_${payload.tipoOrigem}_${payload.origemId}_${numero}`,
+            tipoOrigem: payload.tipoOrigem,
+            origemId: payload.origemId,
+            numero,
+            gabarito: payload.gabarito,
+            origemTipo: payload.origemTipo,
+            fonte: payload.fonte || ""
+        };
+        if (existingIndex >= 0) current[existingIndex] = localItem;
+        else current.push(localItem);
+        progressoUsuario.gabaritoMapas[key] = current;
+        salvarProgressoLocal();
+        return { ok: true, item: localItem, localOnly: true };
+    }
+}
+
+async function persistirGabaritoAdmin(item, gabarito, origemTipo, fonte) {
+    const sourceFile = obterArquivoOrigemGabaritoAdmin();
+    await salvarMapaGabaritoComFallback({
+        tipoOrigem: adminGabaritosState.tipo,
+        origemId: adminGabaritosState.origemId,
+        numero: Number(item.numero),
+        gabarito,
+        origemTipo,
+        fonte,
+        sourceFile
+    });
+
+    if (!item.question) return;
+    const q = item.question;
+    q.gabarito = gabarito;
+    q.gabarito_origem = {
+        tipo: origemTipo,
+        fonte,
+        atualizado_em: new Date().toISOString(),
+        atualizado_por: progressoUsuario.nome || "administrador"
+    };
+    aplicarQuestaoAtualizadaLocal(q);
+}
+
+window.salvarGabaritoAdmin = async function(numero) {
+    const item = encontrarItemGabaritoAdminPorNumero(numero);
+    const select = Array.from(document.querySelectorAll(".admin-gabarito-select"))
+        .find(el => String(el.dataset.numero) === String(numero));
+    if (!item || !select) return;
+    const gabarito = normalizarValorGabaritoAdmin(select.value);
+    if (!gabarito) {
+        alert("Informe um gabarito explícito antes de salvar.");
+        return;
+    }
+    await persistirGabaritoAdmin(item, gabarito, "ajuste_manual", "Painel de Gabaritos");
+    await renderizarAdminGabaritos();
+};
+
+window.aplicarMapaGabaritoAdmin = async function() {
+    if (!adminGabaritosState.questoesProcessadas.length) {
+        alert("Importe as questões desta prova ou lista antes de aplicar gabarito.");
+        return;
+    }
+    const sourceFile = obterArquivoOrigemGabaritoAdmin();
+    if (!sourceFile) {
+        alert("Não há arquivo de origem para cruzar com as questões processadas.");
+        return;
+    }
+    try {
+        const payload = await QUESTOES_API.aplicarMapaGabarito({
+            tipoOrigem: adminGabaritosState.tipo,
+            origemId: adminGabaritosState.origemId,
+            sourceFile
+        });
+        await renderizarAdminGabaritos();
+        alert(`${payload.applyResult?.applied || 0} gabarito(s) aplicado(s) às questões processadas.`);
+    } catch (error) {
+        alert(error.message || "Não foi possível aplicar o mapa de gabarito.");
+    }
+};
+
+function parsearArquivoGabaritoAdmin(text) {
+    const resultados = new Map();
+    try {
+        const parsed = JSON.parse(String(text || ""));
+        const entries = Array.isArray(parsed)
+            ? parsed.map(item => [item.numero || item.questao || item.n, item.gabarito || item.resposta || item.answer])
+            : Object.entries(parsed);
+        entries.forEach(([numero, resposta]) => {
+            const numeroQuestao = Number(numero);
+            const gabarito = normalizarValorGabaritoAdmin(resposta);
+            if (numeroQuestao && gabarito) resultados.set(numeroQuestao, gabarito);
+        });
+        if (resultados.size > 0) return resultados;
+    } catch (e) {
+        // Continua com leitura linha a linha para TXT/CSV.
+    }
+    String(text || "").split(/\r?\n/).forEach(line => {
+        const match = line.match(/^\s*(\d{1,4})\s*(?:[-–—.:;) ]+)\s*(A|B|C|D|E|X|\*|\+|CERTO|ERRADO|ANULAD[AO])\b/i);
+        if (!match) return;
+        const numero = Number(match[1]);
+        const gabarito = normalizarValorGabaritoAdmin(match[2]);
+        if (numero && gabarito) resultados.set(numero, gabarito);
+    });
+    return resultados;
+}
+
+window.importarArquivoGabaritoAdmin = async function(files) {
+    if (!adminGabaritosState.questoesProcessadas.length) {
+        alert("Importe as questões desta prova ou lista antes de importar gabarito.");
+        return;
+    }
+    const file = files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    const mapa = parsearArquivoGabaritoAdmin(text);
+    if (mapa.size === 0) {
+        alert("Nenhum gabarito explícito foi encontrado. Use linhas como: 1 - A ou 2 - CERTO.");
+        return;
+    }
+    const items = Array.from(mapa.entries()).map(([numero, gabarito]) => ({ numero, gabarito }));
+    let aplicados = 0;
+    try {
+        const payload = await QUESTOES_API.importarMapaGabarito({
+            tipoOrigem: adminGabaritosState.tipo,
+            origemId: adminGabaritosState.origemId,
+            items,
+            origemTipo: "arquivo_admin",
+            fonte: file.name,
+            sourceFile: obterArquivoOrigemGabaritoAdmin()
+        });
+        aplicados = payload.applyResult?.applied || 0;
+    } catch (error) {
+        if (!progressoUsuario.gabaritoMapas) progressoUsuario.gabaritoMapas = {};
+        const key = chaveMapaGabaritoLocal(adminGabaritosState.tipo, adminGabaritosState.origemId);
+        progressoUsuario.gabaritoMapas[key] = items.map(item => ({
+            id: `local_${adminGabaritosState.tipo}_${adminGabaritosState.origemId}_${item.numero}`,
+            tipoOrigem: adminGabaritosState.tipo,
+            origemId: adminGabaritosState.origemId,
+            numero: item.numero,
+            gabarito: item.gabarito,
+            origemTipo: "arquivo_admin",
+            fonte: file.name
+        }));
+        salvarProgressoLocal();
+    }
+    await renderizarAdminGabaritos();
+    alert(`${items.length} item(ns) salvo(s) no mapa. ${aplicados} gabarito(s) aplicado(s) às questões processadas.`);
 };
 
 /* =====================================
@@ -6348,7 +7727,623 @@ window.setPortalMode = function(mode) {
     localStorage.setItem("remb_portal_mode", mode);
 };
 
-window.navegarAdminTab = async function(tabName) {
+function estiloPipelineAdmin(pipeline) {
+    if (pipeline.blocked) return "background-color:rgba(239,68,68,0.10); border:1px solid #ef4444; color:#b91c1c;";
+    if (pipeline.code === "completo") return "background-color:var(--correta-light); border:1px solid var(--correta); color:var(--correta);";
+    if (pipeline.code === "gabaritos_pendentes") return "background-color:rgba(245,158,11,0.12); border:1px solid #f59e0b; color:#b45309;";
+    if (pipeline.code === "pronto_processamento") return "background-color:rgba(16,185,129,0.10); border:1px solid #10b981; color:#047857;";
+    return "background-color:rgba(59,130,246,0.10); border:1px solid #3b82f6; color:#2563eb;";
+}
+
+function iconePipelineAdmin(pipeline) {
+    if (pipeline.blocked) return "⛔";
+    if (pipeline.code === "card_criado") return "🆕";
+    if (pipeline.code === "completo") return "✅";
+    if (pipeline.code === "gabaritos_pendentes") return "🟡";
+    if (pipeline.code === "pronto_processamento") return "🔄";
+    if (pipeline.code === "revisao_laboratorio") return "🧪";
+    return "📄";
+}
+
+function progressoPipelinePorMensagem(mensagem) {
+    const texto = String(mensagem || "").toLowerCase();
+    if (texto.includes("salvando")) return 25;
+    if (texto.includes("verificando")) return 45;
+    if (texto.includes("processando")) return 75;
+    if (texto.includes("conclu") || texto.includes("processadas") || texto.includes("salvos")) return 100;
+    return 15;
+}
+
+function renderizarStatusPipelineAdmin(provaId, mensagem) {
+    if (!mensagem) {
+        return `<div id="pipeline-status-${escapeHtml(provaId)}" style="grid-column:1 / -1; display:none; border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text-secondary); background-color:rgba(59,130,246,0.06); font-size:0.86rem; font-weight:700;"></div>`;
+    }
+    const emExecucao = Boolean(pipelineAdminState.emExecucao[provaId]);
+    const progresso = progressoPipelinePorMensagem(mensagem);
+    const boxStyle = emExecucao
+        ? "border:1px solid #3b82f6; background-color:rgba(59,130,246,0.06); color:#1d4ed8;"
+        : "border:1px solid #f59e0b; background-color:rgba(245,158,11,0.10); color:#92400e;";
+    return `
+        <div id="pipeline-status-${escapeHtml(provaId)}" style="grid-column:1 / -1; ${boxStyle} border-radius:8px; padding:10px; font-size:0.86rem; font-weight:700;">
+            <div>${escapeHtml(mensagem)}</div>
+            ${emExecucao ? `
+                <div style="height:8px; background-color:rgba(59,130,246,0.18); border-radius:999px; overflow:hidden; margin-top:8px;">
+                    <div style="height:100%; width:${progresso}%; background-color:#2563eb; border-radius:999px; transition:width 0.25s ease;"></div>
+                </div>
+            ` : ""}
+        </div>
+    `;
+}
+
+function renderizarPainelProvaPipelineSelecionada(selected) {
+    if (!selected) return "";
+    const prova = selected.prova;
+    const pipeline = selected.pipeline;
+    const atual = prova.documentos || {};
+    const origem = atual.origem || obterOrigemDocumentoProva(prova) || "";
+    const provaDoc = atual.prova || obterDocumentoProva(prova, "prova") || "";
+    const gabaritoDoc = atual.gabarito || obterDocumentoProva(prova, "gabarito") || "";
+    const questoesJson = atual.questoes || obterArquivoQuestoesVinculado(prova) || "";
+    const id = escapeHtml(prova.id);
+    const andamento = pipelineAdminState.emExecucao[prova.id] || pipelineAdminState.resultados[prova.id] || "";
+    const emExecucao = Boolean(pipelineAdminState.emExecucao[prova.id]);
+    const andamentoHtml = renderizarStatusPipelineAdmin(prova.id, andamento);
+    const podeEstruturar = Boolean(provaDoc && !questoesJson);
+    const podeAplicarGabarito = Boolean(gabaritoDoc && questoesJson);
+    const abrirLabHtml = pipeline.action === "laboratorio"
+        ? `<button type="button" class="btn btn-outline-success" onclick="window.abrirProvaNoLaboratorio('${id}', '${escapeHtml(prova.file)}')" style="border-radius:8px; font-weight:700;">Abrir revisão no Lab</button>
+           <button type="button" class="btn btn-outline-primary" onclick="window.liberarQuestoesEstruturadasPipeline('${id}')" style="border-radius:8px; font-weight:700;">Liberar após revisão</button>`
+        : "";
+    const estruturaHtml = podeEstruturar ? `
+        <div style="grid-column:1 / -1; border:1px solid var(--border); border-radius:10px; padding:12px; background-color:rgba(16,185,129,0.05);">
+            <div style="font-weight:800; margin-bottom:6px;">Estruturar questões a partir da prova</div>
+            <p style="margin:0 0 10px; color:var(--text-secondary); font-size:0.84rem;">O sistema tentará extrair o texto do PDF. Se não conseguir, cole abaixo o texto copiado da prova para gerar uma versão revisável no Laboratório.</p>
+            <textarea id="pipeline-texto-prova-${id}" rows="5" placeholder="Opcional: cole aqui o texto da prova se a extração automática não funcionar" style="width:100%; border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text-primary); background-color:var(--bg-card); resize:vertical;"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                <input id="pipeline-texto-arquivo-${id}" type="file" accept=".txt,text/plain" onchange="window.carregarTextoProvaPipeline('${id}', this.files)" style="display:none;">
+                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('pipeline-texto-arquivo-${id}')?.click()" style="border-radius:8px; font-weight:700;">Carregar texto da prova</button>
+                <button type="button" class="btn btn-outline-success" onclick="window.estruturarQuestoesProvaPipeline('${id}')" style="border-radius:8px; font-weight:700;">Estruturar questões para revisão</button>
+            </div>
+        </div>
+    ` : "";
+    const suspensaBadge = prova.suspensa
+        ? `<span style="display:inline-flex; align-items:center; gap:4px; background-color:rgba(107,114,128,0.12); border:1px solid #6b7280; color:#374151; border-radius:6px; padding:3px 8px; font-size:0.74rem; font-weight:800;">⏸️ Suspensa</span>`
+        : "";
+
+    return `
+        <div class="card-base" style="border:1px solid var(--accent); box-shadow:var(--shadow); padding:16px; border-radius:12px; background-color:var(--bg-card);">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
+                <div>
+                    <div style="font-weight:800; margin-bottom:6px;">Prova enviada ao pipeline</div>
+                    <div style="color:var(--text-secondary);">${escapeHtml(prova.banca)} · ${escapeHtml(prova.orgao)} · ${escapeHtml(prova.ano)}</div>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                        <span style="${estiloPipelineAdmin(pipeline)} border-radius:6px; padding:3px 8px; font-size:0.74rem; font-weight:800;">${iconePipelineAdmin(pipeline)} ${escapeHtml(pipeline.label)}</span>
+                        ${suspensaBadge}
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.renderizarAdminPipeline()" style="border-radius:8px; font-weight:700;">Fechar</button>
+            </div>
+            <form onsubmit="event.preventDefault(); window.salvarVinculoDocumentosPipeline('${id}');" style="margin-top:14px; display:grid; grid-template-columns:repeat(2, minmax(220px, 1fr)); gap:12px;">
+                <label style="display:flex; flex-direction:column; gap:5px; font-size:0.78rem; font-weight:800; color:var(--text-secondary);">
+                    Página oficial de origem
+                    <input id="pipeline-origem-${id}" type="text" value="${escapeHtml(origem)}" placeholder="Link da página oficial do concurso" style="border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text-primary); background-color:var(--bg-card);">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:5px; font-size:0.78rem; font-weight:800; color:var(--text-secondary);">
+                    Documento da prova
+                    <input id="pipeline-prova-${id}" type="text" value="${escapeHtml(provaDoc)}" placeholder="Link ou caminho do PDF da prova" style="border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text-primary); background-color:var(--bg-card);">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:5px; font-size:0.78rem; font-weight:800; color:var(--text-secondary);">
+                    Documento do gabarito
+                    <input id="pipeline-gabarito-${id}" type="text" value="${escapeHtml(gabaritoDoc)}" placeholder="Link ou caminho do gabarito" style="border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text-primary); background-color:var(--bg-card);">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:5px; font-size:0.78rem; font-weight:800; color:var(--text-secondary);">
+                    Questões estruturadas
+                    <input id="pipeline-questoes-${id}" type="text" value="${escapeHtml(questoesJson)}" placeholder="Opcional: caminho do JSON estruturado" style="border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text-primary); background-color:var(--bg-card);">
+                </label>
+                ${andamentoHtml}
+                ${estruturaHtml}
+                <div style="grid-column:1 / -1; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span style="font-size:0.82rem; color:var(--text-secondary);">Preencha o que tiver. O sistema tentará localizar e baixar documentos pela origem oficial; as questões só serão processadas quando houver JSON estruturado.</span>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        ${abrirLabHtml}
+                        ${podeAplicarGabarito ? `<button type="button" class="btn btn-outline-secondary" onclick="window.aplicarGabaritoOficialPipeline('${id}')" style="border-radius:8px; font-weight:700;">Aplicar gabarito oficial</button>` : ""}
+                        ${origem ? `<button type="button" class="btn btn-outline-secondary" onclick="window.open('${escapeHtml(origem)}', '_blank')" style="border-radius:8px; font-weight:700;">Abrir origem</button>` : ""}
+                        <button id="pipeline-action-${id}" class="btn btn-primary" type="submit" style="display:${emExecucao ? "none" : "inline-flex"}; border:none; border-radius:8px; font-weight:700; color:#fff; background-color:var(--accent);">Dar continuidade ao pipeline</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    `;
+}
+
+function atualizarStatusPipelineAdmin(provaId, mensagem, { concluido = false, erro = false } = {}) {
+    if (!provaId) return;
+    if (concluido || erro) {
+        delete pipelineAdminState.emExecucao[provaId];
+        pipelineAdminState.resultados[provaId] = mensagem;
+    } else {
+        pipelineAdminState.emExecucao[provaId] = mensagem;
+        delete pipelineAdminState.resultados[provaId];
+    }
+    const statusEl = document.getElementById(`pipeline-status-${provaId}`);
+    if (statusEl) {
+        const progresso = progressoPipelinePorMensagem(mensagem);
+        statusEl.style.display = "block";
+        statusEl.style.borderColor = erro ? "#ef4444" : concluido ? "#10b981" : "var(--border)";
+        statusEl.style.backgroundColor = erro ? "rgba(239,68,68,0.08)" : concluido ? "rgba(16,185,129,0.08)" : "rgba(59,130,246,0.06)";
+        statusEl.style.color = erro ? "#b91c1c" : concluido ? "#047857" : "var(--text-secondary)";
+        statusEl.innerHTML = `
+            <div>${escapeHtml(mensagem)}</div>
+            ${!concluido && !erro ? `
+                <div style="height:8px; background-color:rgba(59,130,246,0.18); border-radius:999px; overflow:hidden; margin-top:8px;">
+                    <div style="height:100%; width:${progresso}%; background-color:#2563eb; border-radius:999px; transition:width 0.25s ease;"></div>
+                </div>
+            ` : ""}
+        `;
+    }
+    const actionEl = document.getElementById(`pipeline-action-${provaId}`);
+    if (actionEl) {
+        actionEl.disabled = !concluido && !erro;
+        actionEl.textContent = !concluido && !erro ? "Pipeline em andamento..." : "Dar continuidade ao pipeline";
+        actionEl.style.display = !concluido && !erro ? "none" : "inline-flex";
+    }
+}
+
+async function renderizarAdminPipeline(selectedProvaId = "") {
+    await carregarDocumentosProvas();
+    const panelContent = document.getElementById("admin-panel-content");
+    if (!panelContent) return;
+    const provas = BANCO_PROVAS.map(prova => ({ prova, pipeline: obterEstadoPipelineProva(prova) }));
+    provas.forEach(({ prova, pipeline }) => {
+        if (pipeline.blocked) registrarNotificacaoPipelineAdmin(prova, pipeline);
+    });
+    const selected = selectedProvaId
+        ? provas.find(item => item.prova.id === selectedProvaId)
+        : null;
+    const resumo = provas.reduce((acc, item) => {
+        acc[item.pipeline.code] = (acc[item.pipeline.code] || 0) + 1;
+        return acc;
+    }, {});
+    resumo.suspensa = provas.filter(({ prova }) => prova.suspensa).length;
+    const rows = provas.map(({ prova, pipeline }) => {
+        const isSelected = prova.id === selectedProvaId;
+        const statusStyle = estiloPipelineAdmin(pipeline);
+        const actionButton = pipeline.action === "processar"
+            ? `<button class="btn btn-sm btn-outline-success" onclick="window.processarProvaVinculada('${escapeHtml(prova.id)}')" style="border-radius:8px; font-weight:700;">Processar</button>`
+            : pipeline.action === "gabarito"
+                ? `<button class="btn btn-sm btn-outline-primary" onclick="window.abrirPainelGabaritos('${escapeHtml(prova.id)}')" style="border-radius:8px; font-weight:700;">Gabaritos</button>`
+                : pipeline.action === "laboratorio"
+                    ? `<button class="btn btn-sm btn-outline-success" onclick="window.abrirProvaNoLaboratorio('${escapeHtml(prova.id)}', '${escapeHtml(prova.file)}')" style="border-radius:8px; font-weight:700;">Abrir Lab</button>`
+                : ["card_criado", "arquivos_pendentes", "documentos_parciais"].includes(pipeline.code)
+                    ? `<button class="btn btn-sm btn-outline-primary" onclick="window.abrirVinculoDocumentosPipeline('${escapeHtml(prova.id)}')" style="border-radius:8px; font-weight:700;">Vincular documentos</button>`
+                    : ["documentos_vinculados", "arquivos_baixados"].includes(pipeline.code)
+                        ? `<button class="btn btn-sm btn-outline-secondary" onclick="window.processarProvaVinculada('${escapeHtml(prova.id)}', true)" style="border-radius:8px; font-weight:700;">Estruturar questões</button>`
+                        : `<span style="font-size:0.78rem; color:var(--text-secondary); font-weight:700;">Sem ação pendente</span>`;
+        const visibilityButton = prova.suspensa
+            ? `<button class="btn btn-sm btn-outline-success" onclick="window.alterarSuspensaoProvaPipeline('${escapeHtml(prova.id)}', false)" style="border-radius:8px; font-weight:700; margin-left:6px;">Reativar</button>`
+            : `<button class="btn btn-sm btn-outline-secondary" onclick="window.alterarSuspensaoProvaPipeline('${escapeHtml(prova.id)}', true)" style="border-radius:8px; font-weight:700; margin-left:6px;">Suspender</button>`;
+        const suspensaBadge = prova.suspensa
+            ? `<span style="display:inline-flex; align-items:center; gap:4px; margin-left:8px; background-color:rgba(107,114,128,0.12); border:1px solid #6b7280; color:#374151; border-radius:6px; padding:2px 7px; font-size:0.72rem; font-weight:800;">⏸️ Suspensa</span>`
+            : "";
+        const rowStatus = pipelineAdminState.emExecucao[prova.id] || pipelineAdminState.resultados[prova.id] || "";
+        const tratamentoTexto = rowStatus || pipeline.reason || "Fluxo disponível.";
+        return `
+            <tr style="border-bottom:1px solid var(--border); background:${isSelected ? "rgba(59,130,246,0.06)" : "transparent"};">
+                <td style="padding:10px; width:38px;">
+                    <input type="checkbox" class="pipeline-batch-check" value="${escapeHtml(prova.id)}" aria-label="Selecionar ${escapeHtml(prova.orgao)}">
+                </td>
+                <td style="padding:10px; font-weight:800;">${escapeHtml(prova.banca)} · ${escapeHtml(prova.orgao)} · ${escapeHtml(prova.ano)}${suspensaBadge}</td>
+                <td style="padding:10px;"><span style="${statusStyle} border-radius:6px; padding:3px 8px; font-size:0.74rem; font-weight:800;">${iconePipelineAdmin(pipeline)} ${escapeHtml(pipeline.label)}</span></td>
+                <td style="padding:10px; color:var(--text-secondary); font-size:0.82rem;">${escapeHtml(tratamentoTexto)}</td>
+                <td style="padding:10px; text-align:right;">${actionButton}${visibilityButton}</td>
+            </tr>
+        `;
+    }).join("");
+
+    panelContent.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:18px;">
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                    <div>
+                        <h2 style="font-size:1.8rem; font-weight:800; margin:0;">🔄 Pipeline de Provas</h2>
+                        <p style="color:var(--text-secondary); margin:6px 0 0;">Acompanhe o caminho dos documentos até as questões estruturadas e os gabaritos aplicados.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="window.criarCardProvaPipeline()" style="border:none; border-radius:8px; font-weight:700; color:#fff; background-color:var(--accent);">🆕 Novo card</button>
+                </div>
+            </div>
+            ${pipelineAdminState.resultados.__lote ? `
+                <div style="border:1px solid var(--border); border-radius:10px; padding:12px; background-color:rgba(59,130,246,0.06); color:var(--text-secondary); font-weight:700;">
+                    ${escapeHtml(pipelineAdminState.resultados.__lote)}
+                </div>
+            ` : ""}
+            ${renderizarPainelProvaPipelineSelecionada(selected)}
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
+                ${Object.entries({
+                    arquivos_pendentes: "Arquivos pendentes",
+                    card_criado: "Cards criados",
+                    documentos_parciais: "Docs parciais",
+                    documentos_vinculados: "Docs vinculados",
+                    arquivos_baixados: "Arquivos baixados",
+                    suspensa: "Suspensas",
+                    pronto_processamento: "Prontos",
+                    revisao_laboratorio: "Revisão no Lab",
+                    gabaritos_pendentes: "Gabaritos pendentes",
+                    completo: "Completos"
+                }).map(([code, label]) => `
+                    <div class="card-base" style="border:1px solid var(--border); padding:12px; border-radius:10px; background-color:var(--bg-card);">
+                        <strong style="font-size:1.35rem;">${resumo[code] || 0}</strong><br>
+                        <span style="font-size:0.78rem; color:var(--text-secondary);">${label}</span>
+                    </div>
+                `).join("")}
+            </div>
+            <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:18px; border-radius:12px; background-color:var(--bg-card); overflow-x:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-weight:800; color:var(--text-secondary); font-size:0.84rem;">
+                        <input type="checkbox" onchange="window.alternarSelecaoPipelineLote(this.checked)">
+                        Selecionar todos
+                    </label>
+                    <button class="btn btn-outline-primary btn-sm" onclick="window.continuarPipelineSelecionados()" style="border-radius:8px; font-weight:700;">Dar continuidade aos selecionados</button>
+                </div>
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border);">
+                            <th style="padding:10px; width:38px;"></th>
+                            <th style="padding:10px;">Card</th>
+                            <th style="padding:10px;">Fase</th>
+                            <th style="padding:10px;">Tratamento</th>
+                            <th style="padding:10px; text-align:right;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    atualizarBadgesMenu();
+}
+
+function renderizarAdminNotificacoes() {
+    const panelContent = document.getElementById("admin-panel-content");
+    if (!panelContent) return;
+    const notificacoes = Array.isArray(progressoUsuario.notificacoesAdmin) ? progressoUsuario.notificacoesAdmin : [];
+    const rows = notificacoes.length
+        ? notificacoes.map(item => `
+            <div style="border-bottom:1px solid var(--border); padding:14px 0; display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+                <div>
+                    <div style="font-weight:800; color:var(--text-primary);">${escapeHtml(item.titulo)}</div>
+                    <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:4px;">${escapeHtml(item.mensagem)}</div>
+                    <div style="font-size:0.74rem; color:var(--text-secondary); margin-top:6px;">${escapeHtml(new Date(item.criadoEm).toLocaleString("pt-BR"))}</div>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" onclick="window.marcarNotificacaoAdminLida('${escapeHtml(item.id)}')" style="border-radius:8px; font-weight:700;">${item.lida ? "Lida" : "Marcar lida"}</button>
+            </div>
+        `).join("")
+        : `<p style="color:var(--text-secondary); margin:0;">Nenhum aviso administrativo pendente.</p>`;
+    panelContent.innerHTML = `
+        <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:18px; border-radius:12px; background-color:var(--bg-card);">
+            <h2 style="font-size:1.8rem; font-weight:800; margin:0 0 6px;">🔔 Avisos Administrativos</h2>
+            <p style="color:var(--text-secondary); margin:0 0 14px;">Bloqueios e pendências do pipeline de provas.</p>
+            ${rows}
+        </div>
+    `;
+}
+
+window.abrirVinculoDocumentosPipeline = async function(provaId) {
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        alert("Prova não localizada.");
+        return;
+    }
+    await renderizarAdminPipeline(provaId);
+};
+
+window.salvarVinculoDocumentosPipeline = async function(provaId) {
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        alert("Prova não localizada.");
+        return;
+    }
+    const origem = document.getElementById(`pipeline-origem-${provaId}`)?.value.trim() || "";
+    const provaDoc = document.getElementById(`pipeline-prova-${provaId}`)?.value.trim() || "";
+    const gabaritoDoc = document.getElementById(`pipeline-gabarito-${provaId}`)?.value.trim() || "";
+    const questoesJson = document.getElementById(`pipeline-questoes-${provaId}`)?.value.trim() || "";
+    if (!origem && !provaDoc && !gabaritoDoc && !questoesJson) {
+        alert("Informe pelo menos uma origem, documento ou arquivo estruturado para vincular ao card.");
+        return;
+    }
+
+    atualizarStatusPipelineAdmin(provaId, "Iniciando continuidade do pipeline...");
+    try {
+        const payload = await QUESTOES_API.continuarPipelineProva({
+            provaId,
+            origem,
+            prova: provaDoc,
+            gabarito: gabaritoDoc,
+            questoes: questoesJson,
+            sourceFile: prova.file
+        });
+        (payload.steps || []).forEach((step, index) => {
+            atualizarStatusPipelineAdmin(provaId, `${index + 1}. ${step}`);
+        });
+        documentosProvasCarregados = false;
+        await carregarDocumentosProvas();
+        const docs = payload.documentos || {};
+        prova.documentos = { ...(prova.documentos || {}), ...docs };
+        if (docs.prova) prova.provaUrl = docs.prova;
+        if (docs.gabarito) prova.gabaritoUrl = docs.gabarito;
+        if (docs.origem) prova.origemUrl = docs.origem;
+        if (payload.canProcess) {
+            atualizarStatusPipelineAdmin(provaId, "JSON estruturado localizado. Processando questões...");
+            await window.processarProvaVinculada(provaId, false, { silencioso: true });
+            atualizarStatusPipelineAdmin(provaId, "Pipeline atualizado: questões processadas. Verifique se há gabaritos pendentes.", { concluido: true });
+        } else {
+            const faltamDocs = !(docs.prova && docs.gabarito);
+            const mensagem = faltamDocs
+                ? `Não está em processamento. ${payload.nextAction || "Próxima fase: completar os documentos da prova e do gabarito."}`
+                : `Não está em processamento. ${payload.nextAction || "Próxima fase: incluir ou gerar o JSON estruturado de questões."}`;
+            atualizarStatusPipelineAdmin(provaId, mensagem, { concluido: true });
+        }
+        await renderizarAdminPipeline(provaId);
+    } catch (error) {
+        atualizarStatusPipelineAdmin(provaId, error.message || "Não foi possível dar continuidade ao pipeline.", { erro: true });
+        alert(error.message || "Não foi possível vincular os documentos.");
+    }
+};
+
+window.carregarTextoProvaPipeline = function(provaId, files) {
+    const file = files && files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".txt")) {
+        alert("Envie um arquivo .txt com o texto copiado da prova.");
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const textarea = document.getElementById(`pipeline-texto-prova-${provaId}`);
+        if (textarea) {
+            textarea.value = event.target.result || "";
+            atualizarStatusPipelineAdmin(provaId, "Texto da prova carregado. Agora clique em Estruturar questões para revisão.", { concluido: true });
+        }
+    };
+    reader.readAsText(file);
+};
+
+window.estruturarQuestoesProvaPipeline = async function(provaId) {
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        alert("Prova não localizada.");
+        return;
+    }
+    const texto = document.getElementById(`pipeline-texto-prova-${provaId}`)?.value.trim() || "";
+    atualizarStatusPipelineAdmin(provaId, "Estruturando questões para revisão no Laboratório...");
+    try {
+        const payload = await QUESTOES_API.estruturarQuestoesProva({
+            provaId,
+            texto,
+            banca: prova.banca,
+            orgao: prova.orgao,
+            cargo: prova.cargo,
+            ano: prova.ano,
+            documentoProva: obterDocumentoProva(prova, "prova"),
+            origem: obterOrigemDocumentoProva(prova)
+        });
+        documentosProvasCarregados = false;
+        await carregarDocumentosProvas();
+        const questoes = Array.isArray(payload.questions) ? payload.questions : [];
+        if (!progressoUsuario.questoesLaboratorioAdicionais) progressoUsuario.questoesLaboratorioAdicionais = [];
+        questoes.forEach((q, index) => {
+            const item = {
+                ...q,
+                id: q.id || `${provaId}-${index + 1}`,
+                labId: q.labId || `lab_${Date.now()}_${index}`,
+                gabarito: "",
+                origem_importacao: {
+                    ...(q.origem_importacao || {}),
+                    arquivo: prova.file,
+                    arquivo_json: payload.file,
+                    prova_id: provaId,
+                    documento_prova: obterDocumentoProva(prova, "prova"),
+                    documento_gabarito: obterDocumentoProva(prova, "gabarito"),
+                    status: "estruturado_para_revisao"
+                }
+            };
+            progressoUsuario.questoesLaboratorioAdicionais.push(item);
+            if (Array.isArray(QUESTOES_CESPE_TRATADAS)) QUESTOES_CESPE_TRATADAS.unshift(item);
+        });
+        salvarProgressoLocal();
+        atualizarStatusPipelineAdmin(provaId, `${payload.count || questoes.length} questão(ões) estruturada(s). Revise no Laboratório antes da integração.`, { concluido: true });
+        await renderizarAdminPipeline(provaId);
+    } catch (error) {
+        atualizarStatusPipelineAdmin(provaId, error.message || "Não foi possível estruturar as questões automaticamente.", { erro: true });
+    }
+};
+
+window.aplicarGabaritoOficialPipeline = async function(provaId) {
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        alert("Prova não localizada.");
+        return;
+    }
+
+    atualizarStatusPipelineAdmin(provaId, "Extraindo gabarito oficial e aplicando ao JSON revisável...");
+    try {
+        const payload = await QUESTOES_API.aplicarGabaritoOficialProva({ provaId });
+        documentosProvasCarregados = false;
+        await carregarDocumentosProvas();
+        prova.documentos = { ...(prova.documentos || {}), ...(payload.documentos || {}) };
+        atualizarStatusPipelineAdmin(provaId, `${payload.extracted || 0} gabarito(s) extraído(s); ${payload.applied || 0} aplicado(s) ao JSON revisável.`, { concluido: true });
+        await renderizarAdminPipeline(provaId);
+    } catch (error) {
+        atualizarStatusPipelineAdmin(provaId, error.message || "Não foi possível aplicar o gabarito oficial.", { erro: true });
+    }
+};
+window.liberarQuestoesEstruturadasPipeline = async function(provaId) {
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        alert("Prova não localizada.");
+        return;
+    }
+    const confirmar = confirm("Liberar o JSON revisado para processamento no banco? Use esta ação apenas depois da revisão no Laboratório.");
+    if (!confirmar) return;
+
+    atualizarStatusPipelineAdmin(provaId, "Liberando revisão para processamento controlado...");
+    try {
+        const payload = await QUESTOES_API.liberarQuestoesEstruturadas({ provaId });
+        documentosProvasCarregados = false;
+        await carregarDocumentosProvas();
+        prova.documentos = { ...(prova.documentos || {}), ...(payload.documentos || {}) };
+        atualizarStatusPipelineAdmin(provaId, payload.nextAction || "Revisão liberada para processamento.", { concluido: true });
+        await renderizarAdminPipeline(provaId);
+    } catch (error) {
+        atualizarStatusPipelineAdmin(provaId, error.message || "Não foi possível liberar a revisão.", { erro: true });
+    }
+};
+async function continuarPipelineProvaAdmin(provaId, { abrirFormulario = false } = {}) {
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        atualizarStatusPipelineAdmin(provaId, "Prova não localizada.", { erro: true });
+        return { ok: false };
+    }
+    const documentosAtuais = prova.documentos || {};
+    const temAlgumVinculo = Boolean(obterOrigemDocumentoProva(prova) || obterDocumentoProva(prova, "prova") || obterDocumentoProva(prova, "gabarito") || obterArquivoQuestoesVinculado(prova));
+    if (temAlgumVinculo && !provaTemFonteProcessavelQuestoes(prova)) {
+        atualizarStatusPipelineAdmin(provaId, "Tentando completar documentos pela origem oficial...");
+        try {
+            const payload = await QUESTOES_API.continuarPipelineProva({
+                provaId,
+                origem: documentosAtuais.origem || obterOrigemDocumentoProva(prova),
+                prova: documentosAtuais.prova || obterDocumentoProva(prova, "prova"),
+                gabarito: documentosAtuais.gabarito || obterDocumentoProva(prova, "gabarito"),
+                questoes: documentosAtuais.questoes || obterArquivoQuestoesVinculado(prova),
+                sourceFile: prova.file
+            });
+            (payload.steps || []).forEach((step, index) => atualizarStatusPipelineAdmin(provaId, `${index + 1}. ${step}`));
+            documentosProvasCarregados = false;
+            await carregarDocumentosProvas();
+            prova.documentos = { ...(prova.documentos || {}), ...(payload.documentos || {}) };
+            if (payload.canProcess) {
+                atualizarStatusPipelineAdmin(provaId, "JSON estruturado localizado. Processando questões...");
+                await window.processarProvaVinculada(provaId, false, { silencioso: true });
+                atualizarStatusPipelineAdmin(provaId, "Questões processadas. Verifique se há gabaritos pendentes.", { concluido: true });
+                return { ok: true, processado: true };
+            }
+            atualizarStatusPipelineAdmin(provaId, `Não está em processamento. ${payload.nextAction || "Ainda falta complemento administrativo para avançar."}`, { concluido: true });
+        } catch (error) {
+            atualizarStatusPipelineAdmin(provaId, error.message || "Não foi possível completar este pipeline.", { erro: true });
+            return { ok: false, erro: true };
+        }
+    }
+    const pipeline = obterEstadoPipelineProva(prova);
+    if (["card_criado", "arquivos_pendentes", "documentos_parciais"].includes(pipeline.code)) {
+        atualizarStatusPipelineAdmin(provaId, "Aguardando vínculo de origem, prova, gabarito ou JSON estruturado.", { concluido: true });
+        if (abrirFormulario) await renderizarAdminPipeline(provaId);
+        return { ok: false, precisaVinculo: true };
+    }
+    if (pipeline.code === "gabaritos_pendentes") {
+        atualizarStatusPipelineAdmin(provaId, "Questões processadas. Próxima fase: revisar ou importar gabaritos explícitos.", { concluido: true });
+        return { ok: true, precisaGabarito: true };
+    }
+    if (pipeline.code === "completo") {
+        atualizarStatusPipelineAdmin(provaId, "Pipeline já está completo para este card.", { concluido: true });
+        return { ok: true, completo: true };
+    }
+    if (!provaTemFonteProcessavelQuestoes(prova)) {
+        const atual = obterEstadoPipelineProva(prova);
+        registrarNotificacaoPipelineAdmin(prova, atual);
+        atualizarStatusPipelineAdmin(provaId, "Documentos vinculados, mas ainda falta o JSON estruturado de questões para processar.", { erro: true });
+        return { ok: false, precisaJson: true };
+    }
+    atualizarStatusPipelineAdmin(provaId, "JSON estruturado localizado. Processando questões...");
+    try {
+        await window.processarProvaVinculada(provaId, false, { silencioso: true });
+        atualizarStatusPipelineAdmin(provaId, "Questões processadas. Verifique se há gabaritos pendentes.", { concluido: true });
+        return { ok: true, processado: true };
+    } catch (error) {
+        atualizarStatusPipelineAdmin(provaId, error.message || "Não foi possível processar este card.", { erro: true });
+        return { ok: false, erro: true };
+    }
+}
+
+window.alternarSelecaoPipelineLote = function(checked) {
+    document.querySelectorAll(".pipeline-batch-check").forEach(input => {
+        input.checked = Boolean(checked);
+    });
+};
+
+window.continuarPipelineSelecionados = async function() {
+    const ids = Array.from(document.querySelectorAll(".pipeline-batch-check:checked")).map(input => input.value);
+    if (!ids.length) {
+        alert("Selecione pelo menos um card para dar continuidade ao pipeline.");
+        return;
+    }
+    ids.forEach(id => atualizarStatusPipelineAdmin(id, "Card incluído na fila de continuidade do pipeline..."));
+    await renderizarAdminPipeline();
+    const resultados = await Promise.allSettled(ids.map(id => continuarPipelineProvaAdmin(id)));
+    const processados = resultados.filter(item => item.status === "fulfilled" && item.value?.ok).length;
+    const pendentes = ids.length - processados;
+    pipelineAdminState.resultados.__lote = `${processados} card(s) avançaram e ${pendentes} ficaram aguardando complemento administrativo.`;
+    await renderizarAdminPipeline();
+};
+
+window.criarCardProvaPipeline = async function() {
+    const banca = prompt("Banca do concurso:");
+    if (!banca) return;
+    const orgao = prompt("Órgão ou concurso:");
+    if (!orgao) return;
+    const ano = prompt("Ano de aplicação:");
+    if (!ano) return;
+    const cargo = prompt("Cargo:");
+    if (!cargo) return;
+    const nivel = prompt("Nível:", "Superior");
+    if (nivel === null) return;
+
+    try {
+        const payload = await QUESTOES_API.salvarCardProva({
+            banca,
+            orgao,
+            ano,
+            cargo,
+            nivel: nivel || "Superior",
+            statusPipeline: "card_criado",
+            suspensa: true
+        });
+        documentosProvasCarregados = false;
+        await carregarDocumentosProvas();
+        await renderizarAdminPipeline(payload.id);
+        alert("Card criado no Pipeline e mantido suspenso para usuários comuns.");
+    } catch (error) {
+        alert(error.message || "Não foi possível criar o card.");
+    }
+};
+
+window.alterarSuspensaoProvaPipeline = async function(provaId, suspensa) {
+    const prova = BANCO_PROVAS.find(p => p.id === provaId);
+    if (!prova) {
+        alert("Prova não localizada.");
+        return;
+    }
+    try {
+        const payload = await QUESTOES_API.salvarCardProva({
+            id: prova.id,
+            banca: prova.banca,
+            orgao: prova.orgao,
+            ano: prova.ano,
+            cargo: prova.cargo,
+            nivel: prova.nivel,
+            file: prova.file,
+            statusPipeline: prova.statusPipeline || "card_criado",
+            suspensa
+        });
+        prova.suspensa = Boolean(payload.card?.suspensa);
+        documentosProvasCarregados = false;
+        await carregarDocumentosProvas();
+        await renderizarAdminPipeline(provaId);
+        alert(suspensa ? "Prova suspensa para usuários comuns." : "Prova reativada para usuários comuns.");
+    } catch (error) {
+        alert(error.message || "Não foi possível atualizar a suspensão.");
+    }
+};
+
+window.navegarAdminTab = async function(tabName, contextId = "") {
     // 1. Mostrar a seção do painel administrativo
     const adminSection = document.getElementById("section-admin");
     if (adminSection) {
@@ -6363,7 +8358,10 @@ window.navegarAdminTab = async function(tabName) {
         'geral': 'btn-nav-admin-status',
         'usuarios': 'btn-nav-admin-users',
         'acessos': 'btn-nav-admin-access',
-        'financeiro': 'btn-nav-admin-finance'
+        'financeiro': 'btn-nav-admin-finance',
+        'pipeline': 'btn-nav-admin-pipeline',
+        'notificacoes': 'btn-nav-admin-notificacoes',
+        'gabaritos': 'btn-nav-admin-gabaritos'
     };
     const activeBtn = document.getElementById(navBtnMap[tabName]);
     if (activeBtn) activeBtn.classList.add("active");
@@ -6383,7 +8381,7 @@ window.navegarAdminTab = async function(tabName) {
                 
                 <div class="stats-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
                     <div class="card-base" style="border: 1px solid var(--border); box-shadow: var(--shadow); padding:20px; border-radius:12px; background-color: var(--bg-card);">
-                        <div style="font-size:0.85rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Questões na Sala</div>
+                        <div style="font-size:0.85rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Questões em Sessão</div>
                         <div style="font-size:2rem; font-weight:800; margin:10px 0;">${BANCO_QUESTOES.length}</div>
                         <div style="font-size:0.75rem; color:var(--text-secondary);">Prontas para resolução</div>
                     </div>
@@ -6411,6 +8409,15 @@ window.navegarAdminTab = async function(tabName) {
                 </div>
             </div>
         `;
+    } else if (tabName === 'gabaritos') {
+        await renderizarAdminGabaritos();
+        return;
+    } else if (tabName === 'pipeline') {
+        await renderizarAdminPipeline(contextId);
+        return;
+    } else if (tabName === 'notificacoes') {
+        renderizarAdminNotificacoes();
+        return;
     } else if (tabName === 'usuarios') {
         try {
             const payload = await REMB_API.request("/api/admin/users");
@@ -6487,24 +8494,15 @@ window.navegarAdminTab = async function(tabName) {
             </div>
         `;
     } else if (tabName === 'financeiro') {
-        html = `
-            <div class="admin-finance" style="display:flex; flex-direction:column; gap:25px;">
-                <h2 style="font-size:1.8rem; font-weight:800; margin:0;">💰 Controle Financeiro</h2>
-                
-                <div class="stats-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
-                    <div class="card-base" style="border: 1px solid var(--border); box-shadow: var(--shadow); padding:20px; border-radius:12px; background-color: var(--bg-card);">
-                        <div style="font-size:0.85rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Faturamento Mensal</div>
-                        <div style="font-size:2rem; font-weight:800; margin:10px 0; color:var(--correta);">R$ 14.850,00</div>
-                        <div style="font-size:0.75rem; color:var(--text-secondary);">+15% em relação ao mês anterior</div>
-                    </div>
-                    <div class="card-base" style="border: 1px solid var(--border); box-shadow: var(--shadow); padding:20px; border-radius:12px; background-color: var(--bg-card);">
-                        <div style="font-size:0.85rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Assinaturas Ativas</div>
-                        <div style="font-size:2rem; font-weight:800; margin:10px 0;">247</div>
-                        <div style="font-size:0.75rem; color:var(--text-secondary);">Taxa de Churn: 1.2% (baixa)</div>
-                    </div>
-                </div>
+        panelContent.innerHTML = `
+            <div class="card-base" style="border:1px solid var(--border); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:8px;">Carregando controle de custos</h2>
+                <p style="color:var(--text-secondary); margin:0;">Buscando registros reais do projeto REMB Estudos.</p>
             </div>
         `;
+        await window.carregarCustosProjeto();
+        atualizarBadgesMenu();
+        return;
     }
     panelContent.innerHTML = html;
     
@@ -6517,9 +8515,142 @@ window.navegarAdminTab = async function(tabName) {
 // ==========================================================================
 window.activeQuestionIdForList = null;
 
+function normalizarTextoBuscaListas(value) {
+    return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+function obterTagsLista(list) {
+    const tags = Array.isArray(list?.tags) ? list.tags : [];
+    return [...new Set(tags.map(tag => String(tag || "").trim()).filter(Boolean))];
+}
+
+function normalizarListaUsuario(list) {
+    if (!list) return null;
+    list.questoes = Array.isArray(list.questoes) ? list.questoes : [];
+    list.tags = obterTagsLista(list);
+    list.usarNaResolucao = Boolean(list.usarNaResolucao);
+    list.gabaritoStatus = list.gabaritoStatus || {};
+    list.origemLista = list.origemLista || {
+        tipo: list.tipo === "upload" ? "arquivo_usuario" : "lista_usuario",
+        visibilidade: list.isPublica ? "compartilhada" : "privada"
+    };
+    return list;
+}
+
+function contarGabaritosPendentesLista(list) {
+    const questoes = Array.isArray(list?.questoes) ? list.questoes : [];
+    return questoes.filter(q => !normalizarValorGabaritoAdmin(q.gabarito)).length;
+}
+
+function assinaturaQuestaoLista(q) {
+    return normalizarTextoBuscaListas(q?.enunciado || "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 260);
+}
+
+function encontrarQuestaoExistenteParaLista(q) {
+    const assinatura = assinaturaQuestaoLista(q);
+    if (!assinatura || assinatura.length < 40) return null;
+    const fontes = [];
+    if (Array.isArray(window.BANCO_QUESTOES)) fontes.push(...window.BANCO_QUESTOES);
+    Object.values(progressoUsuario.listas || {}).forEach(list => {
+        if (Array.isArray(list.questoes)) fontes.push(...list.questoes);
+    });
+    return fontes.find(item => item?.id && item.id !== q.id && assinaturaQuestaoLista(item) === assinatura) || null;
+}
+
+function prepararQuestaoImportadaParaLista(q, fileName) {
+    const existente = encontrarQuestaoExistenteParaLista(q);
+    if (!existente) return q;
+
+    const gabaritoImportado = normalizarValorGabaritoAdmin(q.gabarito);
+    const gabaritoExistente = normalizarValorGabaritoAdmin(existente.gabarito);
+    const origemOficial = ["banca_oficial", "arquivo_admin", "prova", "laboratorio"].includes(String(existente.gabarito_origem?.tipo || existente.origem_questao?.tipo || "").toLowerCase());
+
+    const reutilizada = {
+        ...existente,
+        tags: [...new Set([...(existente.tags || []), ...(q.tags || []), "lista-importada"])],
+        origem_lista_importada: {
+            arquivo: fileName,
+            gabarito_informado: gabaritoImportado || "",
+            gabarito_divergente: Boolean(gabaritoImportado && gabaritoExistente && gabaritoImportado !== gabaritoExistente)
+        }
+    };
+
+    if (!gabaritoExistente && gabaritoImportado) {
+        reutilizada.gabarito = gabaritoImportado;
+        reutilizada.gabarito_origem = { tipo: "lista_importada", fonte: fileName };
+    } else if (origemOficial && gabaritoImportado && gabaritoExistente && gabaritoImportado !== gabaritoExistente) {
+        reutilizada.gabarito_lista_divergente = gabaritoImportado;
+    }
+
+    return reutilizada;
+}
+
+function obterListasFiltradas() {
+    const listas = Object.entries(progressoUsuario.listas || {}).map(([id, list]) => [id, normalizarListaUsuario(list)]);
+    const rawBusca = document.getElementById("inputBuscaListas")?.value || "";
+    const termos = normalizarTextoBuscaListas(rawBusca).split(/\s+/).filter(Boolean);
+    if (termos.length === 0) return listas;
+
+    return listas.filter(([, list]) => {
+        const texto = normalizarTextoBuscaListas(`${list.nome || ""} ${obterTagsLista(list).join(" ")}`);
+        return termos.every(termo => texto.includes(termo));
+    });
+}
+
+function atualizarResumoBuscaListas(total, exibidas) {
+    const el = document.getElementById("listasResumoBusca");
+    if (!el) return;
+    el.textContent = total === exibidas
+        ? "Busque por nome ou por uma ou mais tags."
+        : `${exibidas} de ${total} lista(s) encontradas.`;
+}
+
+function extrairGabaritosTextoLista(text) {
+    const mapa = new Map();
+    String(text || "").split(/\r?\n/).forEach(line => {
+        const trimmed = line.trim();
+        const match = trimmed.match(/^(?:quest[aã]o\s*)?(\d{1,4})\s*[-;:,\t ]+\s*(certo|errado|anulada|anulado|[A-E]|C|E|X)\b/i);
+        if (match) {
+            const valor = normalizarValorGabaritoAdmin(match[2]);
+            if (valor) mapa.set(Number(match[1]), valor);
+        }
+    });
+    return mapa;
+}
 window.inicializarListasPrecarregadas = async function() {
+    await carregarEscopoAcessoUsuario();
     if (!progressoUsuario.listas) {
         progressoUsuario.listas = {};
+    }
+
+    if (!progressoUsuario.listasBancoCarregadas) {
+        try {
+            const payload = await REMB_API.request("/api/lists?includeQuestions=true");
+            (payload.lists || []).forEach(item => {
+                progressoUsuario.listas[item.id] = {
+                    id: item.id,
+                    nome: item.nome,
+                    questoes: item.questoes || [],
+                    criadaEm: item.criadaEm || new Date().toISOString(),
+                    tipo: item.tipo || "lista_usuario",
+                    tags: item.tags || [],
+                    usarNaResolucao: Boolean(item.usarNaResolucao),
+                    origemLista: item.origemLista || { persistencia: "banco", visibilidade: "privada" },
+                    gabaritoStatus: { pendentes: item.gabaritosPendentes || contarGabaritosPendentesLista({ questoes: item.questoes || [] }) }
+                };
+            });
+            progressoUsuario.listasBancoCarregadas = true;
+        } catch (e) {
+            console.warn("Listas privadas do banco indisponíveis; mantendo listas locais.", e);
+        }
     }
     if (progressoUsuario.listasPrecarregadas) return;
 
@@ -6530,6 +8661,7 @@ window.inicializarListasPrecarregadas = async function() {
     ];
 
     for (const item of files) {
+        if (listaPermitidaParaUsuario(item.id) === false) continue;
         try {
             const res = await fetch(item.file);
             if (res.ok) {
@@ -6539,7 +8671,9 @@ window.inicializarListasPrecarregadas = async function() {
                     nome: item.name,
                     questoes: data,
                     criadaEm: new Date().toISOString(),
-                    tipo: "precarregada"
+                    tipo: "precarregada",
+                    tags: ["precarregada", "revisao"],
+                    usarNaResolucao: false
                 };
             }
         } catch (e) {
@@ -6562,39 +8696,68 @@ window.renderizarListas = function() {
     }
 
     container.innerHTML = "";
-    const listIds = Object.keys(progressoUsuario.listas);
+    const totalListas = Object.keys(progressoUsuario.listas).length;
+    const listasFiltradas = obterListasFiltradas();
+    atualizarResumoBuscaListas(totalListas, listasFiltradas.length);
 
-    if (listIds.length === 0) {
+    if (totalListas === 0) {
         container.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary);">
-                <p>Nenhuma lista ativa. Crie uma lista vazia ou envie um arquivo para começar!</p>
+                <p>Nenhuma lista ativa. Importe um arquivo ou crie uma lista manual para começar.</p>
             </div>
         `;
         return;
     }
 
-    listIds.forEach(id => {
-        const list = progressoUsuario.listas[id];
+    if (listasFiltradas.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                <p>Nenhuma lista encontrada para essa busca.</p>
+            </div>
+        `;
+        return;
+    }
+
+    listasFiltradas.forEach(([id, list]) => {
         const count = list.questoes ? list.questoes.length : 0;
-        
+        const pendentes = contarGabaritosPendentesLista(list);
+        const tags = obterTagsLista(list);
         const card = document.createElement("div");
         card.className = "stapled-paper";
         card.onclick = () => window.visualizarLista(id);
 
         const isCEO = (progressoUsuario.activeUserLevel === "CEO / PROPRIETÁRIO");
         const ceoActionHTML = isCEO ? `
-            <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); window.tratarListaNoLaboratorio('${id}')" title="Tratar Lista no Laboratório" style="padding: 3px 8px; font-size: 0.72rem; font-weight: 700; border-radius: 6px; border-width: 1.5px; border-color: var(--accent); color: var(--accent); background-color: var(--accent-light); margin-left: 5px;">
-                🧪 Tratar no Lab
+            <button class="lista-card-btn" onclick="event.stopPropagation(); window.tratarListaNoLaboratorio('${id}')" title="Tratar Lista no Laboratório">
+                🧪 Lab
             </button>
         ` : "";
 
-        const content = `
+        const tagsHTML = tags.length
+            ? `<div class="lista-tags-row">${tags.slice(0, 5).map(tag => `<span class="lista-tag-chip">${escapeHtml(tag)}</span>`).join("")}${tags.length > 5 ? `<span class="lista-tag-chip">+${tags.length - 5}</span>` : ""}</div>`
+            : `<div class="lista-tags-row"><span class="lista-tag-chip">sem tags</span></div>`;
+
+        const pendenciaHTML = pendentes > 0
+            ? `<span class="lista-pendencia-badge">${pendentes} gabarito(s) pendente(s)</span>`
+            : `<span class="stapled-paper-badge">Gabaritos ok</span>`;
+
+        card.innerHTML = `
             <div class="stapled-paper-content">
-                <div class="stapled-paper-title">${list.nome}</div>
+                <div class="lista-card-topline">
+                    <div class="stapled-paper-title">${escapeHtml(list.nome)}</div>
+                    <label class="lista-card-check" title="Incluir esta lista na sessão de resolução">
+                        <input type="checkbox" ${list.usarNaResolucao ? "checked" : ""} onclick="event.stopPropagation(); window.alternarListaResolucao('${id}', this.checked)">
+                        Resolver
+                    </label>
+                </div>
                 <div class="stapled-paper-info">Criada em: ${new Date(list.criadaEm).toLocaleDateString('pt-BR')}</div>
+                ${tagsHTML}
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">${pendenciaHTML}</div>
             </div>
-            <div class="stapled-paper-actions" style="display:flex; align-items:center; gap:8px;">
+            <div class="stapled-paper-actions" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                 <span class="stapled-paper-badge">${count} Questões</span>
+                <button class="lista-card-btn" onclick="event.stopPropagation(); window.editarTagsLista('${id}')" title="Editar tags da lista">Tags</button>
+                <button class="lista-card-btn" onclick="event.stopPropagation(); window.informarGabaritoLista('${id}')" title="Informar gabarito da lista">Gabarito</button>
                 ${ceoActionHTML}
                 ${list.tipo !== 'precarregada' ? `
                     <button class="btn-delete-list" onclick="event.stopPropagation(); window.excluirLista('${id}')" title="Excluir Lista">
@@ -6603,7 +8766,6 @@ window.renderizarListas = function() {
                 ` : ''}
             </div>
         `;
-        card.innerHTML = content;
         container.appendChild(card);
     });
 };
@@ -6625,7 +8787,9 @@ window.criarListaManual = function() {
         nome: nome,
         questoes: [],
         criadaEm: new Date().toISOString(),
-        tipo: "custom"
+        tipo: "custom",
+        tags: [],
+        usarNaResolucao: false
     };
 
     salvarProgressoLocal();
@@ -6643,6 +8807,139 @@ window.excluirLista = function(id) {
     }
 };
 
+window.alternarListaResolucao = function(id, checked) {
+    const list = progressoUsuario.listas?.[id];
+    if (!list) return;
+    list.usarNaResolucao = Boolean(checked);
+    salvarProgressoLocal();
+    window.renderizarListas();
+};
+
+window.abrirListasSelecionadasNaSala = function() {
+    const selecionadas = Object.entries(progressoUsuario.listas || {})
+        .map(([id, list]) => [id, normalizarListaUsuario(list)])
+        .filter(([, list]) => list.usarNaResolucao && Array.isArray(list.questoes) && list.questoes.length > 0);
+
+    if (selecionadas.length === 0) {
+        alert("Selecione pelo menos uma lista marcada como Resolver.");
+        return;
+    }
+
+    const seen = new Set();
+    const questoes = [];
+    selecionadas.forEach(([, list]) => {
+        list.questoes.forEach(q => {
+            const key = q.id || assinaturaQuestaoLista(q);
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            questoes.push(q);
+        });
+    });
+
+    window.listaAtivaQuestoes = questoes;
+    window.abrirQuestoesNaSala(questoes, 0, {
+        type: "lista",
+        id: selecionadas.map(([id]) => id).join(","),
+        nome: `${selecionadas.length} lista(s) selecionada(s)`,
+        tipo: "multiplas_listas",
+        descricao: "Sessão composta por listas marcadas para resolução.",
+        quantidade: questoes.length
+    });
+};
+
+window.editarTagsLista = function(id) {
+    const list = progressoUsuario.listas?.[id];
+    if (!list) return;
+    const atuais = obterTagsLista(list).join(", ");
+    const resposta = prompt("Informe as tags separadas por vírgula.", atuais);
+    if (resposta === null) return;
+    list.tags = [...new Set(resposta.split(",").map(tag => tag.trim()).filter(Boolean))];
+    salvarProgressoLocal();
+    window.renderizarListas();
+};
+
+window.informarGabaritoLista = function(id) {
+    const list = progressoUsuario.listas?.[id];
+    if (!list || !Array.isArray(list.questoes) || list.questoes.length === 0) {
+        alert("Lista não encontrada ou sem questões.");
+        return;
+    }
+
+    const modelo = list.questoes.slice(0, 5).map((q, idx) => `${q.numero || idx + 1};`).join("\n");
+    const texto = prompt("Cole o gabarito no formato número;resposta. Exemplo: 1;A ou 2;Certo", modelo);
+    if (!texto) return;
+
+    const mapa = extrairGabaritosTextoLista(texto);
+    let aplicados = 0;
+    list.questoes.forEach((q, idx) => {
+        const numero = Number(q.numero || idx + 1);
+        const novo = mapa.get(numero);
+        if (!novo) return;
+        const atual = normalizarValorGabaritoAdmin(q.gabarito);
+        const origemOficial = ["banca_oficial", "arquivo_admin", "prova", "laboratorio"].includes(String(q.gabarito_origem?.tipo || q.origem_questao?.tipo || "").toLowerCase());
+        if (origemOficial && atual && atual !== novo) {
+            q.gabarito_lista_divergente = novo;
+            return;
+        }
+        if (!atual || !origemOficial) {
+            q.gabarito = novo;
+            q.gabarito_origem = q.gabarito_origem || { tipo: "lista_importada", fonte: list.nome };
+            if (Array.isArray(q.alternativas)) {
+                q.alternativas = q.alternativas.map(alt => ({ ...alt, is_correta: normalizarValorGabaritoAdmin(alt.letra) === novo }));
+            }
+            aplicados += 1;
+        }
+    });
+
+    list.gabaritoStatus = {
+        atualizadoEm: new Date().toISOString(),
+        aplicados,
+        pendentes: contarGabaritosPendentesLista(list)
+    };
+    salvarProgressoLocal();
+    window.renderizarListas();
+    alert(`${aplicados} gabarito(s) aplicado(s). Gabaritos oficiais divergentes foram preservados.`);
+};
+
+window.lidarComUploadGabaritoLista = function(files) {
+    if (!files || files.length === 0) return;
+    const listas = Object.entries(progressoUsuario.listas || {}).filter(([, list]) => Array.isArray(list.questoes) && list.questoes.length > 0);
+    if (listas.length === 0) {
+        alert("Importe uma lista antes de importar o gabarito.");
+        return;
+    }
+    const nomes = listas.map(([id, list], idx) => `${idx + 1}. ${list.nome}`).join("\n");
+    const escolha = Number(prompt(`Para qual lista deseja aplicar este gabarito?\n${nomes}`, "1"));
+    const alvo = listas[escolha - 1];
+    if (!alvo) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const list = progressoUsuario.listas[alvo[0]];
+        const mapa = extrairGabaritosTextoLista(evt.target.result || "");
+        let aplicados = 0;
+        list.questoes.forEach((q, idx) => {
+            const novo = mapa.get(Number(q.numero || idx + 1));
+            if (!novo) return;
+            const atual = normalizarValorGabaritoAdmin(q.gabarito);
+            const origemOficial = ["banca_oficial", "arquivo_admin", "prova", "laboratorio"].includes(String(q.gabarito_origem?.tipo || q.origem_questao?.tipo || "").toLowerCase());
+            if (origemOficial && atual && atual !== novo) {
+                q.gabarito_lista_divergente = novo;
+                return;
+            }
+            q.gabarito = atual && origemOficial ? atual : novo;
+            q.gabarito_origem = q.gabarito_origem || { tipo: "lista_importada", fonte: files[0].name };
+            aplicados += 1;
+        });
+        list.gabaritoStatus = { atualizadoEm: new Date().toISOString(), aplicados, pendentes: contarGabaritosPendentesLista(list) };
+        salvarProgressoLocal();
+        window.renderizarListas();
+        alert(`${aplicados} gabarito(s) aplicado(s) à lista "${list.nome}".`);
+    };
+    reader.readAsText(files[0]);
+    const input = document.getElementById("fileInputGabaritoLista");
+    if (input) input.value = "";
+};
 window.visualizarLista = function(id) {
     const list = progressoUsuario.listas[id];
     if (!list) return;
@@ -6653,7 +8950,14 @@ window.visualizarLista = function(id) {
     }
 
     window.listaAtivaQuestoes = list.questoes;
-    window.abrirQuestoesNaSala(list.questoes, 0);
+    window.abrirQuestoesNaSala(list.questoes, 0, {
+        type: "lista",
+        id,
+        nome: list.nome,
+        tipo: list.tipo,
+        descricao: list.descricao,
+        quantidade: list.questoes.length
+    });
     alert(`Lista "${list.nome}" carregada na aba de Questões.`);
 };
 
@@ -6773,7 +9077,9 @@ window.criarAdicionarNovaListaModal = function() {
         nome: nome,
         questoes: [q],
         criadaEm: new Date().toISOString(),
-        tipo: "custom"
+        tipo: "custom",
+        tags: [],
+        usarNaResolucao: false
     };
 
     salvarProgressoLocal();
@@ -6848,89 +9154,110 @@ window.lidarComUploadArquivo = function(files) {
 window.parsearEImportarQuestoesTexto = function(text, fileName) {
     const linhas = text.split('\n').map(l => l.trim()).filter(l => l !== "");
     const questoesExtraidas = [];
-    
+
     let questaoAtual = null;
     let alternativasTemp = [];
     let idCounter = 1;
 
+    function finalizarQuestaoAtual() {
+        if (!questaoAtual) return;
+        questaoAtual.alternativas = alternativasTemp;
+        if (alternativasTemp.length === 0) {
+            questaoAtual.tipo = "certo_errado";
+            questaoAtual.alternativas = [{ letra: "C", texto: "Certo" }, { letra: "E", texto: "Errado" }];
+        }
+        const gab = normalizarValorGabaritoAdmin(questaoAtual.gabarito);
+        if (gab) {
+            questaoAtual.gabarito = gab;
+            questaoAtual.gabarito_origem = { tipo: "lista_importada", fonte: fileName };
+            questaoAtual.alternativas = questaoAtual.alternativas.map(alt => ({
+                ...alt,
+                is_correta: normalizarValorGabaritoAdmin(alt.letra) === gab
+            }));
+        }
+        questoesExtraidas.push(prepararQuestaoImportadaParaLista(questaoAtual, fileName));
+    }
+
     linhas.forEach(linha => {
-        // Detecção de nova questão
         const matchNovaQuestao = linha.match(/^(Questão\s+\d+|^\d+[\.\-\)])/i);
         if (matchNovaQuestao) {
-            if (questaoAtual) {
-                questaoAtual.alternativas = alternativasTemp;
-                questoesExtraidas.push(questaoAtual);
-            }
-            
+            finalizarQuestaoAtual();
+            const numeroMatch = linha.match(/\d+/);
+            const numero = numeroMatch ? Number(numeroMatch[0]) : idCounter;
             questaoAtual = {
                 id: "upload_" + Date.now() + "_" + idCounter++,
-                numero: idCounter - 1,
+                numero,
                 tipo: "multipla_escolha",
                 disciplina: "Importação Privada",
                 assunto: "Privado",
                 enunciado: linha.replace(/^(Questão\s+\d+|^\d+[\.\-\)])\s*/i, ""),
                 alternativas: [],
-                gabarito: "A", // Default
+                gabarito: "",
                 dificuldade: "Média",
                 tags: ["privado", "upload"],
-                origem_questao: { banca: "Banca Própria", ano: new Date().getFullYear(), prova: fileName }
+                origem_questao: { banca: "Banca Própria", ano: new Date().getFullYear(), prova: fileName, tipo: "lista_importada" }
             };
             alternativasTemp = [];
-        } else if (questaoAtual) {
-            // Detecção de alternativa (Ex: A) ou A - ou A.)
-            const matchAlt = linha.match(/^([A-E])[\)\.\-\s]\s*(.+)/i);
-            if (matchAlt) {
-                const letra = matchAlt[1].toUpperCase();
-                const texto = matchAlt[2];
-                alternativasTemp.push({ letra, texto });
-                
-                // Múltipla escolha identificada
-                questaoAtual.tipo = "multipla_escolha";
-            } else if (linha.toLowerCase() === "certo" || linha.toLowerCase() === "c)") {
-                alternativasTemp.push({ letra: "C", texto: "Certo" });
-                questaoAtual.tipo = "certo_errado";
-                questaoAtual.gabarito = "C";
-            } else if (linha.toLowerCase() === "errado" || linha.toLowerCase() === "e)") {
-                alternativasTemp.push({ letra: "E", texto: "Errado" });
-                questaoAtual.tipo = "certo_errado";
-                questaoAtual.gabarito = "E";
-            } else {
-                // Complemento de enunciado
-                questaoAtual.enunciado += " " + linha;
-            }
+            return;
+        }
+
+        if (!questaoAtual) return;
+
+        const matchGabarito = linha.match(/^Gabarito\s*[:\-]\s*(certo|errado|anulada|anulado|[A-E]|C|E|X)\b/i);
+        if (matchGabarito) {
+            questaoAtual.gabarito = normalizarValorGabaritoAdmin(matchGabarito[1]);
+            return;
+        }
+
+        const matchTags = linha.match(/^Tags?\s*[:\-]\s*(.+)$/i);
+        if (matchTags) {
+            const novasTags = matchTags[1].split(/[,;]/).map(tag => tag.trim()).filter(Boolean);
+            questaoAtual.tags = [...new Set([...(questaoAtual.tags || []), ...novasTags])];
+            return;
+        }
+
+        const matchAlt = linha.match(/^([A-E])[")\.\-\s]\s*(.+)/i);
+        if (matchAlt) {
+            const letra = matchAlt[1].toUpperCase();
+            const textoAlt = matchAlt[2];
+            alternativasTemp.push({ letra, texto: textoAlt });
+            questaoAtual.tipo = "multipla_escolha";
+        } else if (linha.toLowerCase() === "certo" || linha.toLowerCase() === "c)") {
+            alternativasTemp.push({ letra: "C", texto: "Certo" });
+            questaoAtual.tipo = "certo_errado";
+        } else if (linha.toLowerCase() === "errado" || linha.toLowerCase() === "e)") {
+            alternativasTemp.push({ letra: "E", texto: "Errado" });
+            questaoAtual.tipo = "certo_errado";
+        } else {
+            questaoAtual.enunciado += " " + linha;
         }
     });
 
-    if (questaoAtual) {
-        questaoAtual.alternativas = alternativasTemp;
-        if (alternativasTemp.length === 0) {
-            // Se não encontrou alternativas, cria Certo/Errado por padrão
-            questaoAtual.tipo = "certo_errado";
-            questaoAtual.alternativas = [{ letra: "C", texto: "Certo" }, { letra: "E", texto: "Errado" }];
-            questaoAtual.gabarito = "C";
-        }
-        questoesExtraidas.push(questaoAtual);
-    }
+    finalizarQuestaoAtual();
 
     if (questoesExtraidas.length === 0) {
-        // Se falhou em estruturar, cai para fallback mockado do arquivo
         window.importarSimuladoMockDoArquivo(fileName);
         return;
     }
 
     const idLista = "upload_" + Date.now();
     if (!progressoUsuario.listas) progressoUsuario.listas = {};
-    
+    const tagsLista = [...new Set(["privado", "importada", ...questoesExtraidas.flatMap(q => q.tags || []).filter(tag => !["upload", "privado"].includes(String(tag).toLowerCase())).slice(0, 8)])];
+
     progressoUsuario.listas[idLista] = {
         id: idLista,
         nome: fileName.replace(/\.[^/.]+$/, ""),
         questoes: questoesExtraidas,
         criadaEm: new Date().toISOString(),
-        tipo: "upload"
+        tipo: "upload",
+        tags: tagsLista,
+        usarNaResolucao: false,
+        origemLista: { tipo: "arquivo_usuario", arquivo: fileName, visibilidade: "privada" },
+        gabaritoStatus: { pendentes: questoesExtraidas.filter(q => !normalizarValorGabaritoAdmin(q.gabarito)).length }
     };
 
     salvarProgressoLocal();
-    alert(`Sucesso! Importamos a lista "${fileName}" com ${questoesExtraidas.length} questões identificadas.`);
+    alert(`Sucesso! Importamos a lista "${fileName}" com ${questoesExtraidas.length} questões identificadas. Questões já existentes foram reaproveitadas quando houve coincidência de enunciado.`);
     window.renderizarListas();
 };
 
@@ -6947,7 +9274,7 @@ window.importarSimuladoMockDoArquivo = function(fileName) {
             assunto: "Atos Administrativos",
             enunciado: `(Questão extraída de ${fileName}) Acerca dos atributos dos atos administrativos, julgue o item. A presunção de legitimidade dos atos da administração pública é de natureza absoluta, não admitindo prova em contrário.`,
             alternativas: [{ letra: "C", texto: "Certo" }, { letra: "E", texto: "Errado" }],
-            gabarito: "E",
+            gabarito: "",
             dificuldade: "Fácil",
             tags: ["privado", listName],
             origem_questao: { banca: "Simulado", ano: 2026, prova: listName }
@@ -6965,7 +9292,7 @@ window.importarSimuladoMockDoArquivo = function(fileName) {
                 { letra: "C", texto: "Balanço Orçamentário" },
                 { letra: "D", texto: "Demonstração das Variações Patrimoniais" }
             ],
-            gabarito: "C",
+            gabarito: "",
             dificuldade: "Média",
             tags: ["privado", listName],
             origem_questao: { banca: "Simulado", ano: 2026, prova: listName }
@@ -6978,7 +9305,9 @@ window.importarSimuladoMockDoArquivo = function(fileName) {
         nome: listName,
         questoes: mockQuestoes,
         criadaEm: new Date().toISOString(),
-        tipo: "upload"
+        tipo: "upload",
+        tags: ["privado", "importada"],
+        usarNaResolucao: false
     };
 
     salvarProgressoLocal();
@@ -6990,13 +9319,26 @@ window.importarSimuladoMockDoArquivo = function(fileName) {
 // MÓDULO: GERADOR DE CADERNOS DINÂMICOS E FILTROS DE SESSÃO
 // ==========================================================================
 
-window.atualizarAssuntosDropdown = function() {
+window.atualizarAssuntosDropdown = async function() {
     const selectDisc = document.getElementById("filterDisciplina");
     const selectAssunto = document.getElementById("filterAssunto");
     if (!selectDisc || !selectAssunto) return;
 
     const disc = selectDisc.value;
     selectAssunto.innerHTML = '<option value="todos">Todos os Assuntos</option>';
+
+    try {
+        const meta = await QUESTOES_API.carregarMeta({ disciplina: disc });
+        (meta.assuntos || []).forEach(a => {
+            const opt = document.createElement("option");
+            opt.value = a;
+            opt.innerText = a;
+            selectAssunto.appendChild(opt);
+        });
+        return;
+    } catch (e) {
+        console.warn("Falha ao carregar assuntos pelo backend; usando fallback local.", e);
+    }
 
     const assuntos = new Set();
     BANCO_QUESTOES.forEach(q => {
@@ -7217,7 +9559,7 @@ window.excluirFiltroConfig = function(id) {
     }
 };
 
-window.gerarCadernoQuestoes = function() {
+window.gerarCadernoQuestoes = async function() {
     if (window.filterQueue.length === 0) {
         alert("A fila de filtros está vazia! Adicione pelo menos um filtro antes de gerar o caderno.");
         return;
@@ -7241,51 +9583,79 @@ window.gerarCadernoQuestoes = function() {
         return arr;
     };
 
-    window.filterQueue.forEach(filtro => {
-        // Encontrar todas as correspondentes no BANCO_QUESTOES
-        let correspondentes = BANCO_QUESTOES.filter(q => {
-            // Filtro Disciplina
-            if (filtro.disciplina !== 'todas' && q.disciplina !== filtro.disciplina) return false;
-            // Filtro Assunto
-            if (filtro.assunto !== 'todos' && q.assunto !== filtro.assunto) return false;
-            // Filtro Banca
-            if (filtro.banca !== 'todas') {
-                const qBanca = (q.origem_questao?.banca || "").toLowerCase();
-                const selBanca = filtro.banca.toLowerCase();
-                const isCebraspeMatch = (selBanca === "cebraspe" || selBanca === "cespe") && (qBanca === "cebraspe" || qBanca === "cespe");
-                if (!isCebraspeMatch && qBanca !== selBanca) return false;
+    try {
+        for (const filtro of window.filterQueue) {
+            let correspondentes = await QUESTOES_API.buscarParaSessao(filtro, statusVal, cobradosVal);
+            if (correspondentes.length === 0) {
+                const bancaFiltro = normalizarBancaSessao(filtro.banca);
+                const questoesLocais = await obterQuestoesLocaisParaSessao({
+                    incluirLaboratorio: filtro.banca === "todas" || bancaFiltro === "cebraspe"
+                });
+                correspondentes = filtrarQuestoesLocaisParaSessao(questoesLocais, filtro, statusVal, cobradosVal);
             }
+            correspondentes = shuffleArray([...correspondentes]);
 
-            // Filtro Global Status
-            const resp = progressoUsuario.respondidas[q.id];
-            if (statusVal === 'nao_respondidas' && resp) return false;
-            if (statusVal === 'erradas' && (!resp || resp.correta)) return false;
-            if (statusVal === 'favoritas' && (!progressoUsuario.favoritas || !progressoUsuario.favoritas.includes(q.id))) return false;
-
-            // Filtro Global Assuntos Mais Cobrados
-            if (cobradosVal) {
-                const rel = obterRelevanciaQuestao(q);
-                if (rel < 80) return false;
-            }
-
-            return true;
-        });
-
-        // Embaralhar as correspondentes para dar variedade antes de fatiar
-        correspondentes = shuffleArray([...correspondentes]);
-
-        // Fatiar para pegar a quantidade requerida sem duplicar as já selecionadas no caderno
-        let adicionadas = 0;
-        for (let i = 0; i < correspondentes.length; i++) {
-            if (adicionadas >= filtro.quantidade) break;
-            const q = correspondentes[i];
-            if (!questoesSelecionadasUnicas.has(q.id)) {
-                questoesSelecionadasUnicas.add(q.id);
-                cadernoFinal.push(q);
-                adicionadas++;
+            let adicionadas = 0;
+            for (let i = 0; i < correspondentes.length; i++) {
+                if (adicionadas >= filtro.quantidade) break;
+                const q = correspondentes[i];
+                if (!questoesSelecionadasUnicas.has(q.id)) {
+                    questoesSelecionadasUnicas.add(q.id);
+                    cadernoFinal.push(q);
+                    adicionadas++;
+                }
             }
         }
-    });
+    } catch (e) {
+        console.warn("Falha ao gerar sessão pelo backend; usando fallback local.", e);
+
+        const incluirLaboratorio = window.filterQueue.some(filtro => {
+            const bancaFiltro = normalizarBancaSessao(filtro.banca);
+            return filtro.banca === "todas" || bancaFiltro === "cebraspe";
+        });
+        const questoesLocais = await obterQuestoesLocaisParaSessao({ incluirLaboratorio });
+
+        window.filterQueue.forEach(filtro => {
+            let correspondentes = filtrarQuestoesLocaisParaSessao(questoesLocais, filtro, statusVal, cobradosVal);
+
+            correspondentes = shuffleArray([...correspondentes]);
+            let adicionadas = 0;
+            for (let i = 0; i < correspondentes.length; i++) {
+                if (adicionadas >= filtro.quantidade) break;
+                const q = correspondentes[i];
+                if (!questoesSelecionadasUnicas.has(q.id)) {
+                    questoesSelecionadasUnicas.add(q.id);
+                    cadernoFinal.push(q);
+                    adicionadas++;
+                }
+            }
+        });
+    }
+
+    if (cadernoFinal.length === 0) {
+        console.warn("Backend retornou sessão vazia; tentando fallback local.");
+        const incluirLaboratorio = window.filterQueue.some(filtro => {
+            const bancaFiltro = normalizarBancaSessao(filtro.banca);
+            return filtro.banca === "todas" || bancaFiltro === "cebraspe";
+        });
+        const questoesLocais = await obterQuestoesLocaisParaSessao({ incluirLaboratorio });
+
+        window.filterQueue.forEach(filtro => {
+            let correspondentes = filtrarQuestoesLocaisParaSessao(questoesLocais, filtro, statusVal, cobradosVal);
+            correspondentes = shuffleArray([...correspondentes]);
+
+            let adicionadas = 0;
+            for (let i = 0; i < correspondentes.length; i++) {
+                if (adicionadas >= filtro.quantidade) break;
+                const q = correspondentes[i];
+                if (!questoesSelecionadasUnicas.has(q.id)) {
+                    questoesSelecionadasUnicas.add(q.id);
+                    cadernoFinal.push(q);
+                    adicionadas++;
+                }
+            }
+        });
+    }
 
     if (cadernoFinal.length === 0) {
         alert("Nenhuma questão foi encontrada com os filtros selecionados! Verifique as opções e a quantidade de questões disponíveis.");
@@ -7296,6 +9666,16 @@ window.gerarCadernoQuestoes = function() {
     window.cadernoQuestoes = shuffleArray([...cadernoFinal]);
     window.cadernoGerado = true;
     localStorage.setItem("remb_caderno_ativo", JSON.stringify(window.cadernoQuestoes));
+
+    const sessionContext = {
+        type: "filtro",
+        filters: window.filterQueue.map(filtro => ({ ...filtro })),
+        status: statusVal,
+        statusLabel: selectStatus ? (selectStatus.options[selectStatus.selectedIndex]?.text || statusVal) : "Todos",
+        cobrados: cobradosVal
+    };
+    window.sessionSourceContext = sessionContext;
+    localStorage.setItem("remb_session_source_context", JSON.stringify(sessionContext));
 
     // Configurar o Temporizador
     const selectTempo = document.getElementById("filterTempoLimite");
@@ -7340,6 +9720,8 @@ window.voltarParaConfiguracao = function() {
     window.cadernoQuestoes = [];
     localStorage.removeItem("remb_caderno_ativo");
     localStorage.removeItem("remb_caderno_limit_time");
+    window.sessionSourceContext = null;
+    localStorage.removeItem("remb_session_source_context");
 
     timerSegundos = 0;
     timerPausado = true;
@@ -7388,6 +9770,10 @@ window.atualizarProgressoCaderno = function() {
     if (lblCount) lblCount.innerText = `${resolvidas}/${total}`;
 
     if (summaryEl) {
+        if (typeof window.getSessionSummaryText === "function") {
+            summaryEl.innerText = window.getSessionSummaryText();
+            return;
+        }
         // Compilar disciplinas únicas presentes no caderno ativo
         const disctips = new Set(window.cadernoQuestoes.map(q => q.disciplina || "Sem Disciplina"));
         const discStr = Array.from(disctips).join(", ");
@@ -7439,6 +9825,848 @@ window.refazerCadernoAtivo = function() {
         }
         window.atualizarProgressoCaderno();
         alert("Sessão reiniciada! Você pode responder todas as questões novamente.");
+    }
+};
+
+function obterValorInput(id) {
+    return document.getElementById(id)?.value?.trim() || "";
+}
+
+function valorDataInput(value) {
+    return value ? String(value).split("T")[0] : "";
+}
+
+function statusCustoLabel(status) {
+    const labels = {
+        previsto: "Previsto",
+        aprovado: "Aprovado",
+        contratado: "Contratado",
+        pago: "Pago",
+        vencido: "Vencido",
+        cancelado: "Cancelado",
+        encerrado: "Encerrado"
+    };
+    return labels[status] || status || "-";
+}
+
+function badgeStatusCusto(status) {
+    const styles = {
+        previsto: "background-color:var(--accent-light); color:var(--accent);",
+        aprovado: "background-color:rgba(14,165,233,.12); color:#0369a1;",
+        contratado: "background-color:rgba(99,102,241,.12); color:#4338ca;",
+        pago: "background-color:var(--correta-light); color:var(--correta);",
+        vencido: "background-color:var(--errada-light); color:var(--errada);",
+        cancelado: "background-color:var(--border); color:var(--text-secondary);",
+        encerrado: "background-color:var(--border); color:var(--text-secondary);"
+    };
+    return `<span class="meta-badge" style="${styles[status] || styles.previsto}">${statusCustoLabel(status)}</span>`;
+}
+
+function renderizarLinhaCusto(item) {
+    return `
+        <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px; min-width:220px;">
+                <div style="font-weight:800;">${escapeHtml(item.nome)}</div>
+                <div style="font-size:0.78rem; color:var(--text-secondary);">${escapeHtml(item.descricao || item.produto || "REMB Estudos")}</div>
+            </td>
+            <td style="padding:12px;">${escapeHtml(item.categoria)}</td>
+            <td style="padding:12px;">${escapeHtml(item.fornecedor || "-")}</td>
+            <td style="padding:12px;">${badgeStatusCusto(item.status)}</td>
+            <td style="padding:12px; text-align:right; font-weight:800;">${formatarMoedaBRL(item.valorPago)}</td>
+            <td style="padding:12px; text-align:right;">${formatarMoedaBRL(item.valorPrevisto)}</td>
+            <td style="padding:12px;">${formatarDataBR(item.proximoVencimento || item.dataVencimento)}</td>
+            <td style="padding:12px; text-align:right; white-space:nowrap;">
+                <button class="btn btn-sm btn-outline-primary" style="padding:2px 8px; font-size:0.75rem; border-width:1.5px; border-radius:6px; font-weight:700;" onclick="window.editarCustoProjeto('${item.id}')">Editar</button>
+                <button class="btn btn-sm btn-outline-danger" style="padding:2px 8px; font-size:0.75rem; margin-left:5px; border-width:1.5px; border-radius:6px; font-weight:700;" onclick="window.excluirCustoProjeto('${item.id}')">Excluir</button>
+            </td>
+        </tr>
+    `;
+}
+
+function custosFiltradosProjeto() {
+    return adminFinanceState.costs.filter(item => {
+        const statusOk = adminFinanceState.filtroStatus === "todos" || item.status === adminFinanceState.filtroStatus;
+        const categoriaOk = adminFinanceState.filtroCategoria === "todas" || item.categoria === adminFinanceState.filtroCategoria;
+        return statusOk && categoriaOk;
+    });
+}
+
+function statusReceitaLabel(status) {
+    const labels = {
+        prevista: "Prevista",
+        a_receber: "A receber",
+        recebida: "Recebida",
+        atrasada: "Atrasada",
+        cancelada: "Cancelada",
+        estornada: "Estornada"
+    };
+    return labels[status] || status || "-";
+}
+
+function badgeStatusReceita(status) {
+    const styles = {
+        prevista: "background-color:var(--accent-light); color:var(--accent);",
+        a_receber: "background-color:rgba(14,165,233,.12); color:#0369a1;",
+        recebida: "background-color:var(--correta-light); color:var(--correta);",
+        atrasada: "background-color:var(--errada-light); color:var(--errada);",
+        cancelada: "background-color:var(--border); color:var(--text-secondary);",
+        estornada: "background-color:var(--border); color:var(--text-secondary);"
+    };
+    return `<span class="meta-badge" style="${styles[status] || styles.prevista}">${statusReceitaLabel(status)}</span>`;
+}
+
+function receitasFiltradasProjeto() {
+    return adminFinanceState.revenues.filter(item => {
+        const statusOk = adminFinanceState.filtroReceitaStatus === "todos" || item.status === adminFinanceState.filtroReceitaStatus;
+        const categoriaOk = adminFinanceState.filtroReceitaCategoria === "todas" || item.categoria === adminFinanceState.filtroReceitaCategoria;
+        return statusOk && categoriaOk;
+    });
+}
+
+function renderizarLinhaReceita(item) {
+    return `
+        <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px; min-width:220px;">
+                <div style="font-weight:800;">${escapeHtml(item.nome)}</div>
+                <div style="font-size:0.78rem; color:var(--text-secondary);">${escapeHtml(item.plano || item.usuarioNome || item.fonte || "REMB Estudos")}</div>
+            </td>
+            <td style="padding:12px;">${escapeHtml(item.categoria)}</td>
+            <td style="padding:12px;">${escapeHtml(item.fonte || "-")}</td>
+            <td style="padding:12px;">${badgeStatusReceita(item.status)}</td>
+            <td style="padding:12px; text-align:right; font-weight:800;">${formatarMoedaBRL(item.valorRecebido)}</td>
+            <td style="padding:12px; text-align:right;">${formatarMoedaBRL(item.valorPrevisto)}</td>
+            <td style="padding:12px;">${formatarDataBR(item.proximoRecebimento || item.dataRecebimento || item.dataVencimento)}</td>
+            <td style="padding:12px; text-align:right; white-space:nowrap;">
+                <button class="btn btn-sm btn-outline-primary" style="padding:2px 8px; font-size:0.75rem; border-width:1.5px; border-radius:6px; font-weight:700;" onclick="window.editarReceitaProjeto('${item.id}')">Editar</button>
+                <button class="btn btn-sm btn-outline-danger" style="padding:2px 8px; font-size:0.75rem; margin-left:5px; border-width:1.5px; border-radius:6px; font-weight:700;" onclick="window.excluirReceitaProjeto('${item.id}')">Excluir</button>
+            </td>
+        </tr>
+    `;
+}
+
+function renderizarFormularioReceita(item = {}) {
+    const categoriasPadrao = ["Assinatura", "Publicidade", "Parceria", "Venda avulsa", "Licenciamento", "Outro"];
+    const categorias = [...new Set([...categoriasPadrao, ...adminFinanceState.revenueCategories])].sort();
+    const fontesPadrao = ["Usuário", "Empresa anunciante", "Parceiro", "Marketplace", "Outro"];
+    const fontes = [...new Set([...fontesPadrao, ...adminFinanceState.revenueSources])].sort();
+    return `
+        <form onsubmit="window.salvarReceitaProjeto(event)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px;">
+            <input type="hidden" id="txtProjetoReceitaId" value="${escapeHtml(item.id || "")}">
+            <div style="grid-column:1/-1;">
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Nome da receita</label>
+                <input id="txtProjetoReceitaNome" value="${escapeHtml(item.nome || "")}" required placeholder="Ex.: Assinatura mensal de aluno" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Categoria</label>
+                <input id="txtProjetoReceitaCategoria" list="listaCategoriasReceita" value="${escapeHtml(item.categoria || "Assinatura")}" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                <datalist id="listaCategoriasReceita">${categorias.map(c => `<option value="${escapeHtml(c)}"></option>`).join("")}</datalist>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Fonte</label>
+                <input id="txtProjetoReceitaFonte" list="listaFontesReceita" value="${escapeHtml(item.fonte || "Usuário")}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                <datalist id="listaFontesReceita">${fontes.map(f => `<option value="${escapeHtml(f)}"></option>`).join("")}</datalist>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Plano</label>
+                <input id="txtProjetoReceitaPlano" value="${escapeHtml(item.plano || "")}" placeholder="Ex.: Mensal Premium" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Usuário/cliente</label>
+                <input id="txtProjetoReceitaUsuarioNome" value="${escapeHtml(item.usuarioNome || "")}" placeholder="Nome ou identificação" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Status</label>
+                <select id="selProjetoReceitaStatus" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                    ${["prevista","a_receber","recebida","atrasada","cancelada","estornada"].map(status => `<option value="${status}" ${item.status === status ? "selected" : ""}>${statusReceitaLabel(status)}</option>`).join("")}
+                </select>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Periodicidade</label>
+                <select id="selProjetoReceitaPeriodicidade" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                    ${["mensal","anual","unica","outra"].map(periodo => `<option value="${periodo}" ${item.periodicidade === periodo ? "selected" : ""}>${periodo}</option>`).join("")}
+                </select>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Valor recebido</label>
+                <input id="numProjetoReceitaRecebido" type="number" step="0.01" min="0" value="${Number(item.valorRecebido || 0)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Valor previsto</label>
+                <input id="numProjetoReceitaPrevisto" type="number" step="0.01" min="0" value="${Number(item.valorPrevisto || 0)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Valor recorrente</label>
+                <input id="numProjetoReceitaRecorrente" type="number" step="0.01" min="0" value="${Number(item.valorRecorrente || 0)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Recebimento</label>
+                <input id="dtProjetoReceitaRecebimento" type="date" value="${valorDataInput(item.dataRecebimento)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Próximo recebimento</label>
+                <input id="dtProjetoReceitaProximo" type="date" value="${valorDataInput(item.proximoRecebimento)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Forma de recebimento</label>
+                <input id="txtProjetoReceitaForma" value="${escapeHtml(item.formaRecebimento || "")}" placeholder="Pix, cartão, gateway..." style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div style="grid-column:1/-1;">
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Observações executivas</label>
+                <textarea id="txtProjetoReceitaObservacoes" rows="3" placeholder="Origem comercial, recorrência, contrato, risco de inadimplência ou regra do plano." style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">${escapeHtml(item.observacoes || "")}</textarea>
+            </div>
+            <div style="grid-column:1/-1; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline-primary" onclick="window.limparFormularioReceitaProjeto()" style="border-width:1.5px; border-radius:8px; font-weight:800;">Limpar</button>
+                <button type="submit" class="btn btn-primary" style="border:none; box-shadow:var(--shadow); font-weight:800; border-radius:8px; color:#fff; background-color:var(--accent);">Salvar receita</button>
+            </div>
+        </form>
+    `;
+}
+
+function renderizarFluxoCaixa() {
+    const movimentos = [
+        ...adminFinanceState.cashMovements
+            .filter(item => item.tipo === "entrada" && item.status === "confirmado")
+            .map(item => ({
+                data: item.dataMovimento,
+                tipo: "entrada",
+                nome: item.descricao,
+                categoria: item.categoria || "Assinatura",
+                status: "Confirmado",
+                valor: item.valor || 0
+            })),
+        ...adminFinanceState.costs
+            .filter(item => item.status === "pago" && Number(item.valorPago || 0) > 0)
+            .map(item => ({
+            data: item.dataPagamento || item.dataCompetencia || item.createdAt,
+            tipo: "saida",
+            nome: item.nome,
+            categoria: item.categoria,
+            status: "Pago",
+            valor: -(item.valorPago || 0)
+        }))
+    ].sort((a, b) => new Date(a.data || 0) - new Date(b.data || 0));
+
+    let saldo = 0;
+    const rows = movimentos.map(item => {
+        saldo += item.valor;
+        return `
+            <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:12px;">${formatarDataBR(item.data)}</td>
+                <td style="padding:12px;"><span class="meta-badge" style="${item.tipo === "entrada" ? "background-color:var(--correta-light); color:var(--correta);" : "background-color:var(--errada-light); color:var(--errada);"}">${item.tipo === "entrada" ? "Entrada" : "Saída"}</span></td>
+                <td style="padding:12px; font-weight:800;">${escapeHtml(item.nome)}</td>
+                <td style="padding:12px;">${escapeHtml(item.categoria)}</td>
+                <td style="padding:12px;">${escapeHtml(item.status)}</td>
+                <td style="padding:12px; text-align:right; font-weight:800; color:${item.valor >= 0 ? "var(--correta)" : "var(--errada)"};">${formatarMoedaBRL(item.valor)}</td>
+                <td style="padding:12px; text-align:right; font-weight:800;">${formatarMoedaBRL(saldo)}</td>
+            </tr>
+        `;
+    }).join("");
+
+    return `
+        <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card); overflow-x:auto;">
+            <h3 style="font-size:1.15rem; font-weight:800; margin:0 0 14px;">Fluxo de caixa</h3>
+            <p style="color:var(--text-secondary); margin:0 0 14px;">Somente pagamentos confirmados entram como caixa. Receita prevista e cobrança aberta ficam fora do saldo realizado.</p>
+            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                    <tr style="border-bottom:2px solid var(--border);">
+                        <th style="padding:12px;">Data</th>
+                        <th style="padding:12px;">Tipo</th>
+                        <th style="padding:12px;">Movimento</th>
+                        <th style="padding:12px;">Categoria</th>
+                        <th style="padding:12px;">Status</th>
+                        <th style="padding:12px; text-align:right;">Valor</th>
+                        <th style="padding:12px; text-align:right;">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>${rows || `<tr><td colspan="7" style="padding:22px; text-align:center; color:var(--text-secondary);">Cadastre receitas e custos para visualizar o fluxo de caixa.</td></tr>`}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function statusAssinaturaLabel(status) {
+    const labels = {
+        ativa: "Ativa",
+        pendente: "Pendente",
+        cancelada: "Cancelada",
+        encerrada: "Encerrada"
+    };
+    return labels[status] || status || "-";
+}
+
+function statusCobrancaLabel(status) {
+    const labels = {
+        a_receber: "A receber",
+        gerada: "Gerada",
+        paga: "Paga",
+        atrasada: "Atrasada",
+        cancelada: "Cancelada",
+        estornada: "Estornada"
+    };
+    return labels[status] || status || "-";
+}
+
+function renderizarFormularioAssinatura() {
+    const hoje = new Date().toISOString().slice(0, 10);
+    return `
+        <form onsubmit="window.salvarAssinaturaProjeto(event)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px;">
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Usuário/assinante</label>
+                <input id="txtAssinaturaUsuarioNome" placeholder="Nome do assinante" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Plano</label>
+                <input id="txtAssinaturaPlano" required placeholder="Ex.: Premium anual" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Periodicidade</label>
+                <select id="selAssinaturaPeriodicidade" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                    <option value="mensal">mensal</option>
+                    <option value="anual">anual</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Valor contratado</label>
+                <input id="numAssinaturaValorTotal" type="number" step="0.01" min="0" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Duração em meses</label>
+                <input id="numAssinaturaDuracao" type="number" min="1" value="12" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Início</label>
+                <input id="dtAssinaturaInicio" type="date" value="${hoje}" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Vencimento da cobrança</label>
+                <input id="dtAssinaturaVencimento" type="date" value="${hoje}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Forma prevista</label>
+                <input id="txtAssinaturaFormaPagamento" placeholder="Pix, cartão, boleto..." style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div style="grid-column:1/-1;">
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Observações</label>
+                <textarea id="txtAssinaturaObservacoes" rows="2" placeholder="Condição comercial, cupom, origem ou observação de cobrança." style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);"></textarea>
+            </div>
+            <div style="grid-column:1/-1; display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn btn-primary" style="border:none; box-shadow:var(--shadow); font-weight:800; border-radius:8px; color:#fff; background-color:var(--accent);">Criar assinatura e cobrança</button>
+            </div>
+        </form>
+    `;
+}
+
+function renderizarAssinaturasProjeto() {
+    const assinaturaRows = adminFinanceState.subscriptions.map(item => `
+        <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px; font-weight:800;">${escapeHtml(item.usuarioNome || "-")}</td>
+            <td style="padding:12px;">${escapeHtml(item.plano)}</td>
+            <td style="padding:12px;">${item.periodicidade}</td>
+            <td style="padding:12px; text-align:right; font-weight:800;">${formatarMoedaBRL(item.valorTotal)}</td>
+            <td style="padding:12px; text-align:right;">${formatarMoedaBRL(item.valorMensalReconhecido)}</td>
+            <td style="padding:12px;">${formatarDataBR(item.dataInicio)} a ${formatarDataBR(item.dataFim)}</td>
+            <td style="padding:12px;">${statusAssinaturaLabel(item.status)}</td>
+        </tr>
+    `).join("");
+
+    return `
+        <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+            <h3 style="font-size:1.15rem; font-weight:800; margin:0 0 14px;">Nova assinatura</h3>
+            ${renderizarFormularioAssinatura()}
+        </div>
+        <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card); overflow-x:auto;">
+            <h3 style="font-size:1.15rem; font-weight:800; margin:0 0 14px;">Assinaturas</h3>
+            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                    <tr style="border-bottom:2px solid var(--border);">
+                        <th style="padding:12px;">Assinante</th>
+                        <th style="padding:12px;">Plano</th>
+                        <th style="padding:12px;">Ciclo</th>
+                        <th style="padding:12px; text-align:right;">Contratado</th>
+                        <th style="padding:12px; text-align:right;">Competência mensal</th>
+                        <th style="padding:12px;">Período</th>
+                        <th style="padding:12px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>${assinaturaRows || `<tr><td colspan="7" style="padding:22px; text-align:center; color:var(--text-secondary);">Nenhuma assinatura cadastrada.</td></tr>`}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderizarCobrancasProjeto() {
+    const rows = adminFinanceState.billings.map(item => `
+        <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:12px;">
+                <div style="font-weight:800;">${escapeHtml(item.descricao)}</div>
+                <div style="font-size:0.78rem; color:var(--text-secondary);">${escapeHtml(item.usuarioNome || item.plano || "-")}</div>
+            </td>
+            <td style="padding:12px;">${statusCobrancaLabel(item.status)}</td>
+            <td style="padding:12px;">${formatarDataBR(item.dataVencimento)}</td>
+            <td style="padding:12px;">${formatarDataBR(item.dataPagamento)}</td>
+            <td style="padding:12px; text-align:right; font-weight:800;">${formatarMoedaBRL(item.valor)}</td>
+            <td style="padding:12px; text-align:right;">
+                ${item.status === "paga" ? `<span class="meta-badge" style="background-color:var(--correta-light); color:var(--correta);">Caixa confirmado</span>` : `<button class="btn btn-sm btn-outline-primary" onclick="window.confirmarRecebimentoCobranca('${item.id}', ${Number(item.valor || 0)})" style="padding:2px 8px; font-size:0.75rem; border-width:1.5px; border-radius:6px; font-weight:700;">Confirmar pagamento</button>`}
+            </td>
+        </tr>
+    `).join("");
+
+    return `
+        <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card); overflow-x:auto;">
+            <h3 style="font-size:1.15rem; font-weight:800; margin:0 0 14px;">Cobranças</h3>
+            <p style="color:var(--text-secondary); margin:0 0 14px;">Cobrança aberta é receita a receber. Só vira caixa quando o pagamento é confirmado.</p>
+            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                    <tr style="border-bottom:2px solid var(--border);">
+                        <th style="padding:12px;">Cobrança</th>
+                        <th style="padding:12px;">Status</th>
+                        <th style="padding:12px;">Vencimento</th>
+                        <th style="padding:12px;">Pagamento</th>
+                        <th style="padding:12px; text-align:right;">Valor</th>
+                        <th style="padding:12px; text-align:right;">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>${rows || `<tr><td colspan="6" style="padding:22px; text-align:center; color:var(--text-secondary);">Nenhuma cobrança gerada.</td></tr>`}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderizarFormularioCusto(item = {}) {
+    const categoriasPadrao = ["Domínio", "Hospedagem", "Ferramentas", "APIs", "Assinaturas", "Conteúdo", "Jurídico/Contábil", "Desenvolvimento", "Reserva técnica"];
+    const categorias = [...new Set([...categoriasPadrao, ...adminFinanceState.categories])].sort();
+    const fornecedores = adminFinanceState.suppliers;
+    return `
+        <form onsubmit="window.salvarCustoProjeto(event)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px;">
+            <input type="hidden" id="txtProjetoCustoId" value="${escapeHtml(item.id || "")}">
+            <div style="grid-column:1/-1;">
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Nome do gasto</label>
+                <input id="txtProjetoCustoNome" value="${escapeHtml(item.nome || "")}" required placeholder="Ex.: Domínio remb.com.br" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Categoria</label>
+                <input id="txtProjetoCustoCategoria" list="listaCategoriasCusto" value="${escapeHtml(item.categoria || "Domínio")}" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                <datalist id="listaCategoriasCusto">${categorias.map(c => `<option value="${escapeHtml(c)}"></option>`).join("")}</datalist>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Fornecedor</label>
+                <input id="txtProjetoCustoFornecedor" list="listaFornecedoresCusto" value="${escapeHtml(item.fornecedor || "")}" placeholder="Ex.: Registro.br" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                <datalist id="listaFornecedoresCusto">${fornecedores.map(f => `<option value="${escapeHtml(f)}"></option>`).join("")}</datalist>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Status</label>
+                <select id="selProjetoCustoStatus" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                    ${["previsto","aprovado","contratado","pago","vencido","cancelado","encerrado"].map(status => `<option value="${status}" ${item.status === status ? "selected" : ""}>${statusCustoLabel(status)}</option>`).join("")}
+                </select>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Periodicidade</label>
+                <select id="selProjetoCustoPeriodicidade" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                    ${["unica","mensal","anual","outra"].map(periodo => `<option value="${periodo}" ${item.periodicidade === periodo ? "selected" : ""}>${periodo}</option>`).join("")}
+                </select>
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Valor pago</label>
+                <input id="numProjetoCustoPago" type="number" step="0.01" min="0" value="${Number(item.valorPago || 0)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Valor previsto</label>
+                <input id="numProjetoCustoPrevisto" type="number" step="0.01" min="0" value="${Number(item.valorPrevisto || 0)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Valor recorrente</label>
+                <input id="numProjetoCustoRecorrente" type="number" step="0.01" min="0" value="${Number(item.valorRecorrente || 0)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Vencimento</label>
+                <input id="dtProjetoCustoVencimento" type="date" value="${valorDataInput(item.dataVencimento)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Próximo vencimento</label>
+                <input id="dtProjetoCustoProximo" type="date" value="${valorDataInput(item.proximoVencimento)}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Responsável</label>
+                <input id="txtProjetoCustoResponsavel" value="${escapeHtml(item.responsavel || "")}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div>
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Centro de custo</label>
+                <input id="txtProjetoCustoCentro" value="${escapeHtml(item.centroCusto || "REMB Estudos")}" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div style="grid-column:1/-1;">
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Link de contrato, fatura ou comprovante</label>
+                <input id="txtProjetoCustoLink" value="${escapeHtml(item.linkDocumento || "")}" placeholder="https://" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+            </div>
+            <div style="grid-column:1/-1;">
+                <label style="font-size:0.78rem; font-weight:800; color:var(--text-secondary);">Observações executivas</label>
+                <textarea id="txtProjetoCustoObservacoes" rows="3" placeholder="Acesso, titularidade, renovação automática, risco ou decisão pendente." style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">${escapeHtml(item.observacoes || "")}</textarea>
+            </div>
+            <div style="grid-column:1/-1; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline-primary" onclick="window.limparFormularioCustoProjeto()" style="border-width:1.5px; border-radius:8px; font-weight:800;">Limpar</button>
+                <button type="submit" class="btn btn-primary" style="border:none; box-shadow:var(--shadow); font-weight:800; border-radius:8px; color:#fff; background-color:var(--accent);">Salvar custo</button>
+            </div>
+        </form>
+    `;
+}
+
+function renderizarCustosProjeto() {
+    const panelContent = document.getElementById("admin-panel-content");
+    if (!panelContent) return;
+    const summary = adminFinanceState.summary || {};
+    const categoriasOptions = adminFinanceState.categories.map(c => `<option value="${escapeHtml(c)}" ${adminFinanceState.filtroCategoria === c ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
+    const rows = custosFiltradosProjeto().map(renderizarLinhaCusto).join("");
+    panelContent.innerHTML = `
+        <div class="admin-finance" style="display:flex; flex-direction:column; gap:25px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+                <div>
+                    <h2 style="font-size:1.8rem; font-weight:800; margin:0;">Financeiro do Projeto</h2>
+                    <p style="color:var(--text-secondary); margin:6px 0 0;">Controle administrativo de receitas, custos e fluxo de caixa do REMB Estudos.</p>
+                </div>
+                <span class="meta-badge" style="background-color:var(--accent-light); color:var(--accent);">Preparado para consolidação REMB</span>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                ${["assinaturas","cobrancas","fluxo","receitas","custos"].map(view => `
+                    <button class="btn ${adminFinanceState.view === view ? "btn-primary" : "btn-outline-primary"}" onclick="window.alternarVisaoFinanceira('${view}')" style="border-width:1.5px; border-radius:8px; font-weight:800; ${adminFinanceState.view === view ? "border:none; color:#fff; background-color:var(--accent);" : ""}">
+                        ${view === "assinaturas" ? "Assinaturas" : view === "cobrancas" ? "Cobranças" : view === "fluxo" ? "Fluxo de caixa" : view === "receitas" ? "Receitas manuais" : "Custos"}
+                    </button>
+                `).join("")}
+            </div>
+            <div class="stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Receita contratada</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0;">${formatarMoedaBRL(summary.receitaContratada)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">${Number(summary.assinaturasAtivas || 0)} assinaturas ativas</div>
+                </div>
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">A receber</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0; color:${Number(summary.cobrancasAtrasadas || 0) > 0 ? "var(--errada)" : "var(--text-primary)"};">${formatarMoedaBRL(summary.receitasAReceber)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">${Number(summary.cobrancasAbertas || 0)} cobranças abertas</div>
+                </div>
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Entrada de caixa</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0; color:var(--correta);">${formatarMoedaBRL(summary.receitasRecebidas)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">Pagamentos confirmados</div>
+                </div>
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Receita mensal prevista</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0;">${formatarMoedaBRL(summary.receitaRecorrenteMensal)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">Assinaturas e recorrências</div>
+                </div>
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Total pago</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0; color:var(--errada);">${formatarMoedaBRL(summary.custosPagos ?? summary.totalPago)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">Saídas realizadas</div>
+                </div>
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Saldo realizado</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0; color:${Number(summary.saldoRealizado || 0) >= 0 ? "var(--correta)" : "var(--errada)"};">${formatarMoedaBRL(summary.saldoRealizado)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">Recebido menos pago</div>
+                </div>
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Fixo mensal</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0;">${formatarMoedaBRL(summary.custoFixoMensal)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">Recorrências mensais</div>
+                </div>
+                <div class="card-base" style="border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">Alertas</div>
+                    <div style="font-size:1.7rem; font-weight:800; margin:10px 0; color:${summary.vencidos ? "var(--errada)" : "var(--text-primary)"};">${Number(summary.vencidos || 0)}</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">${Number(summary.semResponsavel || 0)} sem responsável</div>
+                </div>
+            </div>
+            <div style="${adminFinanceState.view === "assinaturas" ? "display:flex; flex-direction:column; gap:25px;" : "display:none;"}">${renderizarAssinaturasProjeto()}</div>
+            <div style="${adminFinanceState.view === "cobrancas" ? "" : "display:none;"}">${renderizarCobrancasProjeto()}</div>
+            <div style="${adminFinanceState.view === "fluxo" ? "" : "display:none;"}">${renderizarFluxoCaixa()}</div>
+            <div class="card-base" style="${adminFinanceState.view === "receitas" ? "" : "display:none;"} border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                <h3 style="font-size:1.15rem; font-weight:800; margin:0 0 14px;">Cadastro de receita</h3>
+                <div id="formProjetoReceitaContainer">${renderizarFormularioReceita()}</div>
+            </div>
+            <div class="card-base" style="${adminFinanceState.view === "receitas" ? "" : "display:none;"} border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card); overflow-x:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                    <h3 style="font-size:1.15rem; font-weight:800; margin:0;">Receitas cadastradas</h3>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <select onchange="window.filtrarReceitasProjeto('status', this.value)" style="padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                            <option value="todos" ${adminFinanceState.filtroReceitaStatus === "todos" ? "selected" : ""}>Todos os status</option>
+                            ${["prevista","a_receber","recebida","atrasada","cancelada","estornada"].map(status => `<option value="${status}" ${adminFinanceState.filtroReceitaStatus === status ? "selected" : ""}>${statusReceitaLabel(status)}</option>`).join("")}
+                        </select>
+                        <select onchange="window.filtrarReceitasProjeto('categoria', this.value)" style="padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                            <option value="todas" ${adminFinanceState.filtroReceitaCategoria === "todas" ? "selected" : ""}>Todas as categorias</option>
+                            ${adminFinanceState.revenueCategories.map(c => `<option value="${escapeHtml(c)}" ${adminFinanceState.filtroReceitaCategoria === c ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
+                        </select>
+                    </div>
+                </div>
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border);">
+                            <th style="padding:12px;">Receita</th>
+                            <th style="padding:12px;">Categoria</th>
+                            <th style="padding:12px;">Fonte</th>
+                            <th style="padding:12px;">Status</th>
+                            <th style="padding:12px; text-align:right;">Recebido</th>
+                            <th style="padding:12px; text-align:right;">Previsto</th>
+                            <th style="padding:12px;">Data</th>
+                            <th style="padding:12px; text-align:right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>${receitasFiltradasProjeto().map(renderizarLinhaReceita).join("") || `<tr><td colspan="8" style="padding:22px; text-align:center; color:var(--text-secondary);">Nenhuma receita cadastrada ainda. Comece pelos planos de assinatura.</td></tr>`}</tbody>
+                </table>
+            </div>
+            <div class="card-base" style="${adminFinanceState.view === "custos" ? "" : "display:none;"} border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                <h3 style="font-size:1.15rem; font-weight:800; margin:0 0 14px;">Cadastro de custo</h3>
+                <div id="formProjetoCustoContainer">${renderizarFormularioCusto()}</div>
+            </div>
+            <div class="card-base" style="${adminFinanceState.view === "custos" ? "" : "display:none;"} border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; border-radius:12px; background-color:var(--bg-card); overflow-x:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                    <h3 style="font-size:1.15rem; font-weight:800; margin:0;">Custos cadastrados</h3>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <select onchange="window.filtrarCustosProjeto('status', this.value)" style="padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                            <option value="todos" ${adminFinanceState.filtroStatus === "todos" ? "selected" : ""}>Todos os status</option>
+                            ${["previsto","aprovado","contratado","pago","vencido","cancelado","encerrado"].map(status => `<option value="${status}" ${adminFinanceState.filtroStatus === status ? "selected" : ""}>${statusCustoLabel(status)}</option>`).join("")}
+                        </select>
+                        <select onchange="window.filtrarCustosProjeto('categoria', this.value)" style="padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg-app); color:var(--text-primary);">
+                            <option value="todas" ${adminFinanceState.filtroCategoria === "todas" ? "selected" : ""}>Todas as categorias</option>
+                            ${categoriasOptions}
+                        </select>
+                    </div>
+                </div>
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border);">
+                            <th style="padding:12px;">Gasto</th>
+                            <th style="padding:12px;">Categoria</th>
+                            <th style="padding:12px;">Fornecedor</th>
+                            <th style="padding:12px;">Status</th>
+                            <th style="padding:12px; text-align:right;">Pago</th>
+                            <th style="padding:12px; text-align:right;">Previsto</th>
+                            <th style="padding:12px;">Vencimento</th>
+                            <th style="padding:12px; text-align:right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows || `<tr><td colspan="8" style="padding:22px; text-align:center; color:var(--text-secondary);">Nenhum custo cadastrado ainda. Comece pelos gastos de domínio, hospedagem e ferramentas essenciais.</td></tr>`}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+window.carregarCustosProjeto = async function() {
+    try {
+        const payload = await REMB_API.request("/api/admin/finance-overview");
+        adminFinanceState.costs = payload.costs || [];
+        adminFinanceState.revenues = payload.revenues || [];
+        adminFinanceState.subscriptions = payload.subscriptions || [];
+        adminFinanceState.billings = payload.billings || [];
+        adminFinanceState.cashMovements = payload.cashMovements || [];
+        adminFinanceState.revenueCompetences = payload.revenueCompetences || [];
+        adminFinanceState.summary = payload.summary || {};
+        adminFinanceState.categories = payload.costCategories || payload.categories || [];
+        adminFinanceState.suppliers = payload.suppliers || [];
+        adminFinanceState.revenueCategories = payload.revenueCategories || [];
+        adminFinanceState.revenueSources = payload.revenueSources || [];
+        renderizarCustosProjeto();
+    } catch (e) {
+        const panelContent = document.getElementById("admin-panel-content");
+        if (panelContent) {
+            panelContent.innerHTML = `
+                <div class="card-base" style="border:1px solid var(--border); padding:20px; border-radius:12px; background-color:var(--bg-card);">
+                    <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:8px;">Controle de custos indisponível</h2>
+                    <p style="color:var(--text-secondary); margin:0;">${escapeHtml(e.message)}</p>
+                </div>
+            `;
+        }
+    }
+};
+
+window.alternarVisaoFinanceira = function(view) {
+    adminFinanceState.view = view;
+    renderizarCustosProjeto();
+};
+
+window.salvarAssinaturaProjeto = async function(event) {
+    event.preventDefault();
+    const payload = {
+        usuarioNome: obterValorInput("txtAssinaturaUsuarioNome"),
+        plano: obterValorInput("txtAssinaturaPlano"),
+        periodicidade: obterValorInput("selAssinaturaPeriodicidade"),
+        valorTotal: Number(obterValorInput("numAssinaturaValorTotal") || 0),
+        duracaoMeses: Number(obterValorInput("numAssinaturaDuracao") || 1),
+        dataInicio: obterValorInput("dtAssinaturaInicio"),
+        dataVencimento: obterValorInput("dtAssinaturaVencimento"),
+        formaPagamento: obterValorInput("txtAssinaturaFormaPagamento"),
+        observacoes: obterValorInput("txtAssinaturaObservacoes")
+    };
+    if (!payload.plano || !payload.valorTotal || !payload.dataInicio) {
+        alert("Preencha plano, valor contratado e data de início.");
+        return;
+    }
+    try {
+        await REMB_API.request("/api/admin/subscriptions", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        adminFinanceState.view = "cobrancas";
+        await window.carregarCustosProjeto();
+        alert("Assinatura criada. A receita prevista e a cobrança foram geradas.");
+    } catch (e) {
+        alert(e.message);
+    }
+};
+
+window.confirmarRecebimentoCobranca = async function(cobrancaId, valor) {
+    const recebido = prompt("Valor recebido confirmado:", String(valor || 0));
+    if (recebido === null) return;
+    try {
+        await REMB_API.request(`/api/admin/subscription-billings/${cobrancaId}/receive`, {
+            method: "POST",
+            body: JSON.stringify({
+                valor: Number(recebido || 0),
+                dataRecebimento: new Date().toISOString().slice(0, 10)
+            })
+        });
+        adminFinanceState.view = "fluxo";
+        await window.carregarCustosProjeto();
+        alert("Pagamento confirmado e entrada de caixa registrada.");
+    } catch (e) {
+        alert(e.message);
+    }
+};
+
+window.salvarCustoProjeto = async function(event) {
+    event.preventDefault();
+    const id = obterValorInput("txtProjetoCustoId");
+    const payload = {
+        nome: obterValorInput("txtProjetoCustoNome"),
+        categoria: obterValorInput("txtProjetoCustoCategoria"),
+        fornecedor: obterValorInput("txtProjetoCustoFornecedor"),
+        status: obterValorInput("selProjetoCustoStatus"),
+        periodicidade: obterValorInput("selProjetoCustoPeriodicidade"),
+        valorPago: Number(obterValorInput("numProjetoCustoPago") || 0),
+        valorPrevisto: Number(obterValorInput("numProjetoCustoPrevisto") || 0),
+        valorRecorrente: Number(obterValorInput("numProjetoCustoRecorrente") || 0),
+        dataVencimento: obterValorInput("dtProjetoCustoVencimento"),
+        proximoVencimento: obterValorInput("dtProjetoCustoProximo"),
+        responsavel: obterValorInput("txtProjetoCustoResponsavel"),
+        centroCusto: obterValorInput("txtProjetoCustoCentro"),
+        linkDocumento: obterValorInput("txtProjetoCustoLink"),
+        observacoes: obterValorInput("txtProjetoCustoObservacoes"),
+        produto: "REMB Estudos",
+        origemSistema: "REMB Estudos",
+        origemModulo: "Financeiro"
+    };
+    if (!payload.nome || !payload.categoria) {
+        alert("Preencha pelo menos nome e categoria do custo.");
+        return;
+    }
+    try {
+        await REMB_API.request(id ? `/api/admin/project-costs/${id}` : "/api/admin/project-costs", {
+            method: id ? "PUT" : "POST",
+            body: JSON.stringify(payload)
+        });
+        await window.carregarCustosProjeto();
+        alert("Custo salvo com sucesso.");
+    } catch (e) {
+        alert(e.message);
+    }
+};
+
+window.salvarReceitaProjeto = async function(event) {
+    event.preventDefault();
+    const id = obterValorInput("txtProjetoReceitaId");
+    const payload = {
+        nome: obterValorInput("txtProjetoReceitaNome"),
+        categoria: obterValorInput("txtProjetoReceitaCategoria"),
+        fonte: obterValorInput("txtProjetoReceitaFonte"),
+        plano: obterValorInput("txtProjetoReceitaPlano"),
+        usuarioNome: obterValorInput("txtProjetoReceitaUsuarioNome"),
+        status: obterValorInput("selProjetoReceitaStatus"),
+        periodicidade: obterValorInput("selProjetoReceitaPeriodicidade"),
+        valorRecebido: Number(obterValorInput("numProjetoReceitaRecebido") || 0),
+        valorPrevisto: Number(obterValorInput("numProjetoReceitaPrevisto") || 0),
+        valorRecorrente: Number(obterValorInput("numProjetoReceitaRecorrente") || 0),
+        dataRecebimento: obterValorInput("dtProjetoReceitaRecebimento"),
+        proximoRecebimento: obterValorInput("dtProjetoReceitaProximo"),
+        formaRecebimento: obterValorInput("txtProjetoReceitaForma"),
+        observacoes: obterValorInput("txtProjetoReceitaObservacoes"),
+        produto: "REMB Estudos",
+        origemSistema: "REMB Estudos",
+        origemModulo: "Financeiro"
+    };
+    if (!payload.nome || !payload.categoria) {
+        alert("Preencha pelo menos nome e categoria da receita.");
+        return;
+    }
+    try {
+        await REMB_API.request(id ? `/api/admin/project-revenues/${id}` : "/api/admin/project-revenues", {
+            method: id ? "PUT" : "POST",
+            body: JSON.stringify(payload)
+        });
+        adminFinanceState.view = "receitas";
+        await window.carregarCustosProjeto();
+        alert("Receita salva com sucesso.");
+    } catch (e) {
+        alert(e.message);
+    }
+};
+
+window.editarCustoProjeto = function(costId) {
+    const item = adminFinanceState.costs.find(cost => cost.id === costId);
+    const container = document.getElementById("formProjetoCustoContainer");
+    if (!item || !container) return;
+    container.innerHTML = renderizarFormularioCusto(item);
+    container.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+window.editarReceitaProjeto = function(revenueId) {
+    const item = adminFinanceState.revenues.find(revenue => revenue.id === revenueId);
+    const container = document.getElementById("formProjetoReceitaContainer");
+    if (!item || !container) return;
+    container.innerHTML = renderizarFormularioReceita(item);
+    container.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+window.limparFormularioCustoProjeto = function() {
+    const container = document.getElementById("formProjetoCustoContainer");
+    if (container) container.innerHTML = renderizarFormularioCusto();
+};
+
+window.limparFormularioReceitaProjeto = function() {
+    const container = document.getElementById("formProjetoReceitaContainer");
+    if (container) container.innerHTML = renderizarFormularioReceita();
+};
+
+window.filtrarCustosProjeto = function(tipo, valor) {
+    if (tipo === "status") adminFinanceState.filtroStatus = valor;
+    if (tipo === "categoria") adminFinanceState.filtroCategoria = valor;
+    renderizarCustosProjeto();
+};
+
+window.filtrarReceitasProjeto = function(tipo, valor) {
+    if (tipo === "status") adminFinanceState.filtroReceitaStatus = valor;
+    if (tipo === "categoria") adminFinanceState.filtroReceitaCategoria = valor;
+    renderizarCustosProjeto();
+};
+
+window.excluirCustoProjeto = async function(costId) {
+    if (!confirm("Excluir este custo do projeto?")) return;
+    try {
+        await REMB_API.request(`/api/admin/project-costs/${costId}`, { method: "DELETE" });
+        await window.carregarCustosProjeto();
+        alert("Custo excluído.");
+    } catch (e) {
+        alert(e.message);
+    }
+};
+
+window.excluirReceitaProjeto = async function(revenueId) {
+    if (!confirm("Excluir esta receita do projeto?")) return;
+    try {
+        await REMB_API.request(`/api/admin/project-revenues/${revenueId}`, { method: "DELETE" });
+        adminFinanceState.view = "receitas";
+        await window.carregarCustosProjeto();
+        alert("Receita excluída.");
+    } catch (e) {
+        alert(e.message);
     }
 };
 
@@ -7851,26 +11079,30 @@ window.gerarExplicacaoIA = function(qId) {
         
         // Gerar passos baseados na disciplina
         const disc = qObj.disciplina;
+        const gabaritoCurado = qObj.gabarito ? String(qObj.gabarito).trim().toUpperCase() : "";
+        const textoGabaritoCurado = gabaritoCurado
+            ? `Conforme gabarito curado, a alternativa correta é a letra ${gabaritoCurado}.`
+            : "Gabarito ainda não curado. Inclua o gabarito oficial no Laboratório ou a partir do documento vinculado à prova.";
         let passos = [];
 
         if (disc.includes("Constitucional")) {
             passos = [
                 { titulo: "Constituição Federal", texto: "Análise do artigo referenciado: A questão cobra diretamente o princípio constitucional expresso na CF/88." },
-                { titulo: "Gabarito Oficial", texto: `Conforme gabarito oficial da banca, a alternativa correta é a letra ${qObj.gabarito || 'C'}.` },
+                { titulo: "Gabarito Oficial", texto: textoGabaritoCurado },
                 { titulo: "Pegadinha Comum", texto: "A banca tenta confundir o candidato trocando os termos da lei seca." },
                 { titulo: "Dica de Memorização", texto: "Mapeie os artigos fundamentais e crie gatilhos mentais para prazos." }
             ];
         } else if (disc.includes("Administrativo")) {
             passos = [
                 { titulo: "Regime Jurídico Único", texto: "Princípios explícitos (LIMPE) e implícitos da Administração Pública." },
-                { titulo: "Fundamentação Legal", texto: `Justificativa legal baseada na Lei 8.112 ou 14.133 para a alternativa ${qObj.gabarito || 'A'}.` },
+                { titulo: "Fundamentação Legal", texto: gabaritoCurado ? `Justificativa legal baseada na Lei 8.112 ou 14.133 para a alternativa ${gabaritoCurado}.` : textoGabaritoCurado },
                 { titulo: "Por que está errada?", texto: "As outras afirmativas trazem atos de improbidade ou prazos incorretos." },
                 { titulo: "Resumo em Balão", texto: "Utilize mapas mentais rápidos para diferenciar descentralização de desconcentração." }
             ];
         } else {
             passos = [
                 { titulo: "Introdução ao Assunto", texto: `Questão prática cobrando conhecimentos aplicados de ${qObj.assunto || 'Assuntos Gerais'}.` },
-                { titulo: "Análise Sistemática", texto: `A afirmativa ${qObj.gabarito || 'B'} é a única que condiz de forma íntegra com a jurisprudência atualizada.` },
+                { titulo: "Análise Sistemática", texto: gabaritoCurado ? `A afirmativa ${gabaritoCurado} deve ser analisada contra a fundamentação oficial antes da aprovação.` : textoGabaritoCurado },
                 { titulo: "Atenção Redobrada", texto: "A banca costuma cobrar exceções doutrinárias nessa matéria específica." },
                 { titulo: "Gatilho Pedagógico", texto: "Revise esse conceito pelo menos duas vezes na semana antes da prova." }
             ];
@@ -7913,6 +11145,17 @@ window.processarJsonImportado = function(file) {
         try {
             const data = JSON.parse(e.target.result);
             const arrayQuestoes = Array.isArray(data) ? data : [data];
+            const contextoProva = provaProcessamentoPendente;
+            const arquivoOrigem = contextoProva?.file || file.name;
+            const origemQuestaoPadrao = contextoProva
+                ? {
+                    banca: contextoProva.banca || "Importada",
+                    ano: contextoProva.ano || new Date().getFullYear().toString(),
+                    prova: contextoProva.orgao || file.name,
+                    cargo: contextoProva.cargo || "",
+                    origem: contextoProva.origem || contextoProva.documentoProva || ""
+                }
+                : { banca: "Importada", ano: new Date().getFullYear().toString() };
             
             // Validar itens importados
             const limpas = arrayQuestoes.map((q, idx) => {
@@ -7926,11 +11169,18 @@ window.processarJsonImportado = function(file) {
                         { letra: "C", texto: "Opção C" },
                         { letra: "D", texto: "Opção D" }
                     ],
-                    gabarito: q.gabarito || "A",
+                    gabarito: q.gabarito || "",
                     disciplina: q.disciplina || "Geral",
                     assunto: q.assunto || "Geral",
-                    origem_questao: q.origem_questao || { banca: "Importada", ano: new Date().getFullYear().toString() },
-                    origem_importacao: { arquivo: file.name, data: new Date().toISOString() }
+                    origem_questao: { ...origemQuestaoPadrao, ...(q.origem_questao || {}) },
+                    origem_importacao: {
+                        arquivo: arquivoOrigem,
+                        arquivo_original: file.name,
+                        prova_id: contextoProva?.provaId || q.origem_importacao?.prova_id || "",
+                        documento_prova: contextoProva?.documentoProva || q.origem_importacao?.documento_prova || "",
+                        documento_gabarito: contextoProva?.documentoGabarito || q.origem_importacao?.documento_gabarito || "",
+                        data: new Date().toISOString()
+                    }
                 };
             });
 
@@ -7951,9 +11201,15 @@ window.processarJsonImportado = function(file) {
             if (typeof inicializarFiltrosVal === 'function') {
                 inicializarFiltrosVal();
             }
+            const selectListaVal = document.getElementById("filterListaVal");
+            if (selectListaVal && contextoProva) {
+                selectListaVal.value = arquivoOrigem;
+            }
             aplicarFiltrosVal();
+            provaProcessamentoPendente = null;
+            removerBannerProcessamentoProva();
             
-            alert(`Sucesso! Importadas ${limpas.length} questões com sucesso do arquivo "${file.name}" para a fila do Laboratório.`);
+            alert(`Sucesso! Importadas ${limpas.length} questões com sucesso para a fila do Laboratório.`);
             
         } catch (err) {
             alert("Erro ao ler JSON: Formato do arquivo inválido. Certifique-se de que é um arquivo JSON válido.");
@@ -8087,7 +11343,9 @@ function obterExplicacaoAlternativa(q, alt) {
         const regra = q.termos_incorretos_alternativas.find(r => r.letra === alt.letra);
         if (regra && regra.justificativa) return regra.justificativa;
     }
-    // Fallback
+    if (!q.gabarito) {
+        return "Esta alternativa ainda depende de curadoria. Inclua o gabarito oficial no Laboratório antes de gerar justificativas de certo ou errado.";
+    }
     if (alt.letra === q.gabarito) {
         return `Correta. Esta alternativa atende aos requisitos do enunciado com base na disciplina ${q.disciplina}.`;
     } else {
@@ -8120,10 +11378,10 @@ window.mostrarExplicacaoAlternativa = function(event, questionId, letra, buttonE
     }
 
     // Configurar cores conforme correto/incorreto
-    let themeClass = isCorreta ? "tema-verde" : "tema-laranja";
+    let themeClass = qObj.gabarito && isCorreta ? "tema-verde" : "tema-laranja";
     popup.className = `balao-explicativo-popup alternative-explanation-card ${themeClass}`;
 
-    const titleText = isCorreta ? "POR QUE ESTÁ CERTA" : "POR QUE ESTÁ ERRADA";
+    const titleText = !qObj.gabarito ? "CURADORIA PENDENTE" : isCorreta ? "POR QUE ESTÁ CERTA" : "POR QUE ESTÁ ERRADA";
 
     popup.innerHTML = `
         <button class="balao-btn-close" onclick="window.fecharExplicacaoAlternativa()" title="Fechar" style="position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; color: var(--text-secondary); line-height: 1; padding: 0;">×</button>
@@ -8187,4 +11445,12 @@ window.fecharExplicacaoAlternativa = function() {
         document.body.appendChild(popup);
     }
 };
+
+
+
+
+
+
+
+
 

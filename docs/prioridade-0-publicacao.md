@@ -57,13 +57,26 @@ ADMIN_PASSWORD=senha_segura_com_12_ou_mais_caracteres
 1. Criar `.env` a partir de `.env.example`.
 2. Configurar PostgreSQL acessivel.
 3. Rodar `npm start`.
-4. Abrir `http://localhost:8081`.
+4. Abrir a porta definida em `PORT` no `.env`.
 5. Entrar com o administrador definido em `ADMIN_EMAIL` e `ADMIN_PASSWORD`.
 6. Testar cadastro de aluno, login, logout, progresso, favoritos, listas e tela administrativa de usuarios.
 
+## Validacao realizada em 2026-08-27
+
+- Servidor novo ativo em `http://localhost:8080`, conforme `PORT=8080`.
+- `GET /api/auth/me` antes do login retornou `401`, comportamento esperado.
+- Login administrativo com `ADMIN_EMAIL` e `ADMIN_PASSWORD` retornou `200`.
+- Consulta de usuario autenticado retornou `200`.
+- Gravacao de progresso em `/api/progress` retornou `200`.
+- Leitura de progresso em `/api/progress` retornou `200`.
+- Listagem administrativa de usuarios retornou `200`.
+- Cadastro de aluno temporario retornou `201`.
+- Exclusao do aluno temporario retornou `200`.
+- Dado temporario de teste em `usuario_progresso` foi removido apos a validacao.
+
 ## Pendencias que ainda ficam para Prioridade 1
 
-- Migrar o banco de questoes para consultas paginadas no backend.
+- Conectar a interface aos endpoints paginados de questoes ja criados no backend.
 - Criar build/hospedagem separados para front-end e API.
 - Configurar HTTPS, dominio, cache, backup e observabilidade.
 - Criar testes automatizados para login, progresso, permissoes e fluxos principais.

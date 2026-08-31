@@ -6658,9 +6658,11 @@ window.renderizarBibliotecaProvas = async function() {
                     ? `<span style="font-size:0.7rem; background-color:rgba(99,102,241,0.10); border:1px solid #6366f1; border-radius:6px; padding:2px 8px; color:#4f46e5; font-weight:700;" title="Existe origem ou documento parcial, mas ainda falta prova e/ou gabarito.">🔎 Origem parcial</span>`
                     : `<span style="font-size:0.7rem; background-color:rgba(245,158,11,0.12); border:1px solid #f59e0b; border-radius:6px; padding:2px 8px; color:#b45309; font-weight:700;" title="Ainda falta vincular prova e/ou gabarito.">⚠️ Arquivos pendentes</span>`;
 
+        const demoProfile = localStorage.getItem("remb_demo_profile") || REMB_DEMO_PROFILE;
+        const hasDemoQuestions = REMB_DEMO_MODE && demoProfile === "luciana" && p.id === REMB_DEMO_PROVA_ID;
         const hasQuestions = Array.isArray(BANCO_QUESTOES) && BANCO_QUESTOES.some(q => obterArquivoOrigemQuestao(q) === p.file);
         const hasLabQuestions = Array.isArray(QUESTOES_CESPE_TRATADAS) && QUESTOES_CESPE_TRATADAS.some(q => obterArquivoOrigemQuestao(q) === p.file);
-        const hasProcessedQuestions = hasQuestions || hasLabQuestions;
+        const hasProcessedQuestions = hasDemoQuestions || hasQuestions || hasLabQuestions;
         const curationButtonHtml = isAdmin ? `
                     <button class="btn btn-outline-secondary btn-sm" onclick="window.abrirProvaNoLaboratorio('${p.id}', '${p.file}')" style="flex:1; border-radius:8px; font-size:0.75rem; font-weight:700; padding:6px 8px; border-width:1.5px; ${hasLabQuestions ? '' : 'opacity:0.6;'}">
                         🧪 Curação Lab
@@ -6804,6 +6806,16 @@ window.abrirProvaNaSala = async function(provaId, file, banca) {
         file,
         banca
     };
+
+    const demoProfile = localStorage.getItem("remb_demo_profile") || REMB_DEMO_PROFILE;
+    if (REMB_DEMO_MODE && demoProfile === "luciana" && provaId === REMB_DEMO_PROVA_ID) {
+        const provaQuestoesDemo = await carregarDemoProvaQuestoes();
+        if (provaQuestoesDemo.length > 0) {
+            globalProvaAtiva = provaObj;
+            window.abrirQuestoesNaSala(provaQuestoesDemo.map(q => publicDemoQuestion(q, true)), 0, provaContext);
+            return;
+        }
+    }
 
     const bancaNormalizada = normalizarBancaSessao(provaObj?.banca || banca);
     const incluirLaboratorio = bancaNormalizada === "cebraspe";

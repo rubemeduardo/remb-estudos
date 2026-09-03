@@ -147,16 +147,54 @@ async function carregarDemoProvaQuestoes() {
 async function carregarDemoQuestoesCallado() {
     if (!REMB_DEMO_CACHE.calladoQuestoes) {
         const data = await carregarDemoJson("dados/questoes_importadas_novas.json", []);
-        REMB_DEMO_CACHE.calladoQuestoes = (Array.isArray(data) ? data : []).map((q, idx) => ({
-            ...q,
-            id: q.id || `callado_demo_${idx + 1}`,
-            disciplina: q.disciplina || q.origem_importacao?.disciplina || "Listas Callado",
-            assunto: q.assunto || q.origem_importacao?.arquivo || "Geral",
-            origem_questao: q.origem_questao || { banca: "", orgao: "", cargo: "", ano: "", prova: "" },
-            origem_importacao: { ...(q.origem_importacao || {}), prova_id: "listas-callado" }
-        }));
+        REMB_DEMO_CACHE.calladoQuestoes = (Array.isArray(data) ? data : []).map((q, idx) => {
+            const alternativas = Array.isArray(q.alternativas) && q.alternativas.length
+                ? q.alternativas
+                : [{ letra: "A", texto: "Alternativa A" }, { letra: "B", texto: "Alternativa B" }, { letra: "C", texto: "Alternativa C" }, { letra: "D", texto: "Alternativa D" }, { letra: "E", texto: "Alternativa E" }];
+            const letras = alternativas.map((alt, altIdx) => String(alt.letra || String.fromCharCode(65 + altIdx)).toUpperCase().slice(0, 1));
+            const gabaritoDemo = normalizarValorGabaritoAdmin(q.gabarito || q.resposta_correta) || letras[idx % letras.length] || "A";
+            return {
+                ...q,
+                id: q.id || `callado_demo_${idx + 1}`,
+                disciplina: q.disciplina || q.origem_importacao?.disciplina || "Listas Callado",
+                assunto: q.assunto || q.origem_importacao?.arquivo || "Geral",
+                alternativas: alternativas.map((alt, altIdx) => {
+                    const letra = String(alt.letra || String.fromCharCode(65 + altIdx)).toUpperCase().slice(0, 1);
+                    return { ...alt, letra, is_correta: letra === gabaritoDemo, correta: letra === gabaritoDemo };
+                }),
+                gabarito: gabaritoDemo,
+                gabarito_origem: q.gabarito_origem || { tipo: "demo", fonte: "Gabarito demonstrativo para teste de navegação" },
+                passos_correcao: q.passos_correcao || criarPassosCorrecaoDemo(q, gabaritoDemo),
+                origem_questao: q.origem_questao || { banca: "", orgao: "", cargo: "", ano: "", prova: "" },
+                origem_importacao: { ...(q.origem_importacao || {}), prova_id: "listas-callado" }
+            };
+        });
     }
     return REMB_DEMO_CACHE.calladoQuestoes;
+}
+
+function criarPassosCorrecaoDemo(q, gabarito) {
+    const assunto = q.assunto || q.origem_importacao?.arquivo || "o tema da lista";
+    const incorreta = ["A", "B", "C", "D", "E"].find(letra => letra !== gabarito) || "A";
+    return [
+        {
+            titulo: "Leitura do comando",
+            texto: `Observe primeiro o comando da questão e identifique exatamente o que está sendo pedido em **${assunto}**.`,
+            target: "header"
+        },
+        {
+            titulo: "Eliminação demonstrativa",
+            texto: `A alternativa **(${incorreta})** foi destacada como exemplo de eliminação. Nesta publicação, o objetivo é demonstrar o fluxo de correção interativa.`,
+            target: incorreta,
+            cor_destaque: "tachar"
+        },
+        {
+            titulo: "Gabarito demonstrativo",
+            texto: `Para fins de teste da navegação, o gabarito desta questão está configurado como **${gabarito}**.`,
+            target: "gabarito",
+            cor_destaque: "green"
+        }
+    ];
 }
 
 async function carregarDemoListasCallado() {
@@ -199,12 +237,12 @@ async function carregarDemoListasCallado() {
 }
 
 function publicDemoQuestion(question, includeAnswer = false) {
-    const correta = question.gabarito || question.resposta_correta || "";
+    const correta = normalizarValorGabaritoAdmin(question.gabarito || question.resposta_correta || "");
     const alternativas = (question.alternativas || []).map((alt, idx) => ({
         letra: String(alt.letra || String.fromCharCode(65 + idx)).toUpperCase().slice(0, 1),
         texto: alt.texto || "",
-        is_correta: includeAnswer ? Boolean(alt.is_correta || alt.correta || alt.letra === correta) : false,
-        correta: includeAnswer ? Boolean(alt.is_correta || alt.correta || alt.letra === correta) : false,
+        is_correta: includeAnswer ? Boolean(alt.is_correta || alt.correta || normalizarValorGabaritoAdmin(alt.letra) === correta) : false,
+        correta: includeAnswer ? Boolean(alt.is_correta || alt.correta || normalizarValorGabaritoAdmin(alt.letra) === correta) : false,
         ordem: alt.ordem || idx + 1
     }));
     const payload = {
@@ -3369,6 +3407,9 @@ function responderQuestao(questionId) {
     atualizarBadgesMenu();
     if (window.cadernoGerado && typeof window.atualizarProgressoCaderno === 'function') {
         window.atualizarProgressoCaderno();
+    }
+    if (REMB_DEMO_MODE && typeof iniciarCorrecaoPedagogica === "function") {
+        setTimeout(() => iniciarCorrecaoPedagogica(questionId), 350);
     }
 }
 

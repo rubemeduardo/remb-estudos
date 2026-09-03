@@ -982,7 +982,15 @@ const PILOT_METADATA = {
 };
 
 function obterQuestaoPorId(id) {
-    let q = BANCO_QUESTOES.find(item => item.id === id);
+    let q = null;
+
+    if (Array.isArray(window.cadernoQuestoes)) {
+        q = window.cadernoQuestoes.find(item => item.id === id);
+    }
+
+    if (!q) {
+        q = BANCO_QUESTOES.find(item => item.id === id);
+    }
     if (!q && typeof QUESTOES_CESPE_TRATADAS !== 'undefined') {
         q = QUESTOES_CESPE_TRATADAS.find(item => item.id === id);
     }

@@ -3364,11 +3364,13 @@ function responderQuestao(questionId) {
 
     const letraSelecionada = selecionadaEl.getAttribute("data-letra");
     const qObj = obterQuestaoPorId(questionId);
-    if (!qObj || !qObj.gabarito) {
+    const gabaritoNormalizado = normalizarValorGabaritoAdmin(qObj?.gabarito || qObj?.resposta_correta || qObj?.alternativas?.find(alt => alt.is_correta || alt.correta)?.letra);
+    if (!qObj || !gabaritoNormalizado) {
         alert("Esta questão ainda não tem gabarito curado. Inclua o gabarito no Laboratório antes de corrigir a resposta.");
         return;
     }
-    const correta = (letraSelecionada === qObj.gabarito);
+    qObj.gabarito = gabaritoNormalizado;
+    const correta = (normalizarValorGabaritoAdmin(letraSelecionada) === gabaritoNormalizado);
 
     // Efeito de pulso GSAP no botão de responder
     const btnResp = containerEl.querySelector(".btn-primary");
